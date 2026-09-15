@@ -1,0 +1,19 @@
+keys,zh_CN,en
+UI_TITLE,无名 · 第一周工程,WUMING / WEEK 01
+UI_ENTER_YARD,进入测试庭院,Enter test yard
+UI_LOAD,读取快速存档,Load quick save
+UI_SAVE,快速存档,Quick save
+UI_QUIT,退出,Quit
+UI_TITLE_RETURN,返回标题,Return to title
+UI_PAUSED,暂停,Paused
+UI_RESUME,继续,Resume
+UI_FULLSCREEN,切换窗口／全屏,Window / Fullscreen
+UI_CONTROLS,WASD／十字键选项 · Enter／A 确认 · Esc／B 返回,WASD / D-pad select | Enter / A confirm | Esc / B back
+UI_YARD_CONTROLS,测试庭院（离线） · WASD／手柄移动 · F5 存档 · Esc 菜单,Test yard (offline) | WASD / pad move | F5 save | Esc menu
+UI_SAVE_OK,已保存至 user://saves/quick.sav,Saved to user://saves/quick.sav
+UI_SAVE_FAILED,存档失败：%s,Save failed: %s
+UI_LOAD_OK,存档已恢复（来源：%s）,Loaded (source: %s)
+UI_LOAD_FAILED,没有可读取的快速存档。,No valid quick save.
+UI_INVALID_SCENE,存档引用的地图或出生点无效。,Invalid saved scene or spawn.
+UI_PAD_DISCONNECTED,手柄已断开；可继续使用键盘。,Controller disconnected. Keyboard remains available.
+SCENE_TEST_YARD_NAME,测试庭院,Test yard

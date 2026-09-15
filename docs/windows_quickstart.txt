@@ -1,0 +1,13 @@
+Project Wuming / Week 1 engineering build
+
+Keep ProjectWuming.exe and ProjectWuming.pck together.
+Launch ProjectWuming.exe, choose Enter test yard.
+WASD/arrows or controller left stick/D-pad: move. Enter/A: confirm.
+Esc/B: pause/back. F5: quick save. Pause menu: load and fullscreen.
+Save data: %APPDATA%\ProjectWuming\saves\quick.sav
+No Steam client or login required.
+
+Hardware acceptance still requires an actual Windows x64 PC and gamepad:
+launch, enter yard, move with both devices, save, quit, reopen, load,
+toggle fullscreen, disconnect pad and confirm keyboard still works.
+Record OS/GPU/controller/build_info.json and each result.

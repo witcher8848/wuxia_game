@@ -1,0 +1,145 @@
+name: Validate and build Windows
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: Validate source and export Windows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out this revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the locked Godot toolchain and verify official SHA-512
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qa
+          ./tools/setup_godot.sh 2>&1 | tee builds/qa/toolchain_setup.log
+
+      - name: Validate documents, content, scripts, state, and startup
+        run: |
+          set -euo pipefail
+          ./tools/check_project.sh 2>&1 | tee builds/qa/project_check.log
+
+      - name: Export and verify the Windows Debug package
+        run: |
+          set -euo pipefail
+          ./tools/build_windows_debug.sh 2>&1 | tee builds/qa/windows_debug_build.log
+
+      - name: Export a Windows Release candidate for a tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+          ./tools/build_windows_release.sh 2>&1 | tee builds/qa/windows_release_build.log
+
+      # Upload only after validation and export have succeeded. A failed export
+      # leaves diagnostic logs but cannot publish a partial package as a build.
+      - name: Upload this run's Windows packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/windows/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+
+      - name: Upload the tag's Release candidate
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-release-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/windows/*_release_*/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+
+      - name: Preserve validation and export logs, including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: linux-qa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/qa/
+          if-no-files-found: warn
+          retention-days: 14
+
+  windows-runtime:
+    name: Windows cloud runner startup check
+    needs: validate-and-build
+    runs-on: windows-2025
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Download only the package from this workflow run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: windows-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: windows-build
+          digest-mismatch: error
+
+      - name: Start the exported executable and check its logs
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logRoot = Join-Path $env:GITHUB_WORKSPACE 'builds/qa/windows'
+          New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
+          $packages = @(Get-ChildItem -Path windows-build -Filter ProjectWuming.exe -File -Recurse)
+          if ($packages.Count -eq 0) { throw 'This run contains no exported ProjectWuming.exe.' }
+          foreach ($exe in $packages) {
+            $metadataPath = Join-Path $exe.DirectoryName 'build_info.json'
+            $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+            if ($metadata.commit -ne $env:EXPECTED_COMMIT) { throw 'Artifact commit does not match this workflow revision.' }
+            if ($metadata.godot_version -ne '4.7.2') { throw 'Artifact does not use the locked Godot version.' }
+            if (-not (Test-Path -LiteralPath (Join-Path $exe.DirectoryName 'ProjectWuming.pck'))) { throw 'Exported PCK is missing.' }
+            $label = $exe.Directory.Name
+            $stdoutLog = Join-Path $logRoot "$label.stdout.log"
+            $stderrLog = Join-Path $logRoot "$label.stderr.log"
+            $engineLog = Join-Path $logRoot "$label.engine.log"
+            $process = Start-Process -FilePath $exe.FullName -WorkingDirectory $exe.DirectoryName -ArgumentList @('--headless', '--quit-after', '10', '--log-file', "`"$engineLog`"") -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
+            if (-not $process.WaitForExit(90000)) {
+              Stop-Process -Id $process.Id -Force
+              throw "$label did not exit within 90 seconds."
+            }
+            $process.WaitForExit()
+            $process.Refresh()
+            $combined = (@($stdoutLog, $stderrLog, $engineLog) | Where-Object { Test-Path -LiteralPath $_ } | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n"
+            $combined | Set-Content -LiteralPath (Join-Path $logRoot "$label.combined.log") -Encoding utf8
+            Write-Output $combined
+            if ($process.ExitCode -ne 0) { throw "$label exited with code $($process.ExitCode)." }
+            if ($combined -match '(SCRIPT ERROR:|ERROR:|Parse Error:)') { throw "$label reported a Godot or script error." }
+            if ($combined -notmatch 'Godot Engine v4\.7\.2') { throw "$label produced no identifiable Godot startup output." }
+            "WINDOWS_CLOUD_STARTUP_PASS $label commit=$($metadata.commit)" | Tee-Object -FilePath (Join-Path $logRoot "$label.result.log")
+          }
+          'Windows cloud-runner headless startup passed. Physical Windows 10/11 graphics, controller, and usability tests remain separate release checks.' | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+
+      - name: Preserve Windows runtime logs, including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-runtime-qa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/qa/windows/
+          if-no-files-found: warn
+          retention-days: 14

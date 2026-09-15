@@ -1,0 +1,18 @@
+# Godot imports and local toolchain
+.godot/
+.tools/
+builds/*
+!builds/.gdignore
+.DS_Store
+*.swp
+*.swo
+*.tmp
+*.old
+*.log
+*.sav
+*.bak
+export_credentials.cfg
+.env
+.env.*
+!.env.example
+__pycache__/

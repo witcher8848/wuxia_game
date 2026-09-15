@@ -1,0 +1,38 @@
+# 第三方素材与依赖来源登记
+
+> 建立：2026-09-13；更新：2026-09-14。记录实际状态；“已选型”不等于“文件已引入”或“可发布”。
+
+每个外部代码依赖、字体、图片、音效、音乐或参考图都要有来源。正式素材引入时补全固定版本／原下载链接、原始许可证路径、必要凭证、文件路径和修改说明。生成内容另见 [AI 内容登记](./ai_content_register.md)。
+
+| ID | 名称／作者 | 来源与许可证 | 用途 | 文件／版本与引入状态 | 修改与发布要求 |
+|---|---|---|---|---|---|
+| DEP-GODOT | Godot Engine／Godot contributors | [官方许可说明](https://godotengine.org/license/)，MIT；引擎附带组件分别保留原许可 | 编辑器、运行时、导出模板 | 已安装 `4.7.2.stable.official.ed1daf0bf`，2026-09-14 命令行复核；官方编辑器包、模板包与 SHA-512 清单在 `.tools/downloads/`；许可原文 [GODOT.txt](../licenses/GODOT.txt) | 未修改引擎源码；发布包保留 Godot 及所用第三方组件声明；模板与 Debug／Release 实际导出已验证；第三方组件完整声明另存 [GODOT-COPYRIGHT.txt](../licenses/GODOT-COPYRIGHT.txt) 并随包分发 |
+| FONT-NOTO-CJK-SC | Noto Sans CJK SC Regular／Noto 项目 | [上游字体文件](https://github.com/notofonts/noto-cjk/blob/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf)、[上游许可证](https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE)，SIL OFL 1.1 | 中文 UI | 已取得 [Regular 字体](../assets/runtime/fonts/NotoSansCJKsc-Regular.otf)；许可原文 [NOTO-OFL.txt](../licenses/NOTO-OFL.txt)。当前二进制由下表 SHA-256 固定；上游提交／字体内部版本未单独记录。Medium／Bold 尚未引入 | 未修改／未子集化；已绑定 main.gd 的 UI Theme；Mac 图形截图和菜单操作验证当前中文无缺字；保留 OFL 和版权信息 |
+
+官方许可证已在 2026-09-13 核对；2026-09-14 对实际文件运行 `shasum -a 256`，结果如下。原文件下载 URL 的具体请求记录未单独归档时，使用上游文件定位与本地哈希，不虚构固定上游提交。
+
+| 实际文件 | SHA-256 |
+|---|---|
+| `assets/runtime/fonts/NotoSansCJKsc-Regular.otf` | `2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b` |
+| `licenses/NOTO-OFL.txt` | `6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2` |
+| `licenses/GODOT.txt` | `b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80` |
+
+当前表中未登记任何已完成的正式人物、地图、音乐或音效资产。灰盒颜色、程序绘制形状和内部占位文字不能计入正式资产完成量。Godot 下载包可通过 `python3 tools/verify_downloads.py .tools/downloads Godot_v4.7.2-stable_macos.universal.zip Godot_v4.7.2-stable_export_templates.tpz` 复核官方 SHA-512 清单；该命令核对的是实际下载文件，不是仅比对文件名。
+
+新增条目至少包含：
+
+```text
+asset_id:
+名称／作者:
+原始来源链接:
+固定版本／取得日期／文件 SHA-256:
+许可证名称及本地原文路径:
+购买凭证位置（如适用，不公开个人付款资料）:
+原始文件路径／运行时文件路径:
+用途与允许的修改／分发范围:
+人工修改内容:
+状态：候选 / 已取得 / 已接入 / 已审核可发布 / 已移除
+审核人及日期:
+```
+
+已接入时检查运行时文件实际存在；已审核可发布时检查许可证、署名和包内用途匹配。来源不明确的素材停留在候选状态，不随正式包发布。具体资产的记录随引入动作更新，不能用本表的通用条目覆盖以后所有外部素材。

@@ -1,0 +1,13 @@
+{
+  "content_version": "0.1.0",
+  "start_scene_id": "SCENE_TEST_YARD",
+  "start_spawn_id": "SPAWN_START",
+  "scenes": [
+    {
+      "id": "SCENE_TEST_YARD",
+      "path": "res://game/presentation/exploration/test_yard.tscn",
+      "name_key": "LOCATION_TEST_YARD",
+      "spawn_ids": ["SPAWN_START"]
+    }
+  ]
+}
