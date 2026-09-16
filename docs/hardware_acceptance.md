@@ -1,18 +1,15 @@
 # 外部验收待办
 
-更新：2026-09-14。以下项目尚未通过，保留原 Day 6／第一周门槛。
+更新：2026-09-15。GitHub 推送与首次远端 CI 已通过；其余未完成项目保留原 Day 6／第一周门槛。
 
-## GitHub 与远端 CI
+## GitHub 与远端 CI（首次运行通过）
 
-本机 Git 推送预检因没有 HTTPS 登录凭据失败；GitHub 连接器可读取仓库，但写入 Git tree 返回 `403 Resource not accessible by integration`。尚未向远端创建本次分支或触发工作流。
+2026-09-15，本机 GitHub CLI 登录生效，已通过 Git 推送 `codex/week1-foundation` 和日期标签 `week1-local-2026-09-15`。二者的首轮验证对象均为 `ccad9fd8c4d1074dfcc0598681ea989c705e739f`，没有修改 `main`。此前缺 HTTPS 凭据／连接器写入 403 是历史阻塞，不再代表本机当前推送状态。
 
-开发者在本机完成 GitHub CLI 或 Git HTTPS 登录后，执行：
+- [分支运行 34981898201](https://github.com/witcher8848/wuxia_game/actions/runs/34981898201)：Linux 检查、Debug 导出、artifact 上传与 Windows 云端启动通过；Release 两步骤按非标签条件跳过。
+- [标签运行 34981897065](https://github.com/witcher8848/wuxia_game/actions/runs/34981897065)：Linux 检查、Debug／Release 导出、artifact 上传与两包 Windows 云端启动通过。
 
-```bash
-git push -u origin codex/week1-foundation
-```
-
-不要把 token 发到对话或写入仓库。推送后记录完整提交 SHA、Actions run URL、Linux 校验及 Windows cloud runtime 结果和 artifact 下载验证。云端无头启动与实体设备检查分开计。
+当次 artifact 下载、元数据／校验清单和日志的独立核对结果见 [独立验收报告](./week1_independent_audit.md)。后续提交继续以对应运行和产物验证，不复用旧绿色状态。无需再为本次推送提供 token；任何凭据都不应发到对话或写入仓库。云端运行使用 `--headless --quit-after 10`，仅证明导出的程序可启动并退出，不覆盖以下实体设备项目。
 
 ## Windows x64 与实体手柄
 

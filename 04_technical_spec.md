@@ -2,11 +2,11 @@
 
 > Day 4 输出件
 >
-> 状态：规格已冻结；Day 6 本机工程与导出已实现，实体设备与远端 CI 待验
+> 状态：规格已冻结；Day 6 本机工程、导出与首次远端 CI 已通过，实体设备及独立备份待验
 >
 > 项目代号：`Project Wuming`（无名）
 >
-> 最后更新：2026-09-14
+> 最后更新：2026-09-15
 
 本文件把 [`03_core_gameplay.md`](./03_core_gameplay.md) 的玩法规则转化为工程约束。它决定引擎、平台、模块边界、输入、存档、Steam 隔离、构建与备份方式；Day 6 建立项目时应按本文执行，而不是重新选择技术栈。
 
@@ -41,7 +41,7 @@ Godot 官方归档列出 `4.7.2-stable` 为当前稳定版，而 4.8 仍处于�
 
 ### 1.2 本机现状
 
-2026-09-14 已在项目本地 `.tools/godot/` 安装官方 Godot 4.7.2 Standard，`./tools/godot.sh --version` 输出 `4.7.2.stable.official.ed1daf0bf`。官方 SHA-512 已验证编辑器与模板下载包，匹配的 Windows x86_64 Debug／Release 模板已安装并成功导出；项目入口为 `project.godot`。全局 PATH 不要求安装 Godot，版本检查统一经包装脚本执行。Mac GUI 与自动测试已运行；实体 Windows、手柄、远端 CI 和独立磁盘备份仍待验，详细证据见 [第一周评审](./07_week1_review.md)。
+2026-09-14 已在项目本地 `.tools/godot/` 安装官方 Godot 4.7.2 Standard，`./tools/godot.sh --version` 输出 `4.7.2.stable.official.ed1daf0bf`。官方 SHA-512 已验证编辑器与模板下载包，匹配的 Windows x86_64 Debug／Release 模板已安装并成功导出；项目入口为 `project.godot`。全局 PATH 不要求安装 Godot，版本检查统一经包装脚本执行。Mac GUI 与自动测试已运行。2026-09-15，`codex/week1-foundation` 分支与 `week1-local-2026-09-15` 标签推送成功，首次远端 Linux 检查／Windows 导出和 Windows 云端无头启动均通过；尚未合并到 `main`。实体 Windows、手柄和独立磁盘备份仍待验，详细证据见 [第一周评审](./07_week1_review.md)。
 
 ---
 
@@ -551,6 +551,6 @@ Day 6 执行状态（原验收范围保持不变）：
 - [x] 已定义离线／Steam 双适配器、Auto-Cloud 同步和排除范围。
 - [x] 已定义 Windows Debug／Release、命令行检查和自动构建方案。
 - [x] 已定义源代码、玩家存档、第三方依赖和隐私策略。
-- [x] 已记录工具链、本机实现证据与实体设备／远端验收缺口，规格完成不等于所有平台测试完成。
+- [x] 已记录工具链、本机实现和首次远端 CI 证据，以及实体设备／独立备份验收缺口；规格完成不等于所有平台测试完成。
 
 技术规格已经足够让 Day 6 直接创建工程。若实现过程中发现 Godot 4.7.2 的具体 API 名称变化，可以在不改变本节架构和行为约束的前提下调整实现细节。

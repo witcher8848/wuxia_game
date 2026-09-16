@@ -1,8 +1,8 @@
 # 第一周评审与交接 v0.1
 
-> Day 7 输出件。更新：2026-09-14。
+> Day 7 输出件。更新：2026-09-16。
 >
-> 当前状态：Day 6 本机工程、两种 Windows 导出、Day 7 评审与第二周任务拆分已完成；独立 subagent 已实跑本机验收。实体设备、远端 CI、独立备份与外部卖点理解仍缺证据，第一周尚未全部通过。
+> 当前状态：Day 6 本机工程、两种 Windows 导出、Day 7 评审与第二周任务拆分已完成；独立 subagent 已实跑本机验收。2026-09-15 已推送候选分支与日期标签，首次远端 CI 和 Windows 云端无头启动通过，构建产物已下载核验。实体设备、独立备份与外部卖点理解仍缺证据，第一周尚未全部通过。
 >
 > 独立验收：[docs/week1_independent_audit.md](./docs/week1_independent_audit.md)。该报告由未负责主工程实现的 subagent 逐项检查；本文件不覆盖其未闭合问题。
 
@@ -52,7 +52,7 @@
 2. 调查和战斗没有形成足够的选择。第 4 周之前完成 15～20 分钟闭环，观察证据是否影响战斗、玩家是否主动用位移／破势／援护；未通过就先调整。
 3. 像素美术生产慢。先做一个完整四向人物及一个环境模块样本，复用动作和制服，优先缩减表情、装饰与特写。
 
-工程层面另有 Windows／手柄实际设备和远端 CI 的验收缺口，具体状态见下表；它们不能由上述制作风险说明代替。完整风险表在 [06_scope_and_backlog.md](./06_scope_and_backlog.md)。
+工程层面另有 Windows／手柄实际设备及独立备份的验收缺口；首次远端 CI 已在 2026-09-15 通过，具体状态见下表。它们不能由上述制作风险说明代替。完整风险表在 [06_scope_and_backlog.md](./06_scope_and_backlog.md)。
 
 ## 7. 第二周灰盒原型具体做什么
 
@@ -78,14 +78,18 @@
 | 实体手柄移动、导航、确认取消、断开恢复 | InputMap 已配置；需要型号／连接与操作记录 | 缺实体设备／缺证据；输入注入只能证明模拟事件 |
 | 干净环境恢复 | README、setup／check／run 入口 | 独立 subagent 在不含 .godot/.tools/builds 的临时副本复跑全部检查与两种导出通过；复用已验证版本引擎与模板 |
 | Git 忽略与协作规范 | `.gitignore`、`.gitattributes`、[开发流程](./docs/development_workflow.md) | git check-ignore 验证工具链、导入缓存、构建产物被忽略；保留 builds/.gdignore；新增 swp/swo 排除并保留用户临时文件 |
-| 文档链接与当前内容格式 | 2026-09-14 实跑 `python3 tools/validate_repo.py`，`REPO_VALIDATION_PASS documents=16` | 通过本次链接／代码块／数据与资源引用检查；不代替设计内容审查 |
-| 远端 CI／构建 artifact | 技术规格与开发流程定义触发规则 | 未运行：Git CLI 无 HTTPS 凭据；GitHub 连接器写入返回 403。已建立 .github/workflows/validate.yml，但没有远端成功记录 |
+| 文档链接与当前内容格式 | 2026-09-15 本机与远端均输出 `REPO_VALIDATION_PASS documents=17` | 通过本次链接／代码块／数据与资源引用检查；不代替设计内容审查 |
+| 源码远端与带日期里程碑 | `codex/week1-foundation` 与 `week1-local-2026-09-15` 已推送；首轮对象均为 `ccad9fd8c4d1074dfcc0598681ea989c705e739f` | 通过本次推送及远端 ref 核对；未合并到 `main`，标签不代表整周全部验收通过 |
+| 远端 CI／构建 artifact | [分支运行 34981898201](https://github.com/witcher8848/wuxia_game/actions/runs/34981898201)、[标签运行 34981897065](https://github.com/witcher8848/wuxia_game/actions/runs/34981897065) 均为 success，head SHA 均为上述提交 | 通过首次远端验证：Linux 官方 SHA-512／73＋61＋15 检查／导出／PCK 审计；标签产物下载后 Debug、Release 元数据及每包 7 项 SHA-256 全部通过 |
+| Windows 云端无头启动 | 标签运行 Windows job 对当次 Debug／Release EXE 分别输出 `WINDOWS_CLOUD_STARTUP_PASS` | 仅通过 Windows 云 OS 中的导出程序启动／退出与错误日志检查；不覆盖庭院交互、GPU 显示、存档操作、全屏或实体手柄，不替代上方真机门槛 |
 | 系统级备份与恢复 | 技术规格规定每日备份／每周恢复 | 未通过：tmutil destinationinfo 返回 No destinations configured；需独立备份介质与恢复样本，Git 与存档备份不替代 |
 | 第二周任务拆分 | `docs/week2_task_board.md`，7 票／40h／依赖与验收 | 通过（计划）；执行仍为 Backlog |
 | 独立 subagent 验收 | `docs/week1_independent_audit.md` | 已完成独立检查、干净副本复跑与 PCK 违规夹带负例；最终结论及剩余项见独立报告 |
 
 ## 9. 待补记录与交接
 
-本机工程结果已回填第 8 节。外部收尾步骤集中在 [外部验收待办](./docs/hardware_acceptance.md)，包括 GitHub 登录／CI、Windows／手柄、独立备份与卖点理解记录。独立审查发现已修复的代码和文档问题以报告为准。
+本机工程与首次远端 CI 结果已回填第 8 节。标签运行的四类 artifact 已下载到 `builds/qa/remote/34981897065-proxy/`；文件、元数据及日志核对完成。最初直连下载有实际字节进度但吞吐缓慢，主动取消后以单次本机代理重新下载，未重跑 CI、未覆盖原下载目录；不将此记成权限失败或工作流失败。
+
+外部收尾步骤集中在 [外部验收待办](./docs/hardware_acceptance.md)：Windows／手柄、独立备份与卖点理解记录仍需补齐。GitHub 登录／首次推送与 CI 已闭合，不再作为当前阻塞。独立审查发现已修复的代码和文档问题以报告为准。
 
 没有实体设备时保留未通过项，先完成全部可在本机执行的工作。不得为结束第一周删除技术规格中已要求的 Windows 真机或实体手柄检查，也不得把其改为自动事件模拟后宣布完成。Day 7 的评审文档与任务拆分可以完成，但“第一周整体通过”仍以所有必需门槛均有充分证据为条件。

@@ -4,6 +4,8 @@
 
 这是两人协作的 2D 像素武侠 RPG 项目。六个月目标是 60～90 分钟垂直切片与 Steam Demo 候选版；当前仓库是第一周设计基线和工程骨架。现有测试院用于检验启动、输入、状态与存档，还没有完整剧情、调查或战斗玩法。当前验收状态见 [第一周评审](./07_week1_review.md)与[独立验收报告](./docs/week1_independent_audit.md)。
 
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`。恢复工程时请使用此分支；`week1-local-2026-09-15` 标签保留已验证的工程里程碑，不代表实体设备和整周验收已经通过。
+
 ## 快速启动
 
 开发环境需要 Git、Bash、`curl`、`unzip` 和 Python 3.11 或更新版本。主要开发平台为 macOS；Windows x64 为目标发行平台。固定引擎版本在 [.godot-version](./.godot-version)，当前为 Godot 4.7.2 Standard，使用 GDScript 与 Compatibility。
@@ -80,6 +82,6 @@ Windows 包导出与 PE x86_64 检查通过只能证明产物已生成；真实 
 
 `game/core/` 负责启动与共享服务；`game/domain/` 保存不依赖场景节点的状态／规则；`game/presentation/` 负责画面和输入；`game/content/` 放稳定 ID 的数据；`game/persistence/` 管理存档；`game/platform/` 隔离离线／Steam；`game/tests/` 与 `tools/` 提供验证和构建。`assets/source/` 保留源素材，`assets/runtime/` 只放运行资源。
 
-功能分支使用 `codex/<简短工作名>`，提交格式为 `feat:`、`fix:`、`test:`、`docs:`、`build:` 或 `chore:` 加明确摘要。主分支保持可启动；提交只包含本任务文件，保留他人的未提交修改。远端是 [witcher8848/wuxia_game](https://github.com/witcher8848/wuxia_game)。工作流约定不代表本轮已经提交、推送或远端 CI 通过，实际状态以 Git 和验收记录为准。
+功能分支使用 `codex/<简短工作名>`，提交格式为 `feat:`、`fix:`、`test:`、`docs:`、`build:` 或 `chore:` 加明确摘要。主分支保持可启动；提交只包含本任务文件，保留他人的未提交修改。远端是 [witcher8848/wuxia_game](https://github.com/witcher8848/wuxia_game)。2026-09-15 的候选分支与里程碑标签已推送，首次分支／标签 CI 均成功；对应提交、产物和测试边界见验收记录，不将该结果称为 `main` 已集成或第一周全部通过。
 
 外部资源登记在[素材来源表](./docs/asset_sources.md)，AI 辅助内容登记在[AI 内容表](./docs/ai_content_register.md)。Godot 与 Noto 字体的许可证已放入 `licenses/`；它们不替代本项目自有内容的许可决定。

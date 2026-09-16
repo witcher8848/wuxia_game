@@ -2,9 +2,9 @@
 
 > 验收人：独立 subagent `week1_audit`，未参与主工程实现。
 >
-> 检查日期：2026-09-13～14，最终复核：2026-09-14。
+> 本机初验：2026-09-13～14；远端运行：2026-09-15；最终 artifact 复核与报告更新：2026-09-16。
 >
-> 结论：本机工程、设计产物和第二周拆分通过；第一周整体验收未通过，仍缺 Windows 真机、实体手柄、远端 CI／源码备份、系统备份恢复和陌生人理解测试证据。
+> 结论：本机工程、设计产物、第二周拆分、源码远端备份和远端 CI 通过；第一周整体验收未通过，仍缺 Windows 真机、实体手柄、独立系统备份恢复和陌生人理解测试证据。Windows 云端无头启动单独通过，不替代实体设备验收。
 
 ## 验收范围与证据规则
 
@@ -98,14 +98,14 @@
 | D6-03 | 640×360、Viewport／Keep／integer、Compatibility | 独立工程约束断言和 640×360 实际渲染图 | 通过（本机基线）；其他分辨率完整矩阵仍是后续 UI 实测 |
 | D6-04 | 计划目录与五个必要 Autoload | 目录存在、61 项工程约束内五个 Autoload 加载断言通过 | 通过 |
 | D6-05 | 键鼠和手柄映射、输入上下文、调试开关 | 61 项工程约束＋15 项 UI 事件测试；检查 App 与 main 的 Release `OS.is_debug_build()` 限制 | 通过（配置与自动化）；物理手柄另见 D6-06 |
-| D6-06 | 至少一个实体手柄测试 | 已连接设备 ID、型号、操作者、实际导航／确认／取消／移动及断开检查记录 | 缺证据 |
+| D6-06 | 至少一个实体手柄测试 | 本机及 Linux 冒烟记录连接数 0；尚无设备 ID、型号和实际操作记录 | 缺证据 |
 | D6-07 | 空 GameState、ContentDB、schema 1 存档往返 | 独立 73 项状态测试及 15 项 UI 测试；坏档恢复／较新 schema 拒绝覆盖／独立测试目录／重建场景后坐标恢复 | 通过 |
 | D6-08 | 无 Steam 可启动 | 默认 Offline；独立无 Steam 初始化依赖的启动和平台能力测试 | 通过 |
 | D6-09 | Windows Debug 预设与检查／构建脚本 | 独立运行三个规格命令，产出 EXE／PCK／metadata／checksum／licenses／README；两包各 32 资源、13 必需项通过 | 通过（导出）；Windows 运行另见 D6-10 |
-| D6-10 | Windows x64 真机启动、存档位置、全屏 | Windows 实体硬件环境、包 SHA、实际启动／写存档／全屏／退出结果 | 缺证据 |
-| D6-11 | Git 忽略、分支提交规范、缓存不污染 Git | 独立 `git check-ignore` 命中 `.godot`、`.tools`、构建日志、swap；README／开发流程明确 `codex/` 和提交前缀 | 通过（规则与忽略）；实际源码远端备份未完成 |
+| D6-10 | Windows x64 真机启动、存档位置、全屏 | 两配置均有 Windows 云端无头启动成功记录；尚无实体 Windows 图形、存档目录及全屏操作记录 | 缺实体设备证据；云端启动不替代此项 |
+| D6-11 | Git 忽略、分支提交规范、缓存不污染 Git | 独立 `git check-ignore` 命中缓存；远端分支和日期标签均指向 `ccad9fd8c4d1074dfcc0598681ea989c705e739f`，见下方远端复核 | 通过（规则、忽略及本次源码远端备份） |
 | D6-12 | README 可恢复上下文，干净环境启动 | `/tmp/wuming-week1-audit.rAPbW6/repo` 初始无 `.godot/.tools/builds`，按 README 使用 `GODOT_BIN` 指定已验证引擎后从零导入和检查成功 | 通过（干净工作区）；复用本机系统与模板，不声称全新操作系统已测 |
-| D6-13 | Actions 文档／数据／Godot 解析；导出 artifact | `.github/workflows/validate.yml` 含 Linux 构建／检查及 Windows 云运行；尚无当前提交成功运行 URL 或 artifact | 缺证据：远端未执行 |
+| D6-13 | Actions 文档／数据／Godot 解析；导出 artifact | [分支 run 34981898201](https://github.com/witcher8848/wuxia_game/actions/runs/34981898201) 与 [标签 run 34981897065](https://github.com/witcher8848/wuxia_game/actions/runs/34981897065) 成功；当次四类 artifact 已下载并独立核对日志、metadata 和校验清单 | 通过；限定为下方记录的提交及自动化覆盖 |
 | D6-14 | 第二周任务板 | 7 票具备范围 ID、4～8 小时估算、依赖、责任、验收；合计 40 小时 | 通过（计划） |
 
 ## Day 7：七个问题与整周门槛
@@ -118,7 +118,7 @@
 | D7-04 | 最大三项风险与第二周具体任务 | `07` 6、7；剧情分支量、战斗调查乐趣、美术产能；7 票／40 小时 | 通过（计划） |
 | D7-05 | 七条周通过条件全部有据 | 愿景／切片流程／战斗规格／技术美术／范围／本机工程／下周拆分齐全，另须满足 Day6 明确硬件及协作执行门槛 | 未通过：下述剩余门槛未闭合 |
 
-## 最终独立运行记录
+## 本机独立运行历史（2026-09-13～14）
 
 独立验收人实际执行了以下操作，未以主实现代理的汇报代替结果：
 
@@ -133,13 +133,46 @@
 
 独立测试日志已复制到本机 `builds/qa/independent/`；PCK 负例日志为 `builds/qa/independent_pack_negative.log`。这些是被 Git 忽略的本机验收产物；本报告保留命令、关键输出和边界，不能把未上传的本机文件当作远端 CI artifact。
 
+## 远端验收补充（2026-09-15 运行，2026-09-16 复核）
+
+此前 Git CLI 凭据不足、连接器写入 403 是历史阻塞。2026-09-15 主代理完成本次分支及标签推送后，本验收人使用 `gh run view`、GitHub ref／tag API 和当次 artifact 进行了独立只读复核；当前不再把远端写入与 CI 列为未通过。本次证据针对提交 `ccad9fd8c4d1074dfcc0598681ea989c705e739f`，不自动覆盖以后提交，也不代表默认分支 `main` 已合并工程。
+
+### 远端引用与运行
+
+| 对象 | 独立复核结果 |
+|---|---|
+| `refs/heads/codex/week1-foundation` | GitHub ref API 返回 commit `ccad9fd8c4d1074dfcc0598681ea989c705e739f` |
+| `refs/tags/week1-local-2026-09-15` | 为带说明的 tag 对象 `93f8503a9ecbb78424d2c8861669f55d60ee59a6`；tag API 剥离后指向同一 `ccad9fd`，满足带日期里程碑要求 |
+| [分支运行 34981898201](https://github.com/witcher8848/wuxia_game/actions/runs/34981898201) | `event=push`、`headSha=ccad9fd…`、`status=completed`、`conclusion=success`；Linux 构建和 Windows 云端启动 job 均成功。Release 两步骤因只对标签执行而正常跳过，不把跳过称为通过 |
+| [标签运行 34981897065](https://github.com/witcher8848/wuxia_game/actions/runs/34981897065) | 相同 head SHA，两个 job 均成功；Debug、Release 导出和上传，以及 Windows 当次两包启动步骤均实际执行成功，无必需步骤被跳过 |
+
+标签 run 的四类 artifact 均属于 `run_attempt=1`，API 查询时均未过期：
+
+| Artifact 名称 | GitHub artifact ID | 实际检查 |
+|---|---:|---|
+| `windows-build-34981897065-1` | 10402260825 | 含当次 Debug 和 Release 两个完整包，逐包检查 metadata、EXE 类型和 SHA-256 清单 |
+| `windows-release-candidate-34981897065-1` | 10402260835 | 独立 Release 候选；7 条校验通过，EXE／PCK 与汇总 artifact 的 Release 副本逐字节相同 |
+| `linux-qa-34981897065-1` | 10401847582 | 实际读取工具链、项目检查、导出和 PCK 审计日志 |
+| `windows-runtime-qa-34981897065-1` | 10401653257 | 实际读取两个包的 stdout／stderr／engine／combined／result 日志 |
+
+下载保存在 `builds/qa/remote/34981897065-proxy/`。原直连下载确有字节进度，但实测吞吐过低，主代理授权后主动取消并取得退出码 130；这是路线优化取消，未伪称网络终态失败。随后仅对该下载命令设置本地代理，使用新目录下载全部 artifact，下载进程最终退出码 0。2026-09-16 复核沿用已完成的下载，没有重复下载或重跑工作流。
+
+### Artifact 内容和日志核验
+
+- Debug 目录为 `0.1.0-week1_ccad9fd_debug_20260915T142913Z`，Release 目录为 `0.1.0-week1_ccad9fd_release_20260915T142921Z`；两者 `build_info.json` 均为上述完整 commit、`dirty=false`、`godot_version=4.7.2`、`target=windows-x86_64`，configuration 分别为 debug／release。
+- 独立执行 `shasum -a 256 -c SHA256SUMS.txt`：每包 7 条全部通过，覆盖 EXE、PCK、README、metadata、Godot／组件／Noto 三份许可证；两 EXE 均被识别为 PE32+ x86-64。不是仅依据 Actions 绿色状态认定产物正确。
+- Linux 工具链日志分别包含编辑器 `Godot_v4.7.2-stable_linux.x86_64.zip` 和同版导出模板的 `SHA512_OK`，实际版本为 `4.7.2.stable.official.ed1daf0bf`。
+- Linux 检查日志包含 `STATE_SERVICES: 73 checks, 0 failures`、`PROJECT_CONTRACT_PASS checks=61`、`UI_FLOW_PASS checks=15`、`WEEK1_SMOKE_PASS scene=SCENE_TEST_YARD movement=ok platform=offline connected_pads=0` 和 `PROJECT_CHECK_PASS`；两配置各有 `PACK_AUDIT_PASS resources=32 required=13` 及当次目录的 `WINDOWS_BUILD_PASS`。
+- Windows 两个结果日志分别明确记录该 Debug／Release 包及完整 commit 的 `WINDOWS_CLOUD_STARTUP_PASS`；stdout／engine 存在 Godot 4.7.2 启动输出，两 stderr 均为 0 字节，检查未发现 `SCRIPT ERROR:`、`ERROR:` 或 `Parse Error:`。结合已审读的工作流，成功标记意味着该 EXE 在 Windows 云端进程中正常退出且未触发错误检查。
+
+覆盖边界：Windows job 使用 `--headless --quit-after 10`，没有导航进测试院、操作存档、验证 GPU 图形／中文实际显示、切换全屏或连接物理手柄。因此它只证明当次 Windows 导出程序在云端 Windows 的无头启动成功；不能关闭 D6-06、D6-10 或独立系统备份、新读者理解门槛。
+
 ## 尚未闭合的门槛
 
 | 门槛 | 依据与现有证据 | 完成所需证据 |
 |---|---|---|
-| Windows x64 真机 | `04` 第十节第 8 条明确要求；当前仅完成 macOS 导出／本机装载跨平台 PCK | 实际 Windows 设备／GPU、包校验值、启动、显示、存档位置、全屏和退出结果 |
+| Windows x64 真机 | `04` 第十节第 8 条明确要求；已完成 macOS 本机验证、导出与 Windows 云端无头启动，尚无实体设备证据 | 实际 Windows 设备／GPU、包校验值、启动、显示、存档位置、全屏和退出结果 |
 | 实体手柄 | `04` 第十节第 4 条；独立运行报告连接数 0，已有测试是模拟事件 | 型号、连接记录、移动、菜单导航、确认取消、断开后键盘恢复的实际结果 |
-| 源码远端备份与 CI 执行 | `04` 第八／九节；当前源码未形成这批改动的远端提交，无本次 CI URL／artifact。主代理报告 Git CLI 缺写入凭据，GitHub 连接器写入被 403 拒绝 | 可写入授权或完成本次源文件推送；对应提交的各 job 成功及当次构建 artifact。YAML、只读仓库访问与旧提交不能代替 |
 | 系统级备份及恢复样本 | `04` 9.1；本验收人执行 `tmutil destinationinfo` 得到 `No destinations configured.` | 可用的独立备份位置／系统备份已启用记录，以及恢复一份本项目源文件并比对的结果 |
 | 陌生人 30 秒理解 | 周计划 Day1 的明确理解门槛；已有一句话卖点，尚无真实新读者复述记录 | 新读者读后独立复述核心特色，记录是否理解，不用设计者自评或本报告代替 |
 
