@@ -1,13 +1,19 @@
-Project Wuming / Week 1 engineering build
+Project Wuming / Week 2 greybox exploration candidate
 
 Keep ProjectWuming.exe and ProjectWuming.pck together.
-Launch ProjectWuming.exe, choose Enter test yard.
-WASD/arrows or controller left stick/D-pad: move. Enter/A: confirm.
-Esc/B: pause/back. F5: quick save. Pause menu: load and fullscreen.
+Launch ProjectWuming.exe, choose Enter town.
+WASD/arrows: move. Shift: sprint. E/Enter: interact or close reading.
+Hold F: observe nearby objects. Esc: close reading or pause/back.
+F5: quick save. Pause menu: separate manual save slots, load and fullscreen.
+Manual slots 1-5 are independent of quick save. Confirm before overwriting.
+Title and pause Load menus let you select a slot. Automatic triggers are not implemented yet.
+Explore town, home courtyard and river dock through marked exits.
 Save data: %APPDATA%\ProjectWuming\saves\quick.sav
 No Steam client or login required.
 
-Hardware acceptance still requires an actual Windows x64 PC and gamepad:
-launch, enter yard, move with both devices, save, quit, reopen, load,
-toggle fullscreen, disconnect pad and confirm keyboard still works.
-Record OS/GPU/controller/build_info.json and each result.
+Keyboard is the current acceptance baseline. Controller mappings remain,
+but physical controller compatibility is not yet verified or promised.
+Windows hardware acceptance still needs actual PC testing: graphics,
+keyboard exploration, save, quit/reopen/load, and fullscreen.
+Record OS/GPU/input device/build_info.json and each result.
+This is a greybox prototype: no finished story, combat or production art.

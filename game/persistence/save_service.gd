@@ -2,8 +2,6 @@ extends Node
 ## Versioned JSON slots with validated writes, per-slot backup, and explicit recovery.
 
 const IO = preload("res://game/persistence/save_file_io.gd")
-const GAME_VERSION: String = "0.1.0"
-const CONTENT_VERSION: String = "0.1.0"
 const SLOTS: Array[String] = [
 	"manual_01", "manual_02", "manual_03", "manual_04", "manual_05", "quick",
 	"auto_01", "auto_02", "auto_03",
@@ -18,6 +16,10 @@ func save_game(slot: String, state: GameState) -> Error:
 		return ERR_INVALID_PARAMETER
 	if state == null or not state.validate().is_empty():
 		return ERR_INVALID_DATA
+	# Protect every copy before creating directories or restoring rollback files;
+	# callers other than the slot menu must honor the same version boundary.
+	if not slot_summary(slot)["can_overwrite"]:
+		return ERR_UNAVAILABLE
 	var directory_error: Error = DirAccess.make_dir_recursive_absolute(
 		ProjectSettings.globalize_path(_save_root().path_join("backups")))
 	if directory_error != OK:
@@ -56,7 +58,19 @@ func save_game(slot: String, state: GameState) -> Error:
 	return IO.replace_file(temporary, target)
 
 
-func load_game(slot: String) -> Dictionary:
+func load_game(slot: String, allow_auto_fallback: bool = true) -> Dictionary:
+	var result: Dictionary = _read_slot(slot)
+	if result["error"] == OK or result["error"] == ERR_UNAVAILABLE:
+		return result
+	if allow_auto_fallback and is_valid_slot(slot) and _is_valid_root():
+		var recovered_auto: Dictionary = _load_latest_auto(slot)
+		if recovered_auto["error"] == OK:
+			return recovered_auto
+	return result
+
+
+func _read_slot(slot: String) -> Dictionary:
+	# Exact-slot read: never substitute a different route from an automatic slot.
 	if not is_valid_slot(slot) or not _is_valid_root():
 		return IO.failure(ERR_INVALID_PARAMETER, "Invalid save slot or test directory.")
 	var primary: Dictionary = IO.read_envelope(slot_path(slot))
@@ -70,6 +84,7 @@ func load_game(slot: String) -> Dictionary:
 		{"path": slot_path(slot) + ".old", "source": "rollback"},
 		{"path": backup_path(slot), "source": "backup"},
 	]
+	var failure: Dictionary = primary
 	for candidate: Dictionary in candidates:
 		var recovered: Dictionary = IO.read_envelope(candidate["path"])
 		if recovered["error"] == ERR_UNAVAILABLE:
@@ -78,10 +93,41 @@ func load_game(slot: String) -> Dictionary:
 			recovered["source"] = candidate["source"]
 			recovered["message"] = "Recovered from the slot's " + String(candidate["source"]) + "."
 			return recovered
-	var recovered_auto: Dictionary = _load_latest_auto(slot)
-	if recovered_auto["error"] == OK:
-		return recovered_auto
-	return primary
+		if failure["error"] == ERR_FILE_NOT_FOUND and recovered["error"] != ERR_FILE_NOT_FOUND:
+			failure = recovered
+	return failure
+
+
+func slot_summary(slot: String) -> Dictionary:
+	var summary: Dictionary = {"slot": slot, "exists": false, "can_load": false, "can_overwrite": false,
+		"error": ERR_INVALID_PARAMETER, "source": "", "created_at_utc": "",
+		"scene_id": "", "character_name": "", "message": ""}
+	if not is_valid_slot(slot) or not _is_valid_root():
+		return summary
+	summary["can_overwrite"] = true
+	for path: String in [slot_path(slot), slot_path(slot) + ".old", backup_path(slot)]:
+		if FileAccess.file_exists(path):
+			summary["exists"] = true
+			# Saving replaces backups too, even if a readable primary takes priority.
+			if IO.read_envelope(path)["error"] == ERR_UNAVAILABLE:
+				summary["can_overwrite"] = false
+	var result: Dictionary = _read_slot(slot)
+	summary["error"] = result["error"]
+	summary["message"] = result.get("message", "")
+	if result["error"] == OK:
+		summary["can_load"] = true
+		summary["source"] = result["source"]
+		summary["created_at_utc"] = result["envelope"]["created_at_utc"]
+		summary["scene_id"] = result["state"].scene_id
+		summary["character_name"] = result["state"].player_state["name"]
+	return summary
+
+
+func list_slot_summaries() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for slot: String in SLOTS:
+		result.append(slot_summary(slot))
+	return result
 
 
 func is_valid_slot(slot: String) -> bool:
@@ -111,9 +157,11 @@ func _is_valid_root() -> bool:
 
 func _make_envelope(slot: String, state: GameState) -> Dictionary:
 	var created: String = Time.get_datetime_string_from_system(true) + "Z"
+	var content: Node = get_node_or_null("/root/ContentDB") if is_inside_tree() else null
+	var content_version: String = content.content_version if content != null else "0.2.0"
 	return {
-		"schema_version": GameState.SCHEMA_VERSION, "game_version": GAME_VERSION,
-		"content_version": CONTENT_VERSION, "save_id": "%s_%d" % [slot, Time.get_ticks_usec()],
+		"schema_version": GameState.SCHEMA_VERSION, "game_version": str(ProjectSettings.get_setting("application/config/version", "0.2.1-week2")),
+		"content_version": content_version, "save_id": "%s_%d" % [slot, Time.get_ticks_usec()],
 		"save_kind": "auto" if slot.begins_with("auto_") else ("quick" if slot == "quick" else "manual"),
 		"created_at_utc": created, "playtime_seconds": state.playtime_seconds,
 		"route_id": state.route_id, "scene_id": state.scene_id, "spawn_id": state.spawn_id,

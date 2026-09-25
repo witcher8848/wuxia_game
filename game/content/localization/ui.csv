@@ -1,14 +1,14 @@
 keys,zh_CN,en
-UI_TITLE,无名 · 第一周工程,WUMING / WEEK 01
-UI_ENTER_YARD,进入测试庭院,Enter test yard
-UI_LOAD,读取快速存档,Load quick save
+UI_TITLE,无名 · 灰盒探索,WUMING / EXPLORATION
+UI_ENTER_YARD,进入小镇,Enter town
+UI_LOAD,读取存档,Load game
 UI_SAVE,快速存档,Quick save
 UI_QUIT,退出,Quit
 UI_TITLE_RETURN,返回标题,Return to title
 UI_PAUSED,暂停,Paused
 UI_RESUME,继续,Resume
 UI_FULLSCREEN,切换窗口／全屏,Window / Fullscreen
-UI_CONTROLS,WASD／十字键选项 · Enter／A 确认 · Esc／B 返回,WASD / D-pad select | Enter / A confirm | Esc / B back
+UI_CONTROLS,WASD／方向键选项 · Enter／E 确认 · Esc 返回,WASD / arrows select | Enter / E confirm | Esc back
 UI_YARD_CONTROLS,测试庭院（离线） · WASD／手柄移动 · F5 存档 · Esc 菜单,Test yard (offline) | WASD / pad move | F5 save | Esc menu
 UI_SAVE_OK,已保存至 user://saves/quick.sav,Saved to user://saves/quick.sav
 UI_SAVE_FAILED,存档失败：%s,Save failed: %s
@@ -17,3 +17,35 @@ UI_LOAD_FAILED,没有可读取的快速存档。,No valid quick save.
 UI_INVALID_SCENE,存档引用的地图或出生点无效。,Invalid saved scene or spawn.
 UI_PAD_DISCONNECTED,手柄已断开；可继续使用键盘。,Controller disconnected. Keyboard remains available.
 SCENE_TEST_YARD_NAME,测试庭院,Test yard
+UI_GREYBOX,第二周灰盒,Week 2 greybox
+UI_EXPLORATION_CONTROLS,WASD／方向键移动 · Shift 冲刺 · E 交互 · F 观察 · F5 存档 · Esc 菜单,WASD/arrows move · Shift sprint · E interact · F observe · F5 save · Esc menu
+UI_INTERACT_PROMPT,E／Enter · %s,E / Enter · %s
+UI_CLOSE_READING,E／Enter／Esc 关闭 · 占位文本，不推进时段,E / Enter / Esc close · Prototype text; no time advance
+UI_EXIT_INVALID,出口或落点无效，已留在当前区域安全位置。,Invalid destination. You remain safely in this area.
+UI_SPAWN_RECOVERED,位置或区域无效，已恢复到安全出生点。,Invalid location recovered to a safe spawn.
+UI_MANUAL_SAVE,手动存档,Manual save
+UI_QUICK_SLOT,快速存档,Quick save
+UI_MANUAL_SLOT,手动存档 %d,Manual slot %d
+UI_AUTO_SLOT,自动存档 %d,Automatic slot %d
+UI_SLOT_EMPTY,空槽,Empty
+UI_SLOT_DAMAGED,文件损坏或无法读取,Damaged or unreadable
+UI_SLOT_NEWER,需要新版游戏；禁止覆盖,Newer game required; cannot overwrite
+UI_UNKNOWN_LOCATION,未知地点,Unknown location
+UI_SOURCE_PRIMARY,主档（primary）,Primary (primary)
+UI_SOURCE_ROLLBACK,中断恢复（rollback）,Interrupted-write recovery (rollback)
+UI_SOURCE_BACKUP,备份（backup）,Backup (backup)
+UI_SAVE_SLOT_OK,已保存：%s,Saved: %s
+UI_LOAD_SLOT_OK,已读取：%s · %s,Loaded: %s · %s
+UI_POSITION_RECOVERED_SHORT,位置已恢复到安全出生点,Position recovered to safe spawn
+UI_SLOT_LOAD_FAILED,无法读取 %s：%s,Cannot load %s: %s
+UI_SLOT_PAGE_HINT,第 %d／%d 页 · 方向键选择 · E 确认 · Esc 返回,Page %d / %d · Arrows select · E confirm · Esc back
+UI_SLOT_SAVE_HELP,只写入所选手动槽；F5 始终使用快速存档。,Only the selected manual slot is written. F5 always uses quick save.
+UI_SLOT_LOAD_HELP,仅读取所选槽及其备份。自动存档触发尚未实现。,Loads only this slot or its backup. Automatic triggers are not implemented.
+UI_PREVIOUS_PAGE,上一页,Previous
+UI_NEXT_PAGE,下一页,Next
+UI_BACK,返回,Back
+UI_CANCEL,取消,Cancel
+UI_OVERWRITE_TITLE,覆盖「%s」？,Overwrite %s?
+UI_OVERWRITE_HELP,此槽已有内容。确认后将替换；其他槽不受影响。,This slot contains data. Confirm to replace it; other slots remain unchanged.
+UI_OVERWRITE_CONFIRM,确认覆盖,Confirm overwrite
+UI_OVERWRITE_CANCELLED,已取消覆盖，原存档未改动。,Overwrite cancelled. Existing save is unchanged.

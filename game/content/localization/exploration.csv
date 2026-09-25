@@ -1,0 +1,25 @@
+keys,zh_CN,en
+LOCATION_TOWN_STREET,县城街巷,Town street
+LOCATION_HOME_COURTYARD,旧居院落,Home courtyard
+LOCATION_RIVER_DOCK,河岸码头,River dock
+BUILDING_OLD_HOME,旧居,Old home
+BUILDING_MARKET,市集,Market
+BUILDING_INN,客栈,Inn
+BUILDING_ANCESTRAL_HALL,祠堂入口（暂未开放）,Ancestral hall (closed)
+BUILDING_WORKSHOP,作坊,Workshop
+BUILDING_TEA,茶铺,Tea house
+BUILDING_MAIN_HOUSE,正屋,Main house
+BUILDING_STORAGE,柴房,Store room
+BUILDING_DOCK_STORE,货栈,Warehouse
+BUILDING_DOCK_SHELTER,歇脚棚,Rest shelter
+NPC_STREET_VENDOR_NAME,街边摊主,Street vendor
+NPC_STREET_VENDOR_TEXT,热汤刚出锅。旧居的门在西北边；沿街向东南走就是码头。先认认路吧。【第二周交互样例，非正式剧情】,The soup is hot. The home gate is northwest; the dock lies southeast. Get your bearings first. [Week 2 interaction sample - not final story.]
+NPC_DOCK_WORKER_NAME,码头脚夫,Dock worker
+NPC_DOCK_WORKER_TEXT,这会儿不渡河。货箱挡路就绕开些；往西边的路牌走能回县城。【第二周交互样例，非正式剧情】,No crossing just now. Walk around the cargo; the sign to the west leads back to town. [Week 2 interaction sample - not final story.]
+DOC_STREET_NOTICE_NAME,街口告示,Street notice
+DOC_STREET_NOTICE_TEXT,告示上写着：码头货物请按序搬运，勿堵街道。纸角压着一枚旧铜钱。【第二周阅读样例；尚未接入名册或证据系统】,The notice asks carriers to keep the street clear. An old coin weighs down one corner. [Week 2 reading sample; no roster or evidence system yet.]
+DOC_HOME_NOTE_NAME,门前便笺,Note by the door
+DOC_HOME_NOTE_TEXT,便笺上只有几字：出门记得关门，热饭留在灶边。纸上的折痕已被来回抚平。【第二周阅读样例，非正式剧情】,A short note: Shut the door when you leave. Warm food is by the stove. Its creases have been smoothed many times. [Week 2 reading sample - not final story.]
+EXIT_TO_HOME,进入旧居院落,Enter home courtyard
+EXIT_TO_DOCK,前往河岸码头,Go to river dock
+EXIT_TO_STREET,返回县城街巷,Return to town street

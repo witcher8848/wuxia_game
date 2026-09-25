@@ -1,0 +1,65 @@
+{
+  "regions": [
+    {
+      "id": "SCENE_TOWN_STREET",
+      "name_key": "LOCATION_TOWN_STREET",
+      "size": [1280, 768],
+      "ground": "#807c68",
+      "obstacles": [
+        {"rect": [96, 96, 256, 160], "kind": "building", "label_key": "BUILDING_OLD_HOME"},
+        {"rect": [480, 64, 384, 192], "kind": "building", "label_key": "BUILDING_MARKET"},
+        {"rect": [960, 96, 224, 160], "kind": "building", "label_key": "BUILDING_ANCESTRAL_HALL"},
+        {"rect": [128, 544, 256, 160], "kind": "building", "label_key": "BUILDING_WORKSHOP"},
+        {"rect": [512, 544, 256, 128], "kind": "building", "label_key": "BUILDING_TEA"},
+        {"rect": [960, 448, 320, 320], "kind": "water"},
+        {"rect": [1088, 352, 64, 64], "kind": "crate"}
+      ],
+      "spawns": {
+        "SPAWN_START": [512, 384],
+        "SPAWN_FROM_HOME": [384, 288],
+        "SPAWN_FROM_DOCK": [864, 416]
+      },
+      "interactions": [
+        {"id": "NPC_STREET_VENDOR", "kind": "npc", "position": [608, 352], "name_key": "NPC_STREET_VENDOR_NAME", "text_key": "NPC_STREET_VENDOR_TEXT"},
+        {"id": "DOC_STREET_NOTICE", "kind": "document", "position": [384, 352], "name_key": "DOC_STREET_NOTICE_NAME", "text_key": "DOC_STREET_NOTICE_TEXT"},
+        {"id": "EXIT_STREET_HOME", "kind": "exit", "position": [384, 192], "name_key": "EXIT_TO_HOME", "target_scene": "SCENE_HOME_COURTYARD", "target_spawn": "SPAWN_FROM_TOWN"},
+        {"id": "EXIT_STREET_DOCK", "kind": "exit", "position": [864, 512], "name_key": "EXIT_TO_DOCK", "target_scene": "SCENE_RIVER_DOCK", "target_spawn": "SPAWN_FROM_TOWN"}
+      ]
+    },
+    {
+      "id": "SCENE_HOME_COURTYARD",
+      "name_key": "LOCATION_HOME_COURTYARD",
+      "size": [960, 640],
+      "ground": "#89806a",
+      "obstacles": [
+        {"rect": [128, 64, 512, 224], "kind": "building", "label_key": "BUILDING_MAIN_HOUSE"},
+        {"rect": [704, 96, 160, 192], "kind": "building", "label_key": "BUILDING_STORAGE"},
+        {"rect": [64, 416, 128, 128], "kind": "crate"},
+        {"rect": [320, 448, 96, 64], "kind": "crate"}
+      ],
+      "spawns": {"SPAWN_FROM_TOWN": [768, 416]},
+      "interactions": [
+        {"id": "DOC_HOME_NOTE", "kind": "document", "position": [448, 352], "name_key": "DOC_HOME_NOTE_NAME", "text_key": "DOC_HOME_NOTE_TEXT"},
+        {"id": "EXIT_HOME_STREET", "kind": "exit", "position": [768, 512], "name_key": "EXIT_TO_STREET", "target_scene": "SCENE_TOWN_STREET", "target_spawn": "SPAWN_FROM_HOME"}
+      ]
+    },
+    {
+      "id": "SCENE_RIVER_DOCK",
+      "name_key": "LOCATION_RIVER_DOCK",
+      "size": [1120, 640],
+      "ground": "#85836f",
+      "obstacles": [
+        {"rect": [64, 64, 224, 192], "kind": "building", "label_key": "BUILDING_DOCK_STORE"},
+        {"rect": [800, 64, 224, 192], "kind": "building", "label_key": "BUILDING_DOCK_SHELTER"},
+        {"rect": [384, 288, 64, 64], "kind": "crate"},
+        {"rect": [480, 288, 64, 64], "kind": "crate"},
+        {"rect": [0, 448, 1120, 192], "kind": "water"}
+      ],
+      "spawns": {"SPAWN_FROM_TOWN": [224, 352]},
+      "interactions": [
+        {"id": "NPC_DOCK_WORKER", "kind": "npc", "position": [704, 352], "name_key": "NPC_DOCK_WORKER_NAME", "text_key": "NPC_DOCK_WORKER_TEXT"},
+        {"id": "EXIT_DOCK_STREET", "kind": "exit", "position": [160, 352], "name_key": "EXIT_TO_STREET", "target_scene": "SCENE_TOWN_STREET", "target_spawn": "SPAWN_FROM_DOCK"}
+      ]
+    }
+  ]
+}

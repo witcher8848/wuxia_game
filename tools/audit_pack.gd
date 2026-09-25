@@ -15,6 +15,12 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/presentation/exploration/test_yard.tscn",
 	"res://game/presentation/main.gd",
 	"res://game/presentation/exploration/test_yard.gd",
+	"res://game/presentation/exploration/town_street.tscn",
+	"res://game/presentation/exploration/home_courtyard.tscn",
+	"res://game/presentation/exploration/river_dock.tscn",
+	"res://game/presentation/exploration/exploration_region.gd",
+	"res://game/presentation/exploration/player_controller.gd",
+	"res://game/presentation/exploration/exploration_camera.gd",
 	"res://game/domain/state/game_state.gd",
 	"res://game/core/bootstrap/app.gd",
 	"res://game/core/services/game_session.gd",
@@ -56,6 +62,11 @@ func _run() -> void:
 		if not ResourceLoader.exists(resource):
 			_failures.append("Missing required runtime resource: " + resource)
 	var bootstrap_path: String = "res://game/content/data/bootstrap.json"
+	if not FileAccess.file_exists("res://game/content/data/exploration.json"):
+		_failures.append("Missing exploration map content.")
+	for locale_path: String in ["res://game/content/localization/exploration.zh_CN.translation", "res://game/content/localization/exploration.en.translation"]:
+		if not ResourceLoader.exists(locale_path):
+			_failures.append("Missing exploration localization: " + locale_path)
 	if not FileAccess.file_exists(bootstrap_path):
 		_failures.append("Missing bootstrap JSON in pack.")
 	else:

@@ -1,13 +1,33 @@
 {
-  "content_version": "0.1.0",
-  "start_scene_id": "SCENE_TEST_YARD",
+  "content_version": "0.2.0",
+  "exploration_path": "res://game/content/data/exploration.json",
+  "start_scene_id": "SCENE_TOWN_STREET",
   "start_spawn_id": "SPAWN_START",
   "scenes": [
     {
       "id": "SCENE_TEST_YARD",
       "path": "res://game/presentation/exploration/test_yard.tscn",
-      "name_key": "LOCATION_TEST_YARD",
-      "spawn_ids": ["SPAWN_START"]
+      "name_key": "SCENE_TEST_YARD_NAME",
+      "spawn_ids": ["SPAWN_START"],
+      "spawn_positions": {"SPAWN_START": [320, 180]}
+    },
+    {
+      "id": "SCENE_TOWN_STREET",
+      "path": "res://game/presentation/exploration/town_street.tscn",
+      "name_key": "LOCATION_TOWN_STREET",
+      "spawn_ids": ["SPAWN_START", "SPAWN_FROM_HOME", "SPAWN_FROM_DOCK"]
+    },
+    {
+      "id": "SCENE_HOME_COURTYARD",
+      "path": "res://game/presentation/exploration/home_courtyard.tscn",
+      "name_key": "LOCATION_HOME_COURTYARD",
+      "spawn_ids": ["SPAWN_FROM_TOWN"]
+    },
+    {
+      "id": "SCENE_RIVER_DOCK",
+      "path": "res://game/presentation/exploration/river_dock.tscn",
+      "name_key": "LOCATION_RIVER_DOCK",
+      "spawn_ids": ["SPAWN_FROM_TOWN"]
     }
   ]
 }

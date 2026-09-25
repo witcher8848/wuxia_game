@@ -5,16 +5,38 @@ var status: Label
 var debug_label: Label
 var _automation := false
 var ui_theme: Theme
+var reading_panel: PanelContainer
+var region_label: Label
+var interaction_hint: Label
+var transition_cover: ColorRect
+var controls_backdrop: ColorRect
+var transitioning := false
+var _reading_target: Dictionary = {}
+var _menu_kind: StringName = &"title"
+var _slot_origin: StringName = &"title"
+var _slot_page: int = 0
+var _pending_slot: String = ""
+var slot_buttons: Array[Button] = []
+var slot_entries: Array[Dictionary] = []
+const SLOT_PAGE_SIZE: int = 3
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
 	ui_theme = Theme.new()
 	ui_theme.default_font = preload("res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf")
 	ui_theme.default_font_size = 16
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color("#171820")
+	panel_style.border_color = Color("#747b78")
+	panel_style.set_border_width_all(1)
+	ui_theme.set_stylebox("panel", "PanelContainer", panel_style)
 	_build_ui()
 	_show_title()
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	if _automation:
+		get_tree().create_timer(20).timeout.connect(func() -> void:
+			push_error("Exploration smoke watchdog expired")
+			get_tree().quit(1))
 		_run_smoke.call_deferred()
 
 func _build_ui() -> void:
@@ -38,9 +60,43 @@ func _build_ui() -> void:
 	debug_label.theme = ui_theme
 	debug_label.visible = App.debug_enabled
 	$UIRoot.add_child(debug_label)
+	region_label = Label.new()
+	region_label.theme = ui_theme
+	region_label.position = Vector2(12, 8)
+	region_label.add_theme_color_override("font_color", Color("#f1e6cf"))
+	region_label.add_theme_color_override("font_shadow_color", Color("#171820"))
+	region_label.add_theme_constant_override("shadow_outline_size", 4)
+	$UIRoot.add_child(region_label)
+	interaction_hint = Label.new()
+	interaction_hint.theme = ui_theme
+	interaction_hint.position = Vector2(16, 286)
+	interaction_hint.add_theme_color_override("font_color", Color("#f1e6cf"))
+	interaction_hint.add_theme_color_override("font_shadow_color", Color("#171820"))
+	interaction_hint.add_theme_constant_override("shadow_outline_size", 4)
+	$UIRoot.add_child(interaction_hint)
+	var footer := ColorRect.new()
+	controls_backdrop = footer
+	footer.color = Color("#171820")
+	footer.position = Vector2(0, 310)
+	footer.size = Vector2(640, 50)
+	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$UIRoot.add_child(footer)
+	$UIRoot.move_child(footer, status.get_index())
+	status.position = Vector2(12, 315)
+	status.size = Vector2(616, 40)
+	debug_label.position = Vector2(12, 32)
+	transition_cover = ColorRect.new()
+	transition_cover.color = Color("#171820")
+	transition_cover.size = Vector2(640, 360)
+	transition_cover.modulate.a = 0.0
+	transition_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$TransitionLayer.add_child(transition_cover)
 
 func _new_menu(title: String) -> VBoxContainer:
+	slot_buttons.clear()
 	if is_instance_valid(menu):
+		menu.hide()
+		$UIRoot.remove_child(menu)
 		menu.queue_free()
 	menu = PanelContainer.new()
 	menu.theme = ui_theme
@@ -65,49 +121,243 @@ func _button(box: VBoxContainer, caption: String, callback: Callable, focus: boo
 	button.text = caption
 	button.custom_minimum_size.y = 28
 	box.add_child(button)
-	button.pressed.connect(callback)
+	button.pressed.connect(func() -> void:
+		get_viewport().set_input_as_handled()
+		callback.call())
 	if focus:
-		button.grab_focus.call_deferred()
+		_focus_later(button)
 	return button
 
+func _focus_later(button: Button) -> void:
+	# A second menu can replace this one before the deferred layout pass.
+	# Keep an instance ID rather than a potentially freed typed node reference.
+	var identifier: int = button.get_instance_id()
+	(func() -> void:
+		var target: Object = instance_from_id(identifier)
+		if target is Button and target.is_inside_tree() and target.is_visible_in_tree() and is_instance_valid(menu) and menu.is_ancestor_of(target):
+			target.grab_focus()).call_deferred()
+
 func _show_title() -> void:
+	_menu_kind = &"title"
+	_pending_slot = ""
+	region_label.text = ""
+	interaction_hint.text = ""
+	status.text = tr("UI_CONTROLS")
 	App.reset_contexts()
 	App.push_context(&"system_menu")
 	var box := _new_menu(tr("UI_TITLE"))
 	_button(box, tr("UI_ENTER_YARD"), _start_game, true)
-	_button(box, tr("UI_LOAD"), _load_game)
+	_button(box, tr("UI_LOAD"), _show_load_slots)
 	_button(box, tr("UI_QUIT"), func() -> void: get_tree().quit())
 
 func _start_game() -> void:
 	GameSession.start_new_game()
 	_enter_yard()
 
-func _enter_yard() -> void:
-	for child in $SceneHost.get_children():
-		$SceneHost.remove_child(child)
-		child.queue_free()
-	var scene_path: String = ContentDB.get_scene_path(GameSession.state.scene_id)
-	if scene_path.is_empty() or not ContentDB.has_spawn(GameSession.state.scene_id, GameSession.state.spawn_id):
+func _prepare_region(scene_id: String) -> Node:
+	var path: String = ContentDB.get_scene_path(scene_id)
+	if path.is_empty() or not ResourceLoader.exists(path, "PackedScene"):
+		return null
+	var packed: Resource = load(path)
+	if not packed is PackedScene or not packed.can_instantiate():
+		return null
+	var candidate: Node = packed.instantiate()
+	if not candidate is Node2D:
+		candidate.free()
+		return null
+	if not ContentDB.get_exploration_region(scene_id).is_empty():
+		if not candidate.has_method("choose_target") or candidate.get("scene_id") != scene_id:
+			candidate.free()
+			return null
+	return candidate
+
+func _enter_yard(prepared: Node = null) -> Error:
+	# Kept as a compatibility entry point; current content starts in the town.
+	var recovered := false
+	var next_state: GameState = GameState.from_dict(GameSession.state.to_dict())
+	if next_state == null:
 		status.text = tr("UI_INVALID_SCENE")
-		return
-	$SceneHost.add_child((load(scene_path) as PackedScene).instantiate())
+		if prepared != null:
+			prepared.free()
+		return ERR_INVALID_DATA
+	if ContentDB.get_scene_path(next_state.scene_id).is_empty() or not ContentDB.has_spawn(next_state.scene_id, next_state.spawn_id):
+		next_state.scene_id = ContentDB.start_scene_id
+		next_state.spawn_id = ContentDB.start_spawn_id
+		var start: Vector2 = ContentDB.get_spawn_position(next_state.scene_id, next_state.spawn_id)
+		next_state.player_state["position"] = {"x": start.x, "y": start.y}
+		recovered = true
+	var definition: Dictionary = ContentDB.get_exploration_region(next_state.scene_id)
+	if not definition.is_empty():
+		var saved: Dictionary = next_state.player_state["position"]
+		if not ContentDB.is_safe_player_position(next_state.scene_id, Vector2(saved["x"], saved["y"])):
+			var spawn: Vector2 = ContentDB.get_spawn_position(next_state.scene_id, next_state.spawn_id)
+			if not ContentDB.is_safe_player_position(next_state.scene_id, spawn):
+				status.text = tr("UI_INVALID_SCENE")
+				if prepared != null:
+					prepared.free()
+				return ERR_INVALID_DATA
+			next_state.player_state["position"] = {"x": spawn.x, "y": spawn.y}
+			recovered = true
+	var region: Node = prepared if prepared != null else _prepare_region(next_state.scene_id)
+	if region == null:
+		status.text = tr("UI_INVALID_SCENE")
+		return ERR_CANT_OPEN
+	var previous: GameState = GameSession.state
+	if GameSession.replace_state(next_state) != OK:
+		region.free()
+		status.text = tr("UI_INVALID_SCENE")
+		return ERR_INVALID_DATA
+	if region.has_signal("interaction_requested"):
+		region.interaction_requested.connect(_on_interaction)
+	$SceneHost.add_child(region)
+	if not definition.is_empty() and not is_instance_valid(region.get("player")):
+		$SceneHost.remove_child(region)
+		region.queue_free()
+		GameSession.replace_state(previous)
+		status.text = tr("UI_INVALID_SCENE")
+		return ERR_CANT_CREATE
+	for child in $SceneHost.get_children():
+		if child != region:
+			$SceneHost.remove_child(child)
+			child.queue_free()
 	$UIRoot/Backdrop.hide()
-	menu.hide()
+	if is_instance_valid(menu):
+		menu.hide()
+	_menu_kind = &""
+	_pending_slot = ""
 	App.reset_contexts()
-	status.text = tr("UI_YARD_CONTROLS")
+	region_label.text = tr(ContentDB.get_scene_definition(GameSession.state.scene_id)["name_key"]) + " · " + tr("UI_GREYBOX")
+	status.text = tr("UI_SPAWN_RECOVERED") if recovered else tr("UI_EXPLORATION_CONTROLS")
+	_reset_movement()
+	return OK
+
+func _reset_movement() -> void:
+	if $SceneHost.get_child_count() == 1:
+		var region: Node = $SceneHost.get_child(0)
+		if region.get("player") is CharacterBody2D:
+			region.player.reset_input()
+
+func _on_interaction(target: Dictionary) -> void:
+	if transitioning or App.current_context() != &"exploration" or $SceneHost.get_child_count() != 1:
+		return
+	var region: Node = $SceneHost.get_child(0)
+	if not region.has_method("choose_target") or region.choose_target().get("id", "") != target.get("id", ""):
+		return
+	if target.get("kind") == "exit":
+		_transition_to(target["target_scene"], target["target_spawn"])
+		return
+	if GameSession.mark_inspected(target["id"]) != OK:
+		return
+	_reading_target = target.duplicate(true)
+	_reset_movement()
+	App.push_context(&"dialogue")
+	if is_instance_valid(reading_panel):
+		reading_panel.queue_free()
+	reading_panel = PanelContainer.new()
+	reading_panel.name = "ReadingPanel"
+	reading_panel.theme = ui_theme
+	reading_panel.position = Vector2(12, 172)
+	reading_panel.size = Vector2(616, 176)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 12)
+	reading_panel.add_child(margin)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	margin.add_child(box)
+	var heading := Label.new()
+	heading.text = tr(target["name_key"])
+	heading.add_theme_font_size_override("font_size", 18)
+	box.add_child(heading)
+	var body := Label.new()
+	body.text = tr(target["text_key"])
+	body.custom_minimum_size = Vector2(580, 72)
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.add_theme_font_size_override("font_size", 18)
+	box.add_child(body)
+	var hint := Label.new()
+	hint.text = tr("UI_CLOSE_READING")
+	hint.add_theme_font_size_override("font_size", 14)
+	box.add_child(hint)
+	$UIRoot.add_child(reading_panel)
+	interaction_hint.text = ""
+
+func _close_reading() -> void:
+	if not is_instance_valid(reading_panel) or not reading_panel.visible:
+		return
+	reading_panel.hide()
+	_reading_target.clear()
+	if App.current_context() == &"dialogue":
+		App.pop_context()
+	_reset_movement()
+
+func _transition_to(scene_id: String, spawn_id: String) -> void:
+	if transitioning:
+		return
+	var spawn: Vector2 = ContentDB.get_spawn_position(scene_id, spawn_id)
+	if not ContentDB.has_spawn(scene_id, spawn_id) or not ContentDB.is_safe_player_position(scene_id, spawn):
+		status.text = tr("UI_EXIT_INVALID")
+		_reset_movement()
+		return
+	var candidate: Node = _prepare_region(scene_id)
+	if candidate == null:
+		status.text = tr("UI_EXIT_INVALID")
+		return
+	var previous: GameState = GameState.from_dict(GameSession.state.to_dict())
+	transitioning = true
+	_reset_movement()
+	App.push_context(&"system_menu")
+	interaction_hint.text = ""
+	var fade := create_tween()
+	fade.tween_property(transition_cover, "modulate:a", 1.0, 0.12)
+	await fade.finished
+	# Stop old region processing before changing the authoritative location.
+	for child in $SceneHost.get_children():
+		child.set_physics_process(false)
+	var result: Error = GameSession.enter_region(scene_id, spawn_id)
+	if result == OK:
+		result = _enter_yard(candidate)
+	else:
+		candidate.free()
+	if result != OK:
+		GameSession.replace_state(previous)
+		status.text = tr("UI_EXIT_INVALID")
+		for child in $SceneHost.get_children():
+			child.set_physics_process(true)
+			if child.get("camera") is Camera2D:
+				child.camera.make_current()
+	else:
+		App.push_context(&"system_menu")
+	fade = create_tween()
+	fade.tween_property(transition_cover, "modulate:a", 0.0, 0.12)
+	await fade.finished
+	if App.current_context() == &"system_menu":
+		App.pop_context()
+	transitioning = false
+	_reset_movement()
 
 func _show_pause() -> void:
+	if transitioning or App.current_context() != &"exploration":
+		return
+	_reset_movement()
 	App.push_context(&"system_menu")
+	_render_pause()
+
+func _render_pause() -> void:
+	_menu_kind = &"pause"
+	_pending_slot = ""
 	var box := _new_menu(tr("UI_PAUSED"))
 	menu.position.y = 22
 	box.add_theme_constant_override("separation", 4)
 	_button(box, tr("UI_RESUME"), _resume, true)
 	_button(box, tr("UI_SAVE"), _save_game)
-	_button(box, tr("UI_LOAD"), _load_game)
+	_button(box, tr("UI_MANUAL_SAVE"), _show_save_slots)
+	_button(box, tr("UI_LOAD"), _show_load_slots)
 	_button(box, tr("UI_FULLSCREEN"), _toggle_fullscreen)
 	_button(box, tr("UI_TITLE_RETURN"), _return_to_title)
 
 func _return_to_title() -> void:
+	_close_reading()
 	for child in $SceneHost.get_children():
 		$SceneHost.remove_child(child)
 		child.queue_free()
@@ -116,33 +366,250 @@ func _return_to_title() -> void:
 
 func _resume() -> void:
 	menu.hide()
+	_menu_kind = &""
+	_pending_slot = ""
 	App.pop_context()
+	_reset_movement()
 
-func _save_game() -> void:
-	var result := SaveService.save_game("quick", GameSession.state)
-	status.text = tr("UI_SAVE_OK") if result == OK else tr("UI_SAVE_FAILED") % error_string(result)
+func _save_game(slot: String = "quick") -> Error:
+	if transitioning or App.current_context() == &"dialogue" or $SceneHost.get_child_count() != 1:
+		return ERR_UNAVAILABLE
+	# A future-version backup is data too: the UI must not overwrite its slot.
+	if not SaveService.slot_summary(slot).get("can_overwrite", false):
+		status.text = tr("UI_SLOT_NEWER")
+		return ERR_UNAVAILABLE
+	if $SceneHost.get_child_count() == 1:
+		GameSession.update_player_position($SceneHost.get_child(0).player_position)
+		var region: Node = $SceneHost.get_child(0)
+		if region.get("player") is CharacterBody2D:
+			GameSession.state.player_state["facing"] = region.player.facing
+	var result := SaveService.save_game(slot, GameSession.state)
+	status.text = tr("UI_SAVE_SLOT_OK") % _slot_name(slot) if result == OK else tr("UI_SAVE_FAILED") % error_string(result)
+	return result
 
-func _load_game() -> void:
-	var result := SaveService.load_game("quick")
+func _load_game(slot: String = "quick") -> void:
+	if transitioning:
+		return
+	# Explicit UI selection may recover this slot's backup, never another slot.
+	var result := SaveService.load_game(slot, false)
 	if result.get("error", FAILED) == OK:
 		var loaded: GameState = result["state"]
-		if not ContentDB.has_spawn(loaded.scene_id, loaded.spawn_id) or GameSession.replace_state(loaded) != OK:
+		if not ContentDB.has_spawn(loaded.scene_id, loaded.spawn_id):
 			status.text = tr("UI_INVALID_SCENE")
 			return
-		_enter_yard()
-		status.text = tr("UI_LOAD_OK") % str(result.get("source", "quick"))
+		var candidate: Node = _prepare_region(loaded.scene_id)
+		if candidate == null:
+			status.text = tr("UI_INVALID_SCENE")
+			return
+		var previous: GameState = GameSession.state
+		if GameSession.replace_state(loaded) != OK:
+			candidate.free()
+			status.text = tr("UI_INVALID_SCENE")
+			return
+		_close_reading()
+		if _enter_yard(candidate) != OK:
+			GameSession.replace_state(previous)
+			return
+		var recovered_position: bool = status.text == tr("UI_SPAWN_RECOVERED")
+		status.text = tr("UI_LOAD_SLOT_OK") % [_slot_name(slot), _source_name(str(result.get("source", "primary")))]
+		if recovered_position:
+			status.text += " · " + tr("UI_POSITION_RECOVERED_SHORT")
 	else:
-		status.text = tr("UI_LOAD_FAILED") + str(result.get("message", ""))
+		status.text = tr("UI_SLOT_LOAD_FAILED") % [_slot_name(slot), _slot_error(result["error"])]
+
+func _slot_name(slot: String) -> String:
+	if slot == "quick":
+		return tr("UI_QUICK_SLOT")
+	if slot.begins_with("manual_"):
+		return tr("UI_MANUAL_SLOT") % int(slot.trim_prefix("manual_"))
+	return tr("UI_AUTO_SLOT") % int(slot.trim_prefix("auto_"))
+
+func _source_name(source: String) -> String:
+	match source:
+		"primary": return tr("UI_SOURCE_PRIMARY")
+		"rollback": return tr("UI_SOURCE_ROLLBACK")
+		"backup": return tr("UI_SOURCE_BACKUP")
+		_: return source
+
+func _slot_error(error: int) -> String:
+	match error:
+		ERR_FILE_NOT_FOUND: return tr("UI_SLOT_EMPTY")
+		ERR_UNAVAILABLE: return tr("UI_SLOT_NEWER")
+		_: return tr("UI_SLOT_DAMAGED")
+
+func _slot_caption(summary: Dictionary, for_save: bool = false) -> String:
+	var name: String = _slot_name(summary["slot"])
+	if for_save and not summary.get("can_overwrite", false):
+		return name + " · " + tr("UI_SLOT_NEWER")
+	if not summary["exists"]:
+		return name + " · " + tr("UI_SLOT_EMPTY")
+	if not summary["can_load"]:
+		return name + " · " + _slot_error(summary["error"])
+	var definition: Dictionary = ContentDB.get_scene_definition(summary["scene_id"])
+	var location: String = tr(definition["name_key"]) if not definition.is_empty() else tr("UI_UNKNOWN_LOCATION")
+	var stamp: String = str(summary["created_at_utc"]).replace("T", " ").replace("\n", " ").left(16)
+	var recovered: String = " · " + _source_name(summary["source"]) if summary["source"] != "primary" else ""
+	return name + recovered + "\n" + stamp + " UTC · " + location.left(16)
+
+func _show_save_slots() -> void:
+	if $SceneHost.get_child_count() != 1 or App.current_context() != &"system_menu":
+		return
+	_slot_origin = &"pause"
+	_show_slot_list(&"save_slots")
+
+func _show_load_slots() -> void:
+	if App.current_context() != &"system_menu":
+		return
+	_slot_origin = &"pause" if $SceneHost.get_child_count() == 1 else &"title"
+	_show_slot_list(&"load_slots")
+
+func _show_slot_list(kind: StringName, page: int = 0, focus_slot: String = "", notice: String = "") -> void:
+	_menu_kind = kind
+	_pending_slot = ""
+	slot_entries.clear()
+	slot_buttons.clear()
+	var summaries: Array[Dictionary] = SaveService.list_slot_summaries()
+	if kind == &"load_slots":
+		for summary: Dictionary in summaries:
+			if summary["slot"] == "quick":
+				slot_entries.append(summary)
+	for summary: Dictionary in summaries:
+		if summary["slot"].begins_with("manual_") or (kind == &"load_slots" and summary["slot"].begins_with("auto_") and summary["exists"]):
+			slot_entries.append(summary)
+	var pages: int = maxi(1, ceili(float(slot_entries.size()) / SLOT_PAGE_SIZE))
+	_slot_page = clampi(page, 0, pages - 1)
+	var box := _new_menu(tr("UI_MANUAL_SAVE") if kind == &"save_slots" else tr("UI_LOAD"))
+	menu.position = Vector2(16, 8)
+	menu.size = Vector2(608, 296)
+	var margin: MarginContainer = box.get_parent()
+	for side: String in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 8)
+	box.add_theme_constant_override("separation", 4)
+	var hint := Label.new()
+	hint.text = tr("UI_SLOT_PAGE_HINT") % [_slot_page + 1, pages]
+	hint.add_theme_font_size_override("font_size", 14)
+	box.add_child(hint)
+	var preferred: Button
+	for index in range(_slot_page * SLOT_PAGE_SIZE, mini((_slot_page + 1) * SLOT_PAGE_SIZE, slot_entries.size())):
+		var summary: Dictionary = slot_entries[index]
+		var slot: String = summary["slot"]
+		var callback: Callable = _request_save_slot.bind(slot) if kind == &"save_slots" else _load_game.bind(slot)
+		var button := _button(box, _slot_caption(summary, kind == &"save_slots"), callback)
+		button.name = "Slot_" + slot
+		button.set_meta("slot", slot)
+		button.add_theme_font_size_override("font_size", 14)
+		button.custom_minimum_size.y = 40
+		button.clip_text = true
+		button.disabled = not summary["can_overwrite"] if kind == &"save_slots" else not summary["can_load"]
+		slot_buttons.append(button)
+		if not button.disabled and (preferred == null or slot == focus_slot):
+			preferred = button
+	var navigation := HBoxContainer.new()
+	navigation.add_theme_constant_override("separation", 8)
+	box.add_child(navigation)
+	var previous := Button.new()
+	previous.name = "SlotPrevious"
+	previous.text = tr("UI_PREVIOUS_PAGE")
+	previous.disabled = _slot_page == 0
+	previous.pressed.connect(func() -> void:
+		get_viewport().set_input_as_handled()
+		_show_slot_list(kind, _slot_page - 1))
+	navigation.add_child(previous)
+	var next := Button.new()
+	next.name = "SlotNext"
+	next.text = tr("UI_NEXT_PAGE")
+	next.disabled = _slot_page + 1 >= pages
+	next.pressed.connect(func() -> void:
+		get_viewport().set_input_as_handled()
+		_show_slot_list(kind, _slot_page + 1))
+	navigation.add_child(next)
+	var back := Button.new()
+	back.name = "SlotBack"
+	back.text = tr("UI_BACK")
+	back.pressed.connect(_menu_back)
+	navigation.add_child(back)
+	if preferred == null:
+		preferred = next if not next.disabled else back
+	_focus_later(preferred)
+	status.text = notice if not notice.is_empty() else tr("UI_SLOT_SAVE_HELP" if kind == &"save_slots" else "UI_SLOT_LOAD_HELP")
+
+func _request_save_slot(slot: String) -> void:
+	if _menu_kind != &"save_slots" or not slot.begins_with("manual_") or not SaveService.is_valid_slot(slot):
+		return
+	var summary: Dictionary = SaveService.slot_summary(slot)
+	if not summary["can_overwrite"]:
+		status.text = tr("UI_SLOT_NEWER")
+		return
+	if not summary["exists"]:
+		_save_game(slot)
+		_show_slot_list(&"save_slots", _slot_page, slot, status.text)
+		return
+	_pending_slot = slot
+	_menu_kind = &"overwrite"
+	var box := _new_menu(tr("UI_OVERWRITE_TITLE") % _slot_name(slot))
+	menu.position = Vector2(60, 62)
+	menu.size = Vector2(520, 208)
+	var explanation := Label.new()
+	explanation.text = tr("UI_OVERWRITE_HELP") + "\n" + _slot_caption(summary)
+	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	explanation.custom_minimum_size.x = 480
+	explanation.add_theme_font_size_override("font_size", 14)
+	box.add_child(explanation)
+	var cancel := _button(box, tr("UI_CANCEL"), _menu_back, true)
+	cancel.name = "OverwriteCancel"
+	var confirm := _button(box, tr("UI_OVERWRITE_CONFIRM"), _confirm_overwrite)
+	confirm.name = "OverwriteConfirm"
+
+func _confirm_overwrite() -> void:
+	if _menu_kind != &"overwrite" or _pending_slot.is_empty():
+		return
+	var slot: String = _pending_slot
+	_save_game(slot)
+	_show_slot_list(&"save_slots", _slot_page, slot, status.text)
+
+func _menu_back() -> void:
+	get_viewport().set_input_as_handled()
+	match _menu_kind:
+		&"overwrite":
+			_show_slot_list(&"save_slots", _slot_page, _pending_slot, tr("UI_OVERWRITE_CANCELLED"))
+		&"save_slots", &"load_slots":
+			if _slot_origin == &"title":
+				_show_title()
+			else:
+				_render_pause()
+		&"pause":
+			_resume()
 
 func _toggle_fullscreen() -> void:
 	var mode := DisplayServer.window_get_mode()
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if mode == DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
+func _input(event: InputEvent) -> void:
+	if transitioning:
+		get_viewport().set_input_as_handled()
+		return
+	if App.current_context() == &"system_menu" and is_instance_valid(menu) and menu.visible:
+		if event.is_action_pressed("cancel") or event.is_action_pressed("pause"):
+			get_viewport().set_input_as_handled()
+			if not event.is_echo():
+				_menu_back()
+			return
+		if event.is_echo() and event.is_action_pressed("confirm", true):
+			get_viewport().set_input_as_handled()
+			return
+	if App.current_context() == &"dialogue" and is_instance_valid(reading_panel) and reading_panel.visible:
+		if event.is_action_pressed("confirm") or event.is_action_pressed("cancel") or event.is_action_pressed("pause"):
+			get_viewport().set_input_as_handled()
+			if not event.is_echo():
+				_close_reading()
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_echo() or transitioning:
+		return
 	if event.is_action_pressed("pause") or event.is_action_pressed("cancel"):
 		if App.current_context() == &"exploration":
 			_show_pause()
-		elif $SceneHost.get_child_count() > 0:
+		elif App.current_context() == &"system_menu" and $SceneHost.get_child_count() > 0:
 			_resume()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("quick_save") and App.current_context() == &"exploration":
@@ -153,6 +620,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_label.visible = App.debug_enabled
 
 func _process(_delta: float) -> void:
+	var controls_at_top := false
+	if App.current_context() == &"exploration" and $SceneHost.get_child_count() == 1:
+		var region: Node = $SceneHost.get_child(0)
+		var target: Variant = region.get("selected_target")
+		interaction_hint.text = tr("UI_INTERACT_PROMPT") % tr(target["name_key"]) if target is Dictionary and not target.is_empty() else ""
+		if region.get("player") is CharacterBody2D:
+			var screen_position: Vector2 = region.player.get_global_transform_with_canvas().origin
+			controls_at_top = screen_position.y > 278
+	else:
+		interaction_hint.text = ""
+	# Keep the avatar and its feet visible even at the map's lower camera limit.
+	controls_backdrop.position.y = 48 if controls_at_top else 310
+	status.position.y = 53 if controls_at_top else 315
+	interaction_hint.position.y = 104 if controls_at_top else 286
 	if debug_label.visible:
 		debug_label.text = "DEV | FPS %d | %s | pads %d" % [Engine.get_frames_per_second(), App.current_context(), Input.get_connected_joypads().size()]
 
@@ -166,7 +647,9 @@ func _run_smoke() -> void:
 	if "--capture-week1" in OS.get_cmdline_user_args() and DisplayServer.get_name() != "headless":
 		await _capture("title")
 	_start_game()
+	await get_tree().physics_frame
 	await get_tree().process_frame
+	await get_tree().physics_frame
 	if $SceneHost.get_child_count() != 1 or App.current_context() != &"exploration":
 		push_error("Main scene did not enter test yard")
 		get_tree().quit(1)
@@ -181,7 +664,7 @@ func _run_smoke() -> void:
 		push_error("Test yard did not respond to InputMap")
 		get_tree().quit(1)
 		return
-	print("WEEK1_SMOKE_PASS scene=SCENE_TEST_YARD movement=ok platform=offline connected_pads=", Input.get_connected_joypads().size())
+	print("EXPLORATION_SMOKE_PASS scene=", GameSession.state.scene_id, " movement=ok platform=offline connected_pads=", Input.get_connected_joypads().size())
 	if "--capture-week1" in OS.get_cmdline_user_args() and DisplayServer.get_name() != "headless":
 		await _capture("test_yard")
 		_show_pause()
