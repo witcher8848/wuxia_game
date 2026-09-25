@@ -164,6 +164,7 @@ Day 6 可以创建这些目录，但未出现第二个实现前不为每个接�
 - 领域系统返回事件，如 `GAIN_EVIDENCE`、`SET_FACT`、`CHANGE_RELATION`、`ADVANCE_TIME` 和 `START_BATTLE`。
 - 事件只有在验证通过后一次性写回状态；禁止 UI 先改数值再通知存档。
 - `BattleState` 与 `GameState` 分离，胜利结算后才写回；失败直接丢弃战斗状态。
+- 2026-09-25 Day 15 起点：`game/domain/battle/battle_state.gd`为不读写存档的临时战斗权威，原子校验棋盘／占位／单位数据，按身法维护稳定队列。Demo两人，我方容量4人；`game/tools/battle_lab/`只是独立开发实验场，被两个导出预设排除，后续正式战斗表现层另接入。当前无战斗结算写回，不变更schema 1。
 - 节点路径、场景实例 ID 和动画进度不得进入永久存档。
 
 ### 3.4 初始自动加载项

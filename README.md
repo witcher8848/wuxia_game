@@ -4,7 +4,15 @@
 
 这是两人协作的 2D 像素武侠 RPG 项目。六个月目标是 60～90 分钟垂直切片与 Steam Demo 候选版；当前本地工程为第二周探索灰盒，包含三个区域、移动碰撞、镜头、NPC／文书交互与存读档，还没有完整剧情、调查或战斗玩法。已收到开发者约 7 分钟的 Mac 试玩与原版基线确认；速度和独立存档槽反馈已实现、回归通过，待新版人工复测。新玩家测试获授权转为 P2 后续追踪，不再阻断本轮修改。原交付见[第二周评审](./08_week2_review.md)，本次改动／验证和待确认项以[反馈处理单](./docs/week2_feedback_followup.md)为准。
 
-第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`；`week1-local-2026-09-15` 标签保留当时的工程里程碑。第二周目前位于本地 `codex/week2-exploration` 的未提交工作区，没有推送或对应远端 CI；仅从远端恢复第一周分支不会获得当前第二周实现。
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`；`week1-local-2026-09-15` 标签保留当时的工程里程碑。第二周成果和复核记录已提交为本地 `c8c1e28`（`codex/week2-exploration`）。当前在 `codex/week3-combat` 开始第三周；本次只有本地 Git 提交，未推送／发布或触发远端 CI。
+
+## 第三周当前入口
+
+[第三周每日任务](./武侠RPG_第三周每日任务.md)已拆到 Day 15～21，共40h计划。已开始 Day 15：独立战斗状态、10×8棋盘、占位及稳定行动顺序；开发场景用两个我方和刀役／弓役占位，数据容量支持我方最多4人。
+
+macOS 双击 [Battle.command](./Battle.command)，或运行 `./Battle.command`。WASD／方向键查看格子，E／Enter结束占位回合，R重置，Esc退出。**此入口目前不是完整战斗**：角色移动、攻击、敌人AI、绝技、胜负将在 Day 16～20接入；不读写探索存档，不计正式战斗场次。`Run.command`仍进入第二周探索灰盒，产品版本仍为`0.2.1-week2`，开发实验场不进入发行包。
+
+验证：`./tools/check_project.sh`包含战斗骨架回归；图形检查用 `python3 tools/run_checked.py week3_day15_visual ./tools/godot.sh --path . --script res://game/tests/test_battle_foundation.gd -- --capture-battle`。截图及当前证据见每日任务末节，人工手感尚未验收。
 
 ## 快速启动
 

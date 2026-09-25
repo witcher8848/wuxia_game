@@ -1,10 +1,10 @@
 # 开发与验收流程
 
-> 工程协作与第二周交接基线。更新：2026-09-22。
+> 工程协作与第三周开工基线。更新：2026-09-25。
 
 ## 1. 每次恢复工作
 
-先读 [README](../README.md)、[第二周评审](../08_week2_review.md)及[当前任务板](./week2_task_board.md)，需要历史证据时查[第一周评审](../07_week1_review.md)。再检查 `git status --short` 和当前分支，确认未提交修改属于谁。通过 `./tools/godot.sh --version` 检查工具链，运行 `./tools/check_project.sh` 获取当前基线。失败时记录已有问题，不能假定是本次改动造成，也不能覆盖他人的工作来换取干净状态。
+先读 [README](../README.md)及[第三周每日任务](../武侠RPG_第三周每日任务.md)，需要历史证据时查[第二周评审](../08_week2_review.md)、[反馈处理单](./week2_feedback_followup.md)和[第一周评审](../07_week1_review.md)。再检查 `git status --short` 和当前分支，确认未提交修改属于谁。通过 `./tools/godot.sh --version` 检查工具链，运行 `./tools/check_project.sh` 获取当前基线。失败时记录已有问题，不能假定是本次改动造成，也不能覆盖他人的工作来换取干净状态。
 
 第一周的技术／设计冻结不等于整个游戏已制作。第二周的目标是灰盒探索，第三周才进入回合战斗，第四周串起调查与状态闭环。
 

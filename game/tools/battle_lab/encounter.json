@@ -1,0 +1,10 @@
+{
+  "size": [10, 8],
+  "blocked": [[4, 2], [4, 3], [4, 4], [7, 5]],
+  "units": [
+    {"id":"CHAR_PROTAGONIST","name":"主角","archetype":"ALLY_SWORD","team":"ally","cell":[1,3],"hp":16,"max_hp":16,"qi":5,"max_qi":5,"agility":4,"move":3,"power":3,"guard":1},
+    {"id":"CHAR_COMPANION","name":"同伴","archetype":"ALLY_FIST","team":"ally","cell":[2,5],"hp":14,"max_hp":14,"qi":5,"max_qi":5,"agility":5,"move":3,"power":2,"guard":1},
+    {"id":"ENEMY_BLADE","name":"刀役","archetype":"EN_YAMEN_BLADE","team":"enemy","cell":[6,3],"hp":8,"max_hp":8,"qi":3,"max_qi":3,"agility":2,"move":3,"power":2,"guard":2},
+    {"id":"ENEMY_BOW","name":"弓役","archetype":"EN_YAMEN_BOW","team":"enemy","cell":[8,1],"hp":6,"max_hp":6,"qi":3,"max_qi":3,"agility":3,"move":2,"power":2,"guard":1}
+  ]
+}

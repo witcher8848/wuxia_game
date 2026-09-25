@@ -12,5 +12,6 @@ python3 tools/run_checked.py exploration_controller ./tools/godot.sh --headless 
 python3 tools/run_checked.py exploration_content ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_exploration_content.gd
 python3 tools/run_checked.py exploration_flow ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_exploration_flow.gd
 python3 tools/run_checked.py exploration_walk ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_exploration_walk.gd
+python3 tools/run_checked.py battle_foundation ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_battle_foundation.gd
 python3 tools/run_checked.py main_smoke ./tools/godot.sh --headless --path "$task_root" -- --smoke-test
 echo "PROJECT_CHECK_PASS"
