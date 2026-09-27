@@ -22,6 +22,7 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/presentation/exploration/player_controller.gd",
 	"res://game/presentation/exploration/exploration_camera.gd",
 	"res://game/domain/state/game_state.gd",
+	"res://game/domain/investigation/investigation_rules.gd",
 	"res://game/core/bootstrap/app.gd",
 	"res://game/core/services/game_session.gd",
 	"res://game/core/services/content_db.gd",
@@ -64,6 +65,9 @@ func _run() -> void:
 	var bootstrap_path: String = "res://game/content/data/bootstrap.json"
 	if not FileAccess.file_exists("res://game/content/data/exploration.json"):
 		_failures.append("Missing exploration map content.")
+	var investigation: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/investigation.json"))
+	if not investigation is Dictionary or not investigation.get("steps") is Array or investigation["steps"].is_empty():
+		_failures.append("Missing or invalid investigation content.")
 	for locale_path: String in ["res://game/content/localization/exploration.zh_CN.translation", "res://game/content/localization/exploration.en.translation"]:
 		if not ResourceLoader.exists(locale_path):
 			_failures.append("Missing exploration localization: " + locale_path)

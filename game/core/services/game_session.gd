@@ -64,6 +64,17 @@ func is_inspected(interaction_id: String) -> bool:
 	return state.world_flags.get("INSPECTED_" + interaction_id, false) == true
 
 
+func apply_investigation_step(step_id: String) -> Dictionary:
+	var content: Node = _content_db()
+	if content == null:
+		return {"error": ERR_UNAVAILABLE, "message": "ContentDB unavailable.", "feedback_key": ""}
+	var prepared: Dictionary = content.prepare_investigation_step(state, step_id)
+	if prepared["error"] != OK:
+		return {"error": prepared["error"], "message": prepared["message"], "feedback_key": ""}
+	var error: Error = replace_state(prepared["state"])
+	return {"error": error, "message": "", "feedback_key": prepared["feedback_key"] if error == OK else ""}
+
+
 func _content_db() -> Node:
 	# Standalone service tests may construct a session before it enters the tree.
 	var main_loop: MainLoop = Engine.get_main_loop()

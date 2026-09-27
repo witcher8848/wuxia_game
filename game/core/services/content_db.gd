@@ -4,6 +4,8 @@ extends Node
 const BOOTSTRAP_PATH: String = "res://game/content/data/bootstrap.json"
 const GRID_SIZE: int = 32
 const PLAYER_FEET: Vector2 = Vector2(20, 12)
+const Investigation = preload("res://game/domain/investigation/investigation_rules.gd")
+var _investigation: RefCounted = Investigation.new()
 
 var content_version: String = ""
 var start_scene_id: String = ""
@@ -32,7 +34,7 @@ func reload_content(path: String = BOOTSTRAP_PATH) -> Error:
 	return load_definitions(parser.data)
 
 
-func load_definitions(data: Dictionary, exploration_data: Variant = null) -> Error:
+func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null) -> Error:
 	# Only publish the new registry once every definition and reference passes.
 	if not GameState.is_json_value(data):
 		return _invalid("Bootstrap must contain only finite JSON values.")
@@ -97,6 +99,23 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null) -> Err
 		regions = _build_regions(exploration_data, scenes, data["start_scene_id"])
 		if regions.is_empty():
 			return ERR_INVALID_DATA
+	var investigation: RefCounted = Investigation.new()
+	if investigation_data == null and data.has("investigation_path"):
+		var path: Variant = data["investigation_path"]
+		if not path is String or not path.begins_with("res://game/content/data/") or ".." in path or not path.ends_with(".json"):
+			return _invalid("Investigation path must be a content JSON resource.")
+		if not FileAccess.file_exists(path):
+			return _invalid("Cannot open investigation content.")
+		investigation_data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not investigation_data is Dictionary:
+			return _invalid("Investigation content must be a JSON object.")
+	if investigation_data != null:
+		if not investigation_data is Dictionary:
+			return _invalid("Investigation definitions must be an object.")
+		var investigation_error: String = investigation.configure(investigation_data)
+		if not investigation_error.is_empty():
+			return _invalid(investigation_error)
+	_investigation = investigation
 	_scenes = scenes
 	_regions = regions
 	content_version = data["content_version"]
@@ -108,6 +127,18 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null) -> Err
 
 func get_scene_path(scene_id: String) -> String:
 	return String(_scenes.get(scene_id, {}).get("path", ""))
+
+
+func get_investigation_definitions() -> Dictionary:
+	return _investigation.definitions()
+
+
+func prepare_investigation_step(state: GameState, step_id: String) -> Dictionary:
+	return _investigation.prepare_step(state, step_id)
+
+
+func investigation_condition(state: GameState, condition: Dictionary) -> bool:
+	return _investigation.condition_matches(state, condition)
 
 
 func has_spawn(scene_id: String, spawn_id: String) -> bool:

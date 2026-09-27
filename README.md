@@ -4,7 +4,13 @@
 
 这是两人协作的 2D 像素武侠 RPG 项目。六个月目标是 60～90 分钟垂直切片与 Steam Demo 候选版；当前本地工程为第二周探索灰盒，包含三个区域、移动碰撞、镜头、NPC／文书交互与存读档，还没有完整剧情、调查或战斗玩法。已收到开发者约 7 分钟的 Mac 试玩与原版基线确认；速度和独立存档槽反馈已实现、回归通过，待新版人工复测。新玩家测试获授权转为 P2 后续追踪，不再阻断本轮修改。原交付见[第二周评审](./08_week2_review.md)，本次改动／验证和待确认项以[反馈处理单](./docs/week2_feedback_followup.md)为准。
 
-第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`；`week1-local-2026-09-15` 标签保留当时的工程里程碑。第二周成果和复核记录已提交为本地 `c8c1e28`（`codex/week2-exploration`）。当前在 `codex/week3-combat` 开始第三周；本次只有本地 Git 提交，未推送／发布或触发远端 CI。
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`；`week1-local-2026-09-15` 标签保留当时的工程里程碑。第二周成果和复核记录已提交为本地 `c8c1e28`（`codex/week2-exploration`），第三周Day 15为`eb67fad`。当前在`codex/week4-investigation`先开发第四周的独立调查基础；本次只有本地 Git 提交，未推送／发布或触发远端 CI。
+
+## 第四周当前进度
+
+[第四周每日任务](./武侠RPG_第四周每日任务.md)已拆为Day 22～28。Day 22接入了两份样本证据、事实／五态任务规则、有限条件与效果、原子提交和存档回归；入口是`ContentDB`内容注册与`GameSession.apply_investigation_step()`，暂无玩家可操作的调查界面。文字键的CSV与对话节点校验留给Day 23，质证／二项校勘UI留给Day 24。
+
+**第三周Day 16～21仍未完成，未被第四周替代。** Day 22～25可独立推进；Day 26真实战斗接入前必须补齐移动、攻击、AI、胜负等前置工作，约34h原计划另计。现在双击`Run.command`仍是探索灰盒，`Battle.command`仍只有下述Day 15实验场，不能试玩完整“调查→战斗”闭环。
 
 ## 第三周当前入口
 
@@ -91,6 +97,7 @@ Windows 包导出与 PE x86_64 检查通过只能证明产物已生成；真实 
 | [两周人工复核清单](./docs/week1_week2_human_review.md)／[第二周反馈处理单](./docs/week2_feedback_followup.md) | Day 1～14 逐任务确认、已有人工结果、反馈修复和 P2 追踪 |
 | [第一周每日任务](./武侠RPG_第一周每日任务.md)／[六个月排期](./武侠RPG_六个月开发排期.md) | 日／周里程碑与决策门 |
 | [第二周每日任务](./武侠RPG_第二周每日任务.md)／[第二周任务板](./docs/week2_task_board.md)／[开发流程](./docs/development_workflow.md) | 每日安排、当前状态、如何提交和验证 |
+| [第三周每日任务](./武侠RPG_第三周每日任务.md)／[第四周每日任务](./武侠RPG_第四周每日任务.md) | 战斗前置缺口、调查每日排期与当前开发证据 |
 
 ## 工程地图与协作
 

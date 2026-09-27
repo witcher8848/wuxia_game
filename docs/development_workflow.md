@@ -1,10 +1,10 @@
 # 开发与验收流程
 
-> 工程协作与第三周开工基线。更新：2026-09-25。
+> 工程协作与第四周独立任务开工基线。更新：2026-09-27。
 
 ## 1. 每次恢复工作
 
-先读 [README](../README.md)及[第三周每日任务](../武侠RPG_第三周每日任务.md)，需要历史证据时查[第二周评审](../08_week2_review.md)、[反馈处理单](./week2_feedback_followup.md)和[第一周评审](../07_week1_review.md)。再检查 `git status --short` 和当前分支，确认未提交修改属于谁。通过 `./tools/godot.sh --version` 检查工具链，运行 `./tools/check_project.sh` 获取当前基线。失败时记录已有问题，不能假定是本次改动造成，也不能覆盖他人的工作来换取干净状态。
+先读 [README](../README.md)、[第四周每日任务](../武侠RPG_第四周每日任务.md)及未完成的[第三周每日任务](../武侠RPG_第三周每日任务.md)，需要历史证据时查[第二周评审](../08_week2_review.md)、[反馈处理单](./week2_feedback_followup.md)和[第一周评审](../07_week1_review.md)。再检查 `git status --short` 和当前分支，确认未提交修改属于谁。通过 `./tools/godot.sh --version` 检查工具链，运行 `./tools/check_project.sh` 获取当前基线。失败时记录已有问题，不能假定是本次改动造成，也不能覆盖他人的工作来换取干净状态。
 
 第一周的技术／设计冻结不等于整个游戏已制作。第二周的目标是灰盒探索，第三周才进入回合战斗，第四周串起调查与状态闭环。
 
@@ -27,6 +27,7 @@
 | `./tools/setup_godot.sh` | 下载固定编辑器和 Windows 模板并核验 | 官方文件 SHA-512 匹配，`--version` 与锁定版本一致 |
 | `./tools/check_project.sh` | 文档／数据／资源／Godot／状态／UI／探索控制器与内容、流程、完整脚本步行／主场景检查 | 每个子步骤成功并输出 `PROJECT_CHECK_PASS`；检查没有脚本错误文本 |
 | `./tools/run.sh --dev` | 图形窗口检查与开发运行 | 主菜单进入小镇，键盘操作、存档、菜单与显示正常 |
+| `python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path . --script res://game/tests/test_investigation_rules.gd` | 第四周Day 22数据／状态／服务／隔离存档测试；也纳入全量检查 | `INVESTIGATION_RULES`零失败，无脚本错误；不是对话UI或真实战斗验收 |
 | `python3 tools/run_checked.py week2_visual ./tools/godot.sh --path . --script res://game/tests/capture_week2.gd` | 实际渲染、窗口／全屏缩放和灰盒截图 | `WEEK2_VISUAL_PASS`；仍须目视检查与人工试玩，不算 Windows 真机验收 |
 | `./tools/build_windows_debug.sh` | 可诊断的 Windows 候选包 | `WINDOWS_BUILD_PASS`、构建元数据和文件校验清单 |
 | `./tools/build_windows_release.sh` | Release 候选包 | 同上，且关闭开发入口、排除测试和源资产 |

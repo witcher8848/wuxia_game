@@ -1,6 +1,7 @@
 {
   "content_version": "0.2.0",
   "exploration_path": "res://game/content/data/exploration.json",
+  "investigation_path": "res://game/content/data/investigation.json",
   "start_scene_id": "SCENE_TOWN_STREET",
   "start_spawn_id": "SPAWN_START",
   "scenes": [

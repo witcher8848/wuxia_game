@@ -223,6 +223,17 @@ Main
 
 不引入 YAML、数据库服务器、运行时脚本下载或自定义二进制内容格式。JSON 数据加载后必须经过字段、类型、引用、唯一性和可达性检查。
 
+#### Day 22已落地的调查基础（2026-09-27）
+
+- 内容为`game/content/data/investigation.json`，由bootstrap声明；ContentDB完整验证后才替换注册表，失败保留原有探索与调查内容。
+- `InvestigationRules`只读取定义并生成GameState副本，不碰场景／文件。`GameSession.apply_investigation_step(step_id)`成功时统一替换状态，失败不写入、不发状态替换信号。所有效果先在副本执行，不能部分成功。
+- 条件白名单为`evidence_at_least / holder_is / fact_is / quest_is`，效果为`discover / knowledge / transfer / set_fact / set_quest`。参数严格按字段与引用验证，不支持脚本、表达式或任意属性写入。
+- 证据只在发现后登记，保存`knowledge_state`（clue／doubt／fact）、`holder_id`、`validity`、`discovered_at`；静态来源／类型／文本键留在定义中。`PLAYER`是原件归属标识，不是新增角色ID。交付原件不会删除认知，再次发现不会夺回原件。
+- 任务默认locked，合法推进为locked→available→active→resolved或changed，changed可回active或resolved；changed必须附原因文本键与另一个已定义任务ID。终态不重开。
+- 事实存于既有`world_flags[FACT_*]`；一次性步骤存于`world_flags[APPLIED_STEP_*]`，随存档保留。样本为`FACT_WEST_GRAVES`与`FACT_YAMEN_FORMATION`，后者目前只是事实记录，尚未改变实际战斗。
+- schema仍为1，旧空调查容器视为初始状态，保留其他旧字段。调查领域校验已登记ID的结构；当前通用存档服务仍负责JSON／schema校验，不宣称已实现所有未来剧情内容迁移。
+- 本日无对话图／调查UI；文本键对应CSV、对话可达性、重大交付预览及二次确认在Day 23～25接入。命令接口的存在不代表玩家已经可以交出原件。
+
 ### 4.3 内容 ID
 
 ```text
