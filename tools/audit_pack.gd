@@ -23,6 +23,8 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/presentation/exploration/exploration_camera.gd",
 	"res://game/domain/state/game_state.gd",
 	"res://game/domain/investigation/investigation_rules.gd",
+	"res://game/domain/battle/combat_encounter.gd",
+	"res://game/presentation/battle/battle_screen.gd",
 	"res://game/core/bootstrap/app.gd",
 	"res://game/core/services/game_session.gd",
 	"res://game/core/services/content_db.gd",
@@ -77,7 +79,18 @@ func _run() -> void:
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(bootstrap_path))
 		if not parsed is Dictionary or not parsed.get("scenes") is Array:
 			_failures.append("Pack bootstrap JSON is invalid.")
-	if ProjectSettings.get_setting("application/run/main_scene", "") != REQUIRED_RESOURCES[0]:
+	var expected_main := REQUIRED_RESOURCES[0]
+	if "--battle-candidate" in OS.get_cmdline_user_args():
+		expected_main = "res://game/presentation/battle/prototype_entry.tscn"
+		if not ResourceLoader.exists(expected_main) or not FileAccess.file_exists("res://game/content/data/prototype_encounter.json"):
+			_failures.append("Missing explicitly promoted combat review fixture.")
+		if ProjectSettings.get_setting("application/config/custom_user_dir_name", "") != "ProjectWumingCombatPrototype":
+			_failures.append("Combat review candidate must use isolated user directory.")
+	elif FileAccess.file_exists("res://game/content/data/prototype_encounter.json") or ResourceLoader.exists("res://game/presentation/battle/prototype_entry.tscn"):
+		_failures.append("Combat review entry leaked into normal release.")
+	if not FileAccess.file_exists("res://game/content/data/battle_skills.json"):
+		_failures.append("Missing combat skill definitions.")
+	if ProjectSettings.get_setting("application/run/main_scene", "") != expected_main:
 		_failures.append("Pack main scene does not match the expected entry point.")
 	if _files.is_empty():
 		_failures.append("Pack resource listing is empty.")

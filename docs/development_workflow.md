@@ -1,12 +1,14 @@
 # 开发与验收流程
 
-> 工程协作与第四周独立任务开工基线。更新：2026-09-27。
+> 工程协作与第三周战斗补齐基线。更新：2026-09-28。
 
 ## 1. 每次恢复工作
 
 先读 [README](../README.md)、[第四周每日任务](../武侠RPG_第四周每日任务.md)及未完成的[第三周每日任务](../武侠RPG_第三周每日任务.md)，需要历史证据时查[第二周评审](../08_week2_review.md)、[反馈处理单](./week2_feedback_followup.md)和[第一周评审](../07_week1_review.md)。再检查 `git status --short` 和当前分支，确认未提交修改属于谁。通过 `./tools/godot.sh --version` 检查工具链，运行 `./tools/check_project.sh` 获取当前基线。失败时记录已有问题，不能假定是本次改动造成，也不能覆盖他人的工作来换取干净状态。
 
 第一周的技术／设计冻结不等于整个游戏已制作。第二周的目标是灰盒探索，第三周才进入回合战斗，第四周串起调查与状态闭环。
+
+当前第三周Day 16～20工程已补齐，Day 21三局人工试玩待填，见[第三周评审](../09_week3_review.md)及[试玩表](./week3_playtest.md)。恢复时不要根据旧开工记录重复实现已通过的功能，也不要跳过人工体验门。第四周Day 22保持已实现，后续仍从Day 23接续。
 
 ## 2. 分支和提交
 
@@ -31,6 +33,8 @@
 | `python3 tools/run_checked.py week2_visual ./tools/godot.sh --path . --script res://game/tests/capture_week2.gd` | 实际渲染、窗口／全屏缩放和灰盒截图 | `WEEK2_VISUAL_PASS`；仍须目视检查与人工试玩，不算 Windows 真机验收 |
 | `./tools/build_windows_debug.sh` | 可诊断的 Windows 候选包 | `WINDOWS_BUILD_PASS`、构建元数据和文件校验清单 |
 | `./tools/build_windows_release.sh` | Release 候选包 | 同上，且关闭开发入口、排除测试和源资产 |
+| `./Battle.command` | 独立完整战斗评审原型 | 移动、行动、敌人AI、胜败／撤离、重试；不写探索档 |
+| `python3 tools/build_battle_candidate.py` | 单独的战斗Windows评审候选，不改正常入口 | `BATTLE_CANDIDATE_PASS`；独立用户目录、实际PCK审计／战斗胜利重试、元数据和校验清单；不等于Windows真机通过 |
 
 每项检查保留构建／提交标识、命令、结果与设备。数据和规则用确定性测试；UI、文字和像素比例必须实际渲染检查。2026-09-16 用户决定先验键盘、保留手柄同动作映射；实体手柄实测移至输入完善里程碑，不阻塞第一周／第二周。物理手柄和 Windows 真机实际验收时仍必须登记真实环境，不把模拟事件当成硬件证据。
 

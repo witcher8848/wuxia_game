@@ -1,0 +1,88 @@
+class_name BattleActions
+extends RefCounted
+const Grid = preload("res://game/domain/battle/battle_grid.gd")
+
+
+static func preview(battle: RefCounted, actor: String, skill_id: String, target: Vector2i, origin := Vector2i(-1, -1)) -> Dictionary:
+	var denied := {"ok": false, "reason": "不是该单位的行动回合", "revision": battle.revision}
+	if battle.outcome != "ongoing" or actor != battle.current_actor_id():
+		return denied
+	var unit: Dictionary = battle.unit(actor)
+	var skill: Dictionary = battle.skill(skill_id)
+	if skill.is_empty() or not skill_id in battle.abilities(actor):
+		denied["reason"] = "未配置该招式"
+		return denied
+	var availability: String = unavailable(battle, actor, skill_id)
+	if not availability.is_empty():
+		denied["reason"] = availability
+		return denied
+	if origin == Vector2i(-1, -1):
+		origin = Grid.cell_of(unit)
+	if not battle.contains(target):
+		denied["reason"] = "目标超出战场"
+		return denied
+	var target_id: String = battle.unit_at(target)
+	var distance: int = Grid.distance(origin, target)
+	var valid := false
+	match skill["range_pattern"]:
+		"self": valid = target == origin
+		"adjacent": valid = distance == 1
+		"line": valid = distance >= 1 and distance <= skill["range"] and Grid.line_clear(battle, origin, target)
+		"step":
+			valid = target != origin and battle.is_free(target) and Grid.reachable(battle, actor, int(skill["range"]), origin, true).has(target)
+	if skill["target"] == "enemy":
+		valid = valid and not target_id.is_empty() and battle.unit(target_id)["team"] != unit["team"]
+	if not valid:
+		denied["reason"] = "目标／距离／射线不合法"
+		return denied
+	var hits: Array[Dictionary] = []
+	if skill["target"] == "enemy":
+		hits.append(damage_preview(battle, actor, target_id, skill, distance))
+	var affected: Array = [actor] if skill["target"] != "enemy" else [target_id]
+	if skill["area_pattern"] == "adjacent_allies":
+		for identifier: String in battle.unit_ids():
+			var other: Dictionary = battle.unit(identifier)
+			if identifier != actor and other["team"] == unit["team"] and other["hp"] > 0 and Grid.distance(origin, Grid.cell_of(other)) == 1:
+				affected.append(identifier)
+	return {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": int(skill["qi_cost"]), "restore_qi": int(skill["restore_qi"]), "effects": skill["effects"].duplicate()}
+
+
+static func unavailable(battle: RefCounted, actor: String, skill_id: String) -> String:
+	var unit: Dictionary = battle.unit(actor)
+	var skill: Dictionary = battle.skill(skill_id)
+	if unit.is_empty() or skill.is_empty():
+		return "未知单位／招式"
+	if unit["qi"] < skill["qi_cost"]:
+		return "内力不足：需要%d" % skill["qi_cost"]
+	var available_round: int = int(unit["cooldowns"].get(skill_id, 0))
+	if available_round > battle.round_number:
+		return "冷却中：第%d轮可用" % available_round
+	if skill["ultimate"]:
+		if unit["ultimate_used"]:
+			return "本战绝技已使用"
+		var condition: Dictionary = unit["ultimate"]
+		var progress: int = int(unit["damage_received"] if condition["kind"] == "damage_received" else unit["takedowns"])
+		if progress < condition["threshold"]:
+			return "%s %d/%d" % ["实际受伤" if condition["kind"] == "damage_received" else "击倒敌人", progress, condition["threshold"]]
+	return ""
+
+
+static func damage_preview(battle: RefCounted, actor: String, target: String, skill: Dictionary, distance: int) -> Dictionary:
+	var attacker: Dictionary = battle.unit(actor)
+	var receiver: String = target
+	var defended: Dictionary = battle.unit(target)
+	var supporter: String = str(defended["statuses"].get("support", {}).get("source", ""))
+	var protector: Dictionary = battle.unit(supporter)
+	if not protector.is_empty() and protector["hp"] > 0 and protector["team"] == defended["team"] and supporter != target and Grid.distance(Grid.cell_of(protector), Grid.cell_of(defended)) == 1:
+		receiver = supporter
+		defended = protector
+	var armor: int = int(defended["guard"]) - (2 if defended["statuses"].has("broken") else 0)
+	var damage: int = maxi(1, int(skill["power"]) + int(attacker["power"]) - armor)
+	if distance == 2:
+		damage += int(skill["distance_bonus"])
+	if defended["statuses"].has("guard"):
+		damage -= 2
+	if receiver != target:
+		damage -= 1
+	damage = maxi(0, damage)
+	return {"target": target, "receiver": receiver, "damage": damage, "actual": mini(int(defended["hp"]), damage), "redirected": receiver != target}

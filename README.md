@@ -2,23 +2,23 @@
 
 一名在户籍中早已死去的少年，循养父留下的《勘亡录》追查仍活着的“死人”，在官府清籍与门派旧怨中习武结伴。
 
-这是两人协作的 2D 像素武侠 RPG 项目。六个月目标是 60～90 分钟垂直切片与 Steam Demo 候选版；当前本地工程为第二周探索灰盒，包含三个区域、移动碰撞、镜头、NPC／文书交互与存读档，还没有完整剧情、调查或战斗玩法。已收到开发者约 7 分钟的 Mac 试玩与原版基线确认；速度和独立存档槽反馈已实现、回归通过，待新版人工复测。新玩家测试获授权转为 P2 后续追踪，不再阻断本轮修改。原交付见[第二周评审](./08_week2_review.md)，本次改动／验证和待确认项以[反馈处理单](./docs/week2_feedback_followup.md)为准。
+这是两人协作的2D像素武侠RPG项目。六个月目标是60～90分钟垂直切片与Steam Demo候选版；当前有三个区域的探索灰盒、独立可玩的战斗评审原型及调查规则基础，尚未接成完整剧情／调查闭环。探索版已收到约7分钟的Mac试玩与基线确认，速度／独立存档槽反馈已实现但待新版人工复测；战斗原型另待三局试玩。新玩家测试获授权转为P2跟踪。各阶段证据见[第二周评审](./08_week2_review.md)、[反馈处理单](./docs/week2_feedback_followup.md)及[第三周评审](./09_week3_review.md)。
 
-第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到 `main`；`week1-local-2026-09-15` 标签保留当时的工程里程碑。第二周成果和复核记录已提交为本地 `c8c1e28`（`codex/week2-exploration`），第三周Day 15为`eb67fad`。当前在`codex/week4-investigation`先开发第四周的独立调查基础；本次只有本地 Git 提交，未推送／发布或触发远端 CI。
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周Day 15为`eb67fad`，第四周Day 22为`f21e504`。当前在`codex/week3-complete`补齐战斗，继承调查基础；本轮只有本地Git提交，未推送、发布或触发远端CI。
 
 ## 第四周当前进度
 
 [第四周每日任务](./武侠RPG_第四周每日任务.md)已拆为Day 22～28。Day 22接入了两份样本证据、事实／五态任务规则、有限条件与效果、原子提交和存档回归；入口是`ContentDB`内容注册与`GameSession.apply_investigation_step()`，暂无玩家可操作的调查界面。文字键的CSV与对话节点校验留给Day 23，质证／二项校勘UI留给Day 24。
 
-**第三周Day 16～21仍未完成，未被第四周替代。** Day 22～25可独立推进；Day 26真实战斗接入前必须补齐移动、攻击、AI、胜负等前置工作，约34h原计划另计。现在双击`Run.command`仍是探索灰盒，`Battle.command`仍只有下述Day 15实验场，不能试玩完整“调查→战斗”闭环。
+2026-09-28已在`codex/week3-complete`补齐第三周战斗工程，保留本节的调查基础；Day 21三局人工试玩待确认。Day 26尚未接入，不能试玩完整“调查→战斗”剧情闭环。
 
 ## 第三周当前入口
 
-[第三周每日任务](./武侠RPG_第三周每日任务.md)已拆到 Day 15～21，共40h计划。已开始 Day 15：独立战斗状态、10×8棋盘、占位及稳定行动顺序；开发场景用两个我方和刀役／弓役占位，数据容量支持我方最多4人。
+[第三周每日任务](./武侠RPG_第三周每日任务.md)的Day 15～20工程已实现：10×8棋盘、稳定顺序、四向移动、普攻／武学、五状态、刀役／弓役AI、条件绝技、胜败／撤离和完整重试。Demo仍是两个我方，规则容量支持四人，不等于已做四人内容和平衡。
 
-macOS 双击 [Battle.command](./Battle.command)，或运行 `./Battle.command`。WASD／方向键查看格子，E／Enter结束占位回合，R重置，Esc退出。**此入口目前不是完整战斗**：角色移动、攻击、敌人AI、绝技、胜负将在 Day 16～20接入；不读写探索存档，不计正式战斗场次。`Run.command`仍进入第二周探索灰盒，产品版本仍为`0.2.1-week2`，开发实验场不进入发行包。
+macOS双击[Battle.command](./Battle.command)。↑↓选择指令，方向键选格，E／Enter预览后再次确认；Esc返回，F查看单位，F1规则，F2切换目标，R确认重试。当前是完整的独立战斗评审原型，不是正式剧情战斗。`Run.command`仍进入探索灰盒；战斗不写探索存档。试玩说明与待填写的三局记录见[第三周试玩表](./docs/week3_playtest.md)。
 
-验证：`./tools/check_project.sh`包含战斗骨架回归；图形检查用 `python3 tools/run_checked.py week3_day15_visual ./tools/godot.sh --path . --script res://game/tests/test_battle_foundation.gd -- --capture-battle`。截图及当前证据见每日任务末节，人工手感尚未验收。
+验证：`./tools/check_project.sh`包含旧骨架及完整战斗规则、边界和键盘流程。实际渲染用`python3 tools/run_checked.py combat_visual ./tools/godot.sh --path . --script res://game/tests/test_combat_ui.gd -- --capture-combat`。独立Windows评审候选用`python3 tools/build_battle_candidate.py`生成，版本`0.3.0-week3-prototype`，独立用户目录；正常探索发行入口／版本不变，开发场景仍排除。逐项结果及人工验收缺口见[第三周评审](./09_week3_review.md)。
 
 ## 快速启动
 
@@ -63,7 +63,7 @@ macOS 后续可双击仓库中的 [Run.command](./Run.command)，或执行 `./to
 
 靠近并面向 NPC、文书或出口时按 E；阅读面板可用 E／Esc 关闭，阅读期间锁定移动。输入配置还预留《命卷》、页签和威胁预览，功能将按后续任务接入；有映射不代表对应界面已经完成。实体手柄验收移至第 19 周输入完善阶段，或首次对外提供手柄支持之前；当前记为延期、未实测，不阻塞第一周／第二周键盘操作验收。自动注入的输入事件仍单独记为模拟验证。
 
-场景与角色仍用程序绘制占位形状，不是正式像素资产；[美术规范](./05_art_bible.md)中的明亮县城图是已认可的概念参考，不是实机截图。第二周的角色碰撞、镜头、交互和区域往返已实现，逐项状态见[任务板](./docs/week2_task_board.md)。战斗、轻调查、主支线和恋爱内容目前属于设计规格，不是可玩功能。[人工试玩记录](./docs/week2_playtest.md)提供本周尚待补齐的体验验收表。
+场景与角色仍用程序绘制占位形状，不是正式像素资产；[美术规范](./05_art_bible.md)中的明亮县城图是已认可的概念参考，不是实机截图。第二周的角色碰撞、镜头、交互和区域往返已实现，逐项状态见[任务板](./docs/week2_task_board.md)。独立战斗原型从`Battle.command`启动；此探索入口尚无剧情战斗、轻调查界面、主支线或恋爱内容。[人工试玩记录](./docs/week2_playtest.md)保留第二周的体验验收表。
 
 游戏状态写到 Godot 的 `user://`，不写回工程目录。自定义数据目录为 `ProjectWuming`：macOS 通常为 `~/Library/Application Support/ProjectWuming/`，Windows 为 `%APPDATA%\ProjectWuming\`。快速档为 `saves/quick.sav`，五个手动槽为 `saves/manual_01.sav`～`manual_05.sav`，互不覆盖；旧版本备份位于 `saves/backups/`。F5 更新快速档，手动槽覆盖前确认，标题／暂停的读档列表可独立选择。自动存档触发逻辑尚未接入，不因保留自动槽而宣称已实现。实际路径可通过日志／存档服务查询。存档测试只使用独立的 `user://tests/` 子目录，不覆盖玩家档位。
 

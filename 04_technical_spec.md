@@ -236,6 +236,10 @@ Main
 
 ### 4.3 内容 ID
 
+第三周战斗原型的工程接入：`CombatEncounter`继承已有棋盘／稳定队列，拥有瞬时战斗状态；`BattleGrid`作只读BFS，`BattleActions`作只读预览，`BattleEffects`仅由命令调用并结算状态，`BattleAI`生成确定性计划。`BattleScreen`只发移动／行动命令，不接触永久GameSession。移动与行动确认携带revision，重试使旧预览过期；查询与结构化结果返回副本。详情和边界见[第三周评审](./09_week3_review.md)。
+
+第三周的技能数值与形状保存在`battle_skills.json`，已实现范围／资源／冷却／状态字段；角色专属绝技条件放在遭遇单位的`ultimate`配置中。正式武学成长、全量requirements组合和多语言战斗文本不借此宣称完成。评审入口在`game/tools/`，正常导出排除；独立评审候选只在临时构建副本提升指定入口，使用不同版本和用户目录。
+
 ```text
 CHAR_PRISONER
 EV_GRAVE_TAG_03
