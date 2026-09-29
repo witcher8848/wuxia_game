@@ -19,6 +19,7 @@ var _pending_slot: String = ""
 var slot_buttons: Array[Button] = []
 var slot_entries: Array[Dictionary] = []
 const SLOT_PAGE_SIZE: int = 3
+const DialoguePanel = preload("res://game/presentation/investigation/dialogue_panel.gd")
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
@@ -253,6 +254,15 @@ func _on_interaction(target: Dictionary) -> void:
 	App.push_context(&"dialogue")
 	if is_instance_valid(reading_panel):
 		reading_panel.queue_free()
+	if not ContentDB.dialogue_entry(target["id"], GameSession.state).is_empty():
+		reading_panel = DialoguePanel.new()
+		reading_panel.name = "ReadingPanel"
+		reading_panel.theme = ui_theme
+		reading_panel.target_id = target["id"]
+		reading_panel.close_requested.connect(_close_reading)
+		$UIRoot.add_child(reading_panel)
+		interaction_hint.text = ""
+		return
 	reading_panel = PanelContainer.new()
 	reading_panel.name = "ReadingPanel"
 	reading_panel.theme = ui_theme
@@ -598,6 +608,9 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if App.current_context() == &"dialogue" and is_instance_valid(reading_panel) and reading_panel.visible:
+		if reading_panel.has_method("handle_input"):
+			reading_panel.handle_input(event)
+			return
 		if event.is_action_pressed("confirm") or event.is_action_pressed("cancel") or event.is_action_pressed("pause"):
 			get_viewport().set_input_as_handled()
 			if not event.is_echo():

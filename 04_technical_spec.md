@@ -234,6 +234,12 @@ Main
 - schema仍为1，旧空调查容器视为初始状态，保留其他旧字段。调查领域校验已登记ID的结构；当前通用存档服务仍负责JSON／schema校验，不宣称已实现所有未来剧情内容迁移。
 - 本日无对话图／调查UI；文本键对应CSV、对话可达性、重大交付预览及二次确认在Day 23～25接入。命令接口的存在不代表玩家已经可以交出原件。
 
+#### Day 23对白接入（2026-09-29）
+
+对白图位于`game/content/dialogue/investigation.json`，由`DialogueCatalog`验证节点／选择唯一性、2～4个选项、所有链接与静态可达性、入口目标、条件白名单、已登记命令以及两种语言的文本键。`investigation.csv`通过Godot导入简中／英文Translation（不压缩以保留可校验键列表）；导出时无需读取源CSV。ContentDB在探索、调查、对白全部验证后才发布新注册表。
+
+视图查询只读，`GameSession.choose_dialogue()`在确认时重新验证当前选项和命令，UI不直接写永久状态。探索入口仍校验实际靠近／面向的对象；关闭重置移动输入，不穿透打开暂停。此时质证／校勘、原件二次确认与剧情战斗仍待接入，不将命令接口等同于完整调查流程。
+
 ### 4.3 内容 ID
 
 第三周战斗原型的工程接入：`CombatEncounter`继承已有棋盘／稳定队列，拥有瞬时战斗状态；`BattleGrid`作只读BFS，`BattleActions`作只读预览，`BattleEffects`仅由命令调用并结算状态，`BattleAI`生成确定性计划。`BattleScreen`只发移动／行动命令，不接触永久GameSession。移动与行动确认携带revision，重试使旧预览过期；查询与结构化结果返回副本。详情和边界见[第三周评审](./09_week3_review.md)。

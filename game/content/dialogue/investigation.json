@@ -1,0 +1,46 @@
+{
+  "entries": {
+    "DOC_HOME_NOTE": [
+      {"node":"D_START","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"locked"}]},
+      {"node":"D_ACCEPT","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"available"}]},
+      {"node":"D_HOME","requires":[]}
+    ],
+    "NPC_DOCK_WORKER": [
+      {"node":"D_START","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"locked"}]},
+      {"node":"D_ACCEPT","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"available"}]},
+      {"node":"D_DOCK","requires":[]}
+    ]
+  },
+  "nodes": [
+    {"id":"D_START","speaker_key":"INV_SELF","text_key":"D_START_TEXT","choices":[
+      {"id":"receive","text_key":"D_RECEIVE","next":"@entry","command":"STEP_RECEIVE_INDEX","requires":[]},
+      {"id":"context","text_key":"D_CONTEXT","next":"D_CONTEXT","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_CONTEXT","speaker_key":"INV_SELF","text_key":"D_CONTEXT_TEXT","choices":[
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_ACCEPT","speaker_key":"INV_SELF","text_key":"D_ACCEPT_TEXT","choices":[
+      {"id":"accept","text_key":"D_ACCEPT","next":"@entry","command":"STEP_ACCEPT_SEARCH","requires":[]},
+      {"id":"leave","text_key":"INV_LATER","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_HOME","speaker_key":"INV_SELF","text_key":"D_HOME_TEXT","choices":[
+      {"id":"inspect","text_key":"D_INSPECT_BLANK","next":"D_BLANK","command":"STEP_INSPECT_BLANK","requires":[]},
+      {"id":"read","text_key":"D_READ_BLANK","next":"D_BLANK","command":"","requires":[{"op":"evidence_at_least","id":"EV_BLANK_DEATH_01","value":"clue"}]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_BLANK","speaker_key":"INV_SELF","text_key":"EV_BLANK_DEATH_01_DESC","choices":[
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_DOCK","speaker_key":"INV_BOATMAN","text_key":"D_DOCK_TEXT","choices":[
+      {"id":"ask","text_key":"D_ASK_BOAT","next":"D_BOAT","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_BOAT","speaker_key":"INV_BOATMAN","text_key":"D_BOAT_TEXT","choices":[
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]}
+  ]
+}

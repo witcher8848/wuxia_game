@@ -5,7 +5,9 @@ const BOOTSTRAP_PATH: String = "res://game/content/data/bootstrap.json"
 const GRID_SIZE: int = 32
 const PLAYER_FEET: Vector2 = Vector2(20, 12)
 const Investigation = preload("res://game/domain/investigation/investigation_rules.gd")
+const Dialogue = preload("res://game/domain/investigation/dialogue_catalog.gd")
 var _investigation: RefCounted = Investigation.new()
+var _dialogue: RefCounted = Dialogue.new()
 
 var content_version: String = ""
 var start_scene_id: String = ""
@@ -34,7 +36,7 @@ func reload_content(path: String = BOOTSTRAP_PATH) -> Error:
 	return load_definitions(parser.data)
 
 
-func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null) -> Error:
+func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null, dialogue_data: Variant = null) -> Error:
 	# Only publish the new registry once every definition and reference passes.
 	if not GameState.is_json_value(data):
 		return _invalid("Bootstrap must contain only finite JSON values.")
@@ -115,7 +117,30 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 		var investigation_error: String = investigation.configure(investigation_data)
 		if not investigation_error.is_empty():
 			return _invalid(investigation_error)
+	var dialogue: RefCounted = Dialogue.new()
+	if dialogue_data == null and data.has("dialogue_path"):
+		var path: Variant = data["dialogue_path"]
+		if not path is String or not path.begins_with("res://game/content/dialogue/") or ".." in path or not path.ends_with(".json"):
+			return _invalid("Dialogue path must be a content dialogue JSON resource.")
+		if not FileAccess.file_exists(path):
+			return _invalid("Cannot open dialogue content.")
+		dialogue_data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not dialogue_data is Dictionary:
+			return _invalid("Dialogue content must be a JSON object.")
+	if dialogue_data != null:
+		if not dialogue_data is Dictionary:
+			return _invalid("Dialogue definitions must be an object.")
+		var interactions: Array = []
+		for region: Dictionary in regions.values():
+			for target: Dictionary in region["interactions"]:
+				if target["kind"] in ["npc", "document"]:
+					interactions.append(target["id"])
+		var text_keys: Dictionary = dialogue_text_keys()
+		var dialogue_error: String = dialogue.configure(dialogue_data, investigation, text_keys, interactions)
+		if not dialogue_error.is_empty():
+			return _invalid(dialogue_error)
 	_investigation = investigation
+	_dialogue = dialogue
 	_scenes = scenes
 	_regions = regions
 	content_version = data["content_version"]
@@ -139,6 +164,32 @@ func prepare_investigation_step(state: GameState, step_id: String) -> Dictionary
 
 func investigation_condition(state: GameState, condition: Dictionary) -> bool:
 	return _investigation.condition_matches(state, condition)
+
+
+func dialogue_text_keys() -> Dictionary:
+	var keys: Dictionary = {}
+	var chinese := load("res://game/content/localization/investigation.zh_CN.translation") as Translation
+	var english := load("res://game/content/localization/investigation.en.translation") as Translation
+	if chinese == null or english == null:
+		return keys
+	# OptimizedTranslation does not expose get_message_list; CSV import is configured
+	# uncompressed so the registry can validate every source key in exported builds.
+	for key: String in chinese.get_message_list():
+		if not chinese.get_message(key).is_empty() and not english.get_message(key).is_empty():
+			keys[key] = true
+	return keys
+
+
+func get_dialogue_definitions() -> Dictionary:
+	return _dialogue.definitions()
+
+
+func dialogue_entry(target: String, state: GameState) -> String:
+	return _dialogue.entry(target, state)
+
+
+func dialogue_view(identifier: String, state: GameState) -> Dictionary:
+	return _dialogue.node_view(identifier, state)
 
 
 func has_spawn(scene_id: String, spawn_id: String) -> bool:

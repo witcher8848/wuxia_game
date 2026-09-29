@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://debtvpcxqb3n1"
+
+[deps]
+
+files=["res://game/content/localization/investigation.zh_CN.translation", "res://game/content/localization/investigation.en.translation"]
+
+source_file="res://game/content/localization/investigation.csv"
+dest_files=["res://game/content/localization/investigation.zh_CN.translation", "res://game/content/localization/investigation.en.translation"]
+
+[params]
+
+compress=false
+delimiter=0
+unescape_keys=false
+unescape_translations=true

@@ -35,7 +35,7 @@ textures/canvas_textures/default_texture_filter=0
 environment/defaults/default_clear_color=Color(0.09, 0.094, 0.125, 1)
 
 [internationalization]
-locale/translations=PackedStringArray("res://game/content/localization/ui.zh_CN.translation", "res://game/content/localization/ui.en.translation", "res://game/content/localization/exploration.zh_CN.translation", "res://game/content/localization/exploration.en.translation")
+locale/translations=PackedStringArray("res://game/content/localization/ui.zh_CN.translation", "res://game/content/localization/ui.en.translation", "res://game/content/localization/exploration.zh_CN.translation", "res://game/content/localization/exploration.en.translation", "res://game/content/localization/investigation.zh_CN.translation", "res://game/content/localization/investigation.en.translation")
 locale/fallback="zh_CN"
 
 [input]

@@ -38,6 +38,10 @@ func definitions() -> Dictionary:
 	return _data.duplicate(true)
 
 
+func valid_condition(value: Variant) -> bool:
+	return _valid_operation(value, false)
+
+
 func _build(data: Dictionary) -> String:
 	for name: String in ["evidence", "facts", "quests", "holders", "steps"]:
 		if not data.get(name) is Array:

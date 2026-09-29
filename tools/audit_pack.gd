@@ -23,6 +23,8 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/presentation/exploration/exploration_camera.gd",
 	"res://game/domain/state/game_state.gd",
 	"res://game/domain/investigation/investigation_rules.gd",
+	"res://game/domain/investigation/dialogue_catalog.gd",
+	"res://game/presentation/investigation/dialogue_panel.gd",
 	"res://game/domain/battle/combat_encounter.gd",
 	"res://game/presentation/battle/battle_screen.gd",
 	"res://game/core/bootstrap/app.gd",
@@ -70,6 +72,12 @@ func _run() -> void:
 	var investigation: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/investigation.json"))
 	if not investigation is Dictionary or not investigation.get("steps") is Array or investigation["steps"].is_empty():
 		_failures.append("Missing or invalid investigation content.")
+	var dialogue: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/dialogue/investigation.json"))
+	if not dialogue is Dictionary or not dialogue.get("nodes") is Array or dialogue["nodes"].is_empty():
+		_failures.append("Missing or invalid dialogue graph.")
+	for locale_path: String in ["res://game/content/localization/investigation.zh_CN.translation", "res://game/content/localization/investigation.en.translation"]:
+		if not ResourceLoader.exists(locale_path):
+			_failures.append("Missing investigation localization: " + locale_path)
 	for locale_path: String in ["res://game/content/localization/exploration.zh_CN.translation", "res://game/content/localization/exploration.en.translation"]:
 		if not ResourceLoader.exists(locale_path):
 			_failures.append("Missing exploration localization: " + locale_path)

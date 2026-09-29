@@ -81,3 +81,24 @@ func _content_db() -> Node:
 	if main_loop is SceneTree:
 		return main_loop.root.get_node_or_null("ContentDB")
 	return null
+
+
+func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
+	var content: Node = _content_db()
+	if content == null:
+		return {"error": ERR_UNAVAILABLE}
+	# Resolve the option again from current authoritative state, not UI snapshots.
+	var view: Dictionary = content.dialogue_view(node_id, state)
+	for choice: Dictionary in view.get("choices", []):
+		if choice["id"] != choice_id:
+			continue
+		if not choice["enabled"]:
+			return {"error": ERR_UNAVAILABLE, "feedback_key": choice["reason"]}
+		var feedback := ""
+		if not choice["command"].is_empty():
+			var result: Dictionary = apply_investigation_step(choice["command"])
+			if result["error"] != OK:
+				return result
+			feedback = result["feedback_key"]
+		return {"error": OK, "next": choice["next"], "feedback_key": feedback}
+	return {"error": ERR_INVALID_PARAMETER}

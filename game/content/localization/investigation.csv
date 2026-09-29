@@ -1,0 +1,33 @@
+keys,zh_CN,en
+INV_SELF,主角,Protagonist
+INV_BOATMAN,码头船夫,Boatman
+INV_LEAVE,离开,Leave
+INV_BACK,返回,Back
+INV_LATER,暂不行动,Not yet
+INV_REQUIREMENTS,尚不满足条件；可先查看已有线索。,Requirements not met. Review the clues you know.
+INV_ALREADY_RECORDED,已经记录；不重复领取。,Already recorded. Nothing is granted twice.
+INV_COMMAND_FAILED,情况已变化，请重新查看选项。,The situation has changed. Review the choices again.
+INV_DIALOGUE_KEYS,↑↓ / W S 选择 · E / Enter 确认 · Esc 离开,Arrows / W S: choose · E / Enter: confirm · Esc: leave
+EV_INDEX_01_TITLE,《勘亡录》首条索引,First index of the Death Register
+EV_INDEX_01_DESC,女囚在祠堂交给你的残纸上写着：河西、七步、三牌、无骨。不是完整地址；需要弄清记号的用法。,The prisoner's scrap reads: west bank; seven paces; third tablet; no bones. A code rather than a full address.
+EV_BLANK_DEATH_01_TITLE,预盖空白亡籍,Pre-sealed blank death record
+EV_BLANK_DEATH_01_DESC,姓名栏尚空，县印却已盖好。边角是父亲惯用的书吏简记：方位—列数—牌数—尸况。便衣编组批注也留在背面。,The name is blank but the county seal is already stamped. Your father's notation reads: direction; row; marker; body. Constable formation notes appear on the back.
+QUEST_FIND_GRAVEKEEPER_TITLE,找到守墓老妇,Find the gravekeeper
+QUEST_RESCUE_GRAVEKEEPER_TITLE,保护守墓老妇,Protect the gravekeeper
+INV_INDEX_RECEIVED,已整理女囚交来的索引。可接受寻找老妇的目标。,The prisoner's index is recorded. You may take up the search.
+INV_SEARCH_ACCEPTED,下一步：查住所的文书，或向码头船夫问话。,Next: inspect the papers at home or question the dock boatman.
+INV_BLANK_FOUND,取得空白亡籍。县印与书吏批注都已记入线索。,Blank death record acquired. The seal and clerk's notes are recorded.
+INV_WEST_GRAVES_FOUND,校勘成立：河西罪坟第七列第三牌。另辨认出县衙便衣的编组。,Comparison confirmed: third marker of row seven at the west-bank graves. You also recognize the constables' formation.
+INV_ORIGINAL_TRANSFERRED,原件已交清籍使团，已知内容仍可查阅。,The original is now with the inspector's delegation. Your knowledge remains available.
+D_START_TEXT,祠堂脱身后，女囚交给你的索引还折在衣内。她要找守墓老妇：官府迁坟之前，须弄清那本埋尸簿为何被带走。,After escaping the ancestral hall you still carry the prisoner's folded index. She seeks the gravekeeper and the burial ledger before the county moves the graves.
+D_RECEIVE,展开并记录索引,Unfold and record the index
+D_CONTEXT,回想此行缘由,Recall why you came
+D_CONTEXT_TEXT,父亲的亡籍疑点尚无答案。老妇经手埋尸记录，可能知道哪些姓名与尸体对不上。先查家里的文书或问渡口的人；不必两边都查才能前进。,Your father's records remain unexplained. The gravekeeper may know which names never matched the bodies. Papers at home or witnesses at the ferry offer two leads; either can move the search forward.
+D_ACCEPT_TEXT,索引的记号难以直接辨认。住所里有父亲旧日的书吏批注；码头的人则可能见过老妇。你准备从哪条线索入手？,The index needs interpretation. Your father's clerical notes are at home; the boatman may have seen the gravekeeper. Either lead could help.
+D_ACCEPT,着手寻找守墓老妇,Begin the search for the gravekeeper
+D_HOME_TEXT,旧案边压着一张空白亡籍。纸上的县印与父亲的笔迹挨得很近，唯独本应写着死者姓名的地方空着。,A blank death record lies beneath an old file. The county seal sits beside your father's handwriting; only the name is missing.
+D_INSPECT_BLANK,取出并检查空白亡籍,Take and inspect the blank death record
+D_READ_BLANK,重看已记录的批注,Read the recorded notes again
+D_DOCK_TEXT,船夫正在收拢缆绳。听见你问守墓老妇，他手里的动作停了一瞬。,The boatman gathers his ropes. At the mention of the gravekeeper his hands pause.
+D_ASK_BOAT,她近日可曾渡河？,Has she crossed the river recently?
+D_BOAT_TEXT,船夫：她三个月没坐过我的船。河西那边不太平，你们也少去。船舷旁还挂着一串渡船铁牌。,Boatman: She has not taken my boat in three months. The west bank is dangerous; stay away. A string of ferry tokens hangs beside the boat.
