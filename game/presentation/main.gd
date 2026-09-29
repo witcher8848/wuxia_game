@@ -20,6 +20,10 @@ var slot_buttons: Array[Button] = []
 var slot_entries: Array[Dictionary] = []
 const SLOT_PAGE_SIZE: int = 3
 const DialoguePanel = preload("res://game/presentation/investigation/dialogue_panel.gd")
+const ActivityPanel = preload("res://game/presentation/investigation/activity_panel.gd")
+var activity_panel: PanelContainer
+var _activity_from_dialogue := false
+var _activity_initial_state: Dictionary = {}
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
@@ -260,6 +264,7 @@ func _on_interaction(target: Dictionary) -> void:
 		reading_panel.theme = ui_theme
 		reading_panel.target_id = target["id"]
 		reading_panel.close_requested.connect(_close_reading)
+		reading_panel.activity_requested.connect(_open_activity)
 		$UIRoot.add_child(reading_panel)
 		interaction_hint.text = ""
 		return
@@ -299,6 +304,37 @@ func _close_reading() -> void:
 	_reading_target.clear()
 	if App.current_context() == &"dialogue":
 		App.pop_context()
+	_reset_movement()
+
+func _open_activity(activity: String) -> void:
+	if transitioning or App.current_context() not in [&"exploration", &"dialogue"]:
+		return
+	if not activity in DialogueCatalog.ACTIVITIES:
+		return
+	_activity_from_dialogue = App.current_context() == &"dialogue"
+	_activity_initial_state = GameSession.state.to_dict()
+	if _activity_from_dialogue:
+		reading_panel.hide()
+	_reset_movement()
+	App.push_context(&"codex")
+	if is_instance_valid(activity_panel): activity_panel.queue_free()
+	activity_panel = ActivityPanel.new()
+	activity_panel.theme = ui_theme
+	activity_panel.activity = activity
+	activity_panel.close_requested.connect(_close_activity)
+	$UIRoot.add_child(activity_panel)
+
+func _close_activity() -> void:
+	if not is_instance_valid(activity_panel) or not activity_panel.visible: return
+	GameSession.cancel_original_handover(activity_panel.handover_preview.get("token", ""))
+	activity_panel.hide()
+	if App.current_context() == &"codex": App.pop_context()
+	if _activity_from_dialogue and is_instance_valid(reading_panel):
+		reading_panel.show()
+		if _activity_initial_state != GameSession.state.to_dict():
+			reading_panel.go_to("@entry")
+		else: reading_panel.refresh()
+	_activity_from_dialogue = false
 	_reset_movement()
 
 func _transition_to(scene_id: String, spawn_id: String) -> void:
@@ -382,7 +418,7 @@ func _resume() -> void:
 	_reset_movement()
 
 func _save_game(slot: String = "quick") -> Error:
-	if transitioning or App.current_context() == &"dialogue" or $SceneHost.get_child_count() != 1:
+	if transitioning or App.current_context() not in [&"exploration", &"system_menu"] or $SceneHost.get_child_count() != 1:
 		return ERR_UNAVAILABLE
 	# A future-version backup is data too: the UI must not overwrite its slot.
 	if not SaveService.slot_summary(slot).get("can_overwrite", false):
@@ -598,6 +634,9 @@ func _input(event: InputEvent) -> void:
 	if transitioning:
 		get_viewport().set_input_as_handled()
 		return
+	if App.current_context() == &"codex" and is_instance_valid(activity_panel) and activity_panel.visible:
+		activity_panel.handle_input(event)
+		return
 	if App.current_context() == &"system_menu" and is_instance_valid(menu) and menu.visible:
 		if event.is_action_pressed("cancel") or event.is_action_pressed("pause"):
 			get_viewport().set_input_as_handled()
@@ -618,6 +657,10 @@ func _input(event: InputEvent) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo() or transitioning:
+		return
+	if event.is_action_pressed("open_codex") and App.current_context() == &"exploration":
+		get_viewport().set_input_as_handled()
+		_open_activity("@journal")
 		return
 	if event.is_action_pressed("pause") or event.is_action_pressed("cancel"):
 		if App.current_context() == &"exploration":

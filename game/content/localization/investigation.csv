@@ -28,6 +28,64 @@ D_ACCEPT,着手寻找守墓老妇,Begin the search for the gravekeeper
 D_HOME_TEXT,旧案边压着一张空白亡籍。纸上的县印与父亲的笔迹挨得很近，唯独本应写着死者姓名的地方空着。,A blank death record lies beneath an old file. The county seal sits beside your father's handwriting; only the name is missing.
 D_INSPECT_BLANK,取出并检查空白亡籍,Take and inspect the blank death record
 D_READ_BLANK,重看已记录的批注,Read the recorded notes again
-D_DOCK_TEXT,船夫正在收拢缆绳。听见你问守墓老妇，他手里的动作停了一瞬。,The boatman gathers his ropes. At the mention of the gravekeeper his hands pause.
+D_DOCK_TEXT,船夫指着铜钉补过的铁牌嘀咕：这种补法，只有守墓老妇会。你问起她近日的去向，他收缆绳的手停了一瞬。,The boatman points to a token repaired with a copper nail: only the gravekeeper mends them that way. His hands pause when you ask where she has been recently.
 D_ASK_BOAT,她近日可曾渡河？,Has she crossed the river recently?
 D_BOAT_TEXT,船夫：她三个月没坐过我的船。河西那边不太平，你们也少去。船舷旁还挂着一串渡船铁牌。,Boatman: She has not taken my boat in three months. The west bank is dangerous; stay away. A string of ferry tokens hangs beside the boat.
+EV_FERRY_TOKEN_01_TITLE,新近使用的渡船铁牌,Recently used ferry token
+EV_FERRY_TOKEN_01_DESC,验痕还是今日的新印；断角用铜钉补过。船夫方才说，这种补法只有守墓老妇用。你问能否带走这块旧牌，他不耐烦地摆了摆手。,The inspection mark is fresh today. A copper nail repairs a broken corner; the boatman said only the gravekeeper mends tokens that way. He waves you away when you ask to keep it.
+CL_BOATMAN_01_TITLE,船夫的三月未渡说,The boatman's three-month claim
+CL_BOATMAN_01_DESC,船夫声称：守墓老妇三个月没有渡河。他认得她修补铁牌的手艺，却不愿谈最近的渡客。,The boatman claims the gravekeeper has not crossed for three months. He knows her token repairs but refuses to discuss recent passengers.
+D_REVIEW_CLAIM,重问已经记下的说法,Return to the recorded claim
+D_INSPECT_TOKEN,检查船舷的旧铁牌,Inspect the old ferry token
+INV_CLAIM_RECORDED,已记录证言；尚未证实。,Testimony recorded; not yet verified.
+INV_TOKEN_FOUND,取得铁牌；验痕和修补痕迹已记下。,Token acquired; inspection and repair marks noted.
+INV_BOATMAN_ADMITS,船夫改口：今晨送她去了河西罪坟。她说不能让迁坟抹平旧账；可从西岸近道上岸。,He admits taking her to the west-bank graves this morning. She feared the relocation would erase old records. He describes a closer landing.
+INV_CHALLENGE_TITLE,出示证物,Present evidence
+INV_CHALLENGE_PROMPT,要质证的是「三个月没有渡河」。选一条已知材料，先看细节，再确认出示。,Challenge the claim of no crossing in three months. Read a known item and confirm to present it.
+INV_CHALLENGE_WRONG,这不能核实她最近有没有渡河。说法本身也不能证明说法；需看能对应到人的近期痕迹。不扣时间。,This does not verify a recent crossing. A claim cannot prove itself; look for a recent trace tied to her. No time is spent.
+INV_COMPARE_TITLE,二项校勘,Compare two records
+INV_COMPARE_PROMPT,先选一条材料，再选一条可对照的材料。比较记号的含义，不必穷举所有物品。,Choose one record and then a relevant counterpart. Compare what the markings mean.
+INV_COMPARE_WRONG,这两条材料没有共同的记号规则，不能据此解释索引。不扣时间，也不登记事实。,These items share no notation that decodes the index. No time is spent and no fact is recorded.
+INV_PAIR_DISTINCT,请选两条不同且已知的材料。,Choose two different known items.
+INV_INQUIRY_KEYS,↑↓ 选择 · E 确认 · Esc 返回 · PgUp/PgDn 翻文,Arrows: choose · E: confirm · Esc: back · PgUp/PgDn: text
+INV_FIRST_SELECTED,已选：%s。再选一条材料。,Selected: %s. Choose a counterpart.
+INV_NO_ITEMS,还没有可用材料。可以返回住所或码头补查。,No relevant items yet. Check home or the docks.
+INV_CHALLENGE_RETRY,可暂时退出补查。错误出示不会扣时间或关系。,You can leave and investigate. Wrong evidence costs no time or trust.
+INV_RETURN_DIALOGUE,回到对话,Return to dialogue
+INV_CODEX_TITLE,命卷,Case journal
+INV_TAB_CASE,当前案,Current case
+INV_TAB_EVIDENCE,证据,Evidence
+INV_TAB_PEOPLE,人物（未开放）,People (unavailable)
+INV_TAB_ROUTES,路线（未开放）,Routes (unavailable)
+INV_CODEX_KEYS,Q/R 切页 · ↑↓ 选择 · E 校勘 · Esc 返回 · PgUp/Dn 翻文,Q/R: tabs · Arrows: choose · E: compare · Esc: back · PgUp/Dn: text
+INV_JOURNAL_NAV_KEYS,Q/R 切页 · ↑↓ 选择 · Esc 返回 · PgUp/Dn 翻文,Q/R: tabs · Arrows: choose · Esc: back · PgUp/Dn: text
+INV_UNAVAILABLE_PAGE,本页尚未开放。本周先完成当前案与证据记录。,This page is not available. Current case and evidence are the working pages.
+INV_EMPTY_EVIDENCE,暂无已知证据。可去住所或码头展开调查。,No known evidence. Start at home or the docks.
+INV_OBJECTIVE_START,下一步：在住所文书或码头船夫处整理索引。,Next: unfold the index at home or by the boatman.
+INV_OBJECTIVE_ACCEPT,下一步：在住所或码头接受寻找老妇的目标。,Next: accept the search at home or by the boatman.
+INV_OBJECTIVE_SEARCH,下一步：校勘住所文书，或用渡船痕迹质证船夫。两条路均可继续。,Next: compare the papers at home or challenge the boatman. Either route can advance the search.
+INV_OBJECTIVE_GRAVES,下一目标：河西罪坟，寻找守墓老妇。前往遭遇的入口将在本周战斗接入时开放。,Next: find the gravekeeper at the west-bank graves. The encounter entry is being connected this week.
+INV_REWARD_FORMATION,已获情报：县衙便衣编组（首轮意图优势，待战斗接入）。,Intel: constable formation (first-round intent advantage; battle integration pending).
+INV_REWARD_FERRY,已获情报：西岸近道（较近部署，待战斗接入）。,Intel: closer west-bank landing (nearer deployment; battle integration pending).
+INV_STATUS_locked,未开启,Locked
+INV_STATUS_available,可接受,Available
+INV_STATUS_active,进行中,Active
+INV_STATUS_resolved,已解决,Resolved
+INV_STATUS_changed,目标转变,Changed objective
+INV_KNOW_clue,线索,Clue
+INV_KNOW_doubt,存疑,Doubt
+INV_KNOW_fact,已核实,Verified
+INV_HOLDER_PLAYER,自己,You
+INV_HOLDER_CHAR_PRISONER,女囚,The prisoner
+INV_HOLDER_CHAR_FATHER,父亲,Father
+INV_HOLDER_FACTION_INSPECTOR,清籍使团,Inspector's delegation
+INV_HOLDER_CHAR_BOATMAN,船夫,Boatman
+INV_EVIDENCE_META,认知：%s · 原件／记录归属：%s · 来源：%s,Knowledge: %s · Original / record held by: %s · Source: %s
+INV_NOTICE,清籍使团告示,Inspector's notice
+D_NOTICE_TEXT,告示附着一个封口收证匣：涉亡籍旧案的原件可投交清籍使团。交出后由使团保管，已记下的内容仍可查阅。你也可以保留原件继续调查。,A sealed evidence box sits by the inspector's notice. Originals concerning death records may be submitted to the delegation. They retain custody; your notes remain readable. You can also keep the original.
+INV_HANDOVER_TITLE,预览交付空白亡籍,Preview original handover
+INV_HANDOVER_EFFECT,接受方：清籍使团。交付：预盖空白亡籍原件。确认后原件不再由你持有；已知内容与事实保留。本周样本不直接翻案、不推进时段，也不把老妇位置写入递呈。此处取消不会交付。,Recipient: inspector's delegation. Item: original blank death record. You lose custody but retain knowledge and facts. This sample grants no legal verdict and spends no time; it does not disclose the gravekeeper's location. Cancel to keep it.
+INV_HANDOVER_CONFIRM,确认投交原件,Confirm submission of original
+INV_HANDOVER_KEEP,保留原件，返回,Keep the original and return
+INV_HANDOVER_STALE,预览已失效，原件未交出；请重新查看。,This preview has expired. No original was handed over. Review again.
+INV_HANDOVER_LOCATION,请到县城街口告示旁的收证匣查看交付。,Visit the evidence box by the town notice to preview submission.

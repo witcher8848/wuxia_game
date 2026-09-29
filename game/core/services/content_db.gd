@@ -6,8 +6,10 @@ const GRID_SIZE: int = 32
 const PLAYER_FEET: Vector2 = Vector2(20, 12)
 const Investigation = preload("res://game/domain/investigation/investigation_rules.gd")
 const Dialogue = preload("res://game/domain/investigation/dialogue_catalog.gd")
+const Inquiry = preload("res://game/domain/investigation/inquiry_rules.gd")
 var _investigation: RefCounted = Investigation.new()
 var _dialogue: RefCounted = Dialogue.new()
+var _inquiry: RefCounted = Inquiry.new()
 
 var content_version: String = ""
 var start_scene_id: String = ""
@@ -139,8 +141,13 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 		var dialogue_error: String = dialogue.configure(dialogue_data, investigation, text_keys, interactions)
 		if not dialogue_error.is_empty():
 			return _invalid(dialogue_error)
+	var inquiry: RefCounted = Inquiry.new()
+	var inquiry_error: String = inquiry.configure(investigation.definitions().get("inquiries", []), investigation, dialogue_text_keys())
+	if not inquiry_error.is_empty():
+		return _invalid(inquiry_error)
 	_investigation = investigation
 	_dialogue = dialogue
+	_inquiry = inquiry
 	_scenes = scenes
 	_regions = regions
 	content_version = data["content_version"]
@@ -190,6 +197,14 @@ func dialogue_entry(target: String, state: GameState) -> String:
 
 func dialogue_view(identifier: String, state: GameState) -> Dictionary:
 	return _dialogue.node_view(identifier, state)
+
+
+func inquiry_view(identifier: String, state: GameState, first: String = "") -> Dictionary:
+	return _inquiry.view(identifier, state, first)
+
+
+func prepare_inquiry(state: GameState, identifier: String, selected: Array) -> Dictionary:
+	return _inquiry.prepare(state, identifier, selected)
 
 
 func has_spawn(scene_id: String, spawn_id: String) -> bool:

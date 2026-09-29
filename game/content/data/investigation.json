@@ -1,10 +1,12 @@
 {
-  "holders": ["PLAYER", "CHAR_PRISONER", "CHAR_FATHER", "FACTION_INSPECTOR"],
+  "holders": ["PLAYER", "CHAR_PRISONER", "CHAR_FATHER", "FACTION_INSPECTOR", "CHAR_BOATMAN"],
   "evidence": [
     {"id":"EV_INDEX_01","title_key":"EV_INDEX_01_TITLE","description_key":"EV_INDEX_01_DESC","source_id":"CHAR_PRISONER","kind":"document","initial_holder":"CHAR_PRISONER"},
-    {"id":"EV_BLANK_DEATH_01","title_key":"EV_BLANK_DEATH_01_TITLE","description_key":"EV_BLANK_DEATH_01_DESC","source_id":"CHAR_FATHER","kind":"document","initial_holder":"PLAYER"}
+    {"id":"EV_BLANK_DEATH_01","title_key":"EV_BLANK_DEATH_01_TITLE","description_key":"EV_BLANK_DEATH_01_DESC","source_id":"CHAR_FATHER","kind":"document","initial_holder":"PLAYER"},
+    {"id":"EV_FERRY_TOKEN_01","title_key":"EV_FERRY_TOKEN_01_TITLE","description_key":"EV_FERRY_TOKEN_01_DESC","source_id":"CHAR_BOATMAN","kind":"object","initial_holder":"PLAYER"},
+    {"id":"CL_BOATMAN_01","title_key":"CL_BOATMAN_01_TITLE","description_key":"CL_BOATMAN_01_DESC","source_id":"CHAR_BOATMAN","kind":"testimony","initial_holder":"PLAYER"}
   ],
-  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION"],
+  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE"],
   "quests": [
     {"id":"QUEST_FIND_GRAVEKEEPER","title_key":"QUEST_FIND_GRAVEKEEPER_TITLE"},
     {"id":"QUEST_RESCUE_GRAVEKEEPER","title_key":"QUEST_RESCUE_GRAVEKEEPER_TITLE"}
@@ -31,9 +33,29 @@
       {"op":"set_fact","id":"FACT_WEST_GRAVES"},
       {"op":"set_fact","id":"FACT_YAMEN_FORMATION"}
     ]},
+    {"id":"STEP_RECORD_BOATMAN","feedback_key":"INV_CLAIM_RECORDED","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}],"effects":[
+      {"op":"discover","id":"CL_BOATMAN_01"}
+    ]},
+    {"id":"STEP_TAKE_FERRY_TOKEN","feedback_key":"INV_TOKEN_FOUND","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}],"effects":[
+      {"op":"discover","id":"EV_FERRY_TOKEN_01"}
+    ]},
+    {"id":"STEP_CHALLENGE_BOATMAN","feedback_key":"INV_BOATMAN_ADMITS","requires":[
+      {"op":"evidence_at_least","id":"EV_FERRY_TOKEN_01","value":"clue"},
+      {"op":"evidence_at_least","id":"CL_BOATMAN_01","value":"clue"},
+      {"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}
+    ],"effects":[
+      {"op":"knowledge","id":"EV_FERRY_TOKEN_01","value":"fact"},
+      {"op":"knowledge","id":"CL_BOATMAN_01","value":"doubt"},
+      {"op":"set_fact","id":"FACT_WEST_GRAVES"},
+      {"op":"set_fact","id":"FACT_FERRY_ROUTE"}
+    ]},
     {"id":"STEP_HAND_OVER_BLANK","feedback_key":"INV_ORIGINAL_TRANSFERRED","requires":[
       {"op":"holder_is","id":"EV_BLANK_DEATH_01","value":"PLAYER"},
       {"op":"fact_is","id":"FACT_WEST_GRAVES","value":true}
     ],"effects":[{"op":"transfer","id":"EV_BLANK_DEATH_01","from":"PLAYER","to":"FACTION_INSPECTOR"}]}
+  ],
+  "inquiries": [
+    {"id":"INQ_BOATMAN","kind":"challenge","title_key":"INV_CHALLENGE_TITLE","prompt_key":"INV_CHALLENGE_PROMPT","wrong_key":"INV_CHALLENGE_WRONG","claim_id":"CL_BOATMAN_01","proof_id":"EV_FERRY_TOKEN_01","candidates":["EV_INDEX_01","CL_BOATMAN_01","EV_FERRY_TOKEN_01","EV_BLANK_DEATH_01"],"step_id":"STEP_CHALLENGE_BOATMAN"},
+    {"id":"INQ_INDEX","kind":"compare","title_key":"INV_COMPARE_TITLE","prompt_key":"INV_COMPARE_PROMPT","wrong_key":"INV_COMPARE_WRONG","pair":["EV_INDEX_01","EV_BLANK_DEATH_01"],"candidates":["EV_INDEX_01","EV_BLANK_DEATH_01","EV_FERRY_TOKEN_01"],"step_id":"STEP_COMPARE_INDEX_BLANK"}
   ]
 }

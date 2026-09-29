@@ -240,6 +240,12 @@ Main
 
 视图查询只读，`GameSession.choose_dialogue()`在确认时重新验证当前选项和命令，UI不直接写永久状态。探索入口仍校验实际靠近／面向的对象；关闭重置移动输入，不穿透打开暂停。此时质证／校勘、原件二次确认与剧情战斗仍待接入，不将命令接口等同于完整调查流程。
 
+#### Day 24～25交互接入（2026-09-29）
+
+`investigation.json`的`inquiries`声明有限质证／二项校勘候选、正确对与已登记步骤；`InquiryRules`只返回候选状态，GameSession统一提交。命卷是只读投影，不复制永久知识容器；出示无关材料、第一项选择和取消不产生永久影响。
+
+交付样本由`preview_original_handover()`产生会话内凭证和接收方／原件说明，`confirm_original_handover(token)`重新校验快照并提交一次转移。凭证不写存档，取消、状态替换和新游戏失效。对白验证器拒绝直接调用从PLAYER转移原件的步骤，必须进入二次确认界面。普通领取原件不受此限制。实际任务转向和调查改变战斗仍待Day 26接续。
+
 ### 4.3 内容 ID
 
 第三周战斗原型的工程接入：`CombatEncounter`继承已有棋盘／稳定队列，拥有瞬时战斗状态；`BattleGrid`作只读BFS，`BattleActions`作只读预览，`BattleEffects`仅由命令调用并结算状态，`BattleAI`生成确定性计划。`BattleScreen`只发移动／行动命令，不接触永久GameSession。移动与行动确认携带revision，重试使旧预览过期；查询与结构化结果返回副本。详情和边界见[第三周评审](./09_week3_review.md)。

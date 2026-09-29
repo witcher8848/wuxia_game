@@ -1,6 +1,7 @@
 extends PanelContainer
 ## A keyboard view only. Permanent changes go through GameSession commands.
 signal close_requested
+signal activity_requested(activity: String)
 
 var target_id := ""
 var node_id := ""
@@ -14,6 +15,10 @@ var hint: Label
 var _focus_by_node: Dictionary = {}
 
 func _ready() -> void:
+	_build_layout()
+	go_to(ContentDB.dialogue_entry(target_id, GameSession.state))
+
+func _build_layout() -> void:
 	position = Vector2(12, 54)
 	size = Vector2(616, 294)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -52,9 +57,11 @@ func _ready() -> void:
 	hint.add_theme_font_size_override("font_size", 12)
 	hint.text = tr("INV_DIALOGUE_KEYS")
 	box.add_child(hint)
-	go_to(ContentDB.dialogue_entry(target_id, GameSession.state))
 
 func go_to(identifier: String) -> void:
+	if identifier in DialogueCatalog.ACTIVITIES:
+		activity_requested.emit(identifier)
+		return
 	if identifier == "@entry":
 		identifier = ContentDB.dialogue_entry(target_id, GameSession.state)
 	if identifier.is_empty():

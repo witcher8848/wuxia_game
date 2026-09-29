@@ -5,6 +5,7 @@ extends RefCounted
 var _data: Dictionary = {}
 var _nodes: Dictionary = {}
 var _rules: InvestigationRules
+const ACTIVITIES := ["@challenge", "@compare", "@journal", "@handover"]
 
 func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionary, interactions: Array) -> String:
 	if not GameState.is_json_value(data) or data.size() != 2 or not data.get("nodes") is Array or not data.get("entries") is Dictionary or data["nodes"].is_empty():
@@ -12,7 +13,7 @@ func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionar
 	var nodes: Dictionary = {}
 	var steps: Dictionary = {}
 	for step: Dictionary in rules.definitions().get("steps", []):
-		steps[step["id"]] = true
+		steps[step["id"]] = step
 		if not _text(step["feedback_key"], text_keys):
 			return "Missing investigation feedback translation."
 		for effect: Dictionary in step["effects"]:
@@ -40,6 +41,10 @@ func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionar
 				return "Choice requires text, next and registered command."
 			if not choice["command"].is_empty() and not steps.has(choice["command"]):
 				return "Unknown dialogue command."
+			if not choice["command"].is_empty():
+				for effect: Dictionary in steps[choice["command"]]["effects"]:
+					if effect["op"] == "transfer" and effect["from"] == "PLAYER":
+						return "Handing over a player original requires the confirmation flow."
 			if not _conditions(choice.get("requires"), rules):
 				return "Invalid choice condition."
 			# No scripts, effects or property paths can hide beside a legal command.
@@ -50,7 +55,7 @@ func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionar
 		nodes[node["id"]] = node.duplicate(true)
 	for node: Dictionary in nodes.values():
 		for choice: Dictionary in node["choices"]:
-			if not choice["next"] in ["", "@entry"] and not nodes.has(choice["next"]):
+			if not choice["next"] in ["", "@entry"] and not choice["next"] in ACTIVITIES and not nodes.has(choice["next"]):
 				return "Broken dialogue link."
 	for target: Variant in data["entries"]:
 		if not target in interactions or not data["entries"][target] is Array or data["entries"][target].is_empty():

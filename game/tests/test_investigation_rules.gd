@@ -35,7 +35,7 @@ func _test_definitions() -> void:
 	_check(rules.configure(_data).is_empty(), "canonical definitions validate")
 	var published: Dictionary = rules.definitions()
 	published["evidence"].clear()
-	_check(rules.definitions()["evidence"].size() == 2, "definitions are deep copies")
+	_check(rules.definitions()["evidence"].size() == _data["evidence"].size(), "definitions are deep copies")
 	var bad_cases: Array[Dictionary] = []
 	for field: String in ["evidence", "facts", "quests", "holders", "steps"]:
 		var bad := _data.duplicate(true)
@@ -74,7 +74,7 @@ func _test_definitions() -> void:
 	var alias := _data.duplicate(true)
 	_check(rules.configure(alias).is_empty(), "configurable from caller dictionary")
 	alias["steps"].clear()
-	_check(rules.definitions()["steps"].size() == 5, "configure owns its definitions")
+	_check(rules.definitions()["steps"].size() == _data["steps"].size(), "configure owns its definitions")
 
 
 func _test_rules() -> void:

@@ -20,5 +20,7 @@ python3 tools/run_checked.py skill_preview ./tools/godot.sh --headless --path "$
 python3 tools/run_checked.py command_options ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_battle_command_options.gd
 python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_investigation_rules.gd
 python3 tools/run_checked.py dialogue ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_dialogue.gd
+python3 tools/run_checked.py inquiry ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_inquiry.gd
+python3 tools/run_checked.py handover ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_handover.gd
 python3 tools/run_checked.py main_smoke ./tools/godot.sh --headless --path "$task_root" -- --smoke-test
 echo "PROJECT_CHECK_PASS"

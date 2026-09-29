@@ -2,6 +2,7 @@ extends SceneTree
 const Catalog = preload("res://game/domain/investigation/dialogue_catalog.gd")
 const Rules = preload("res://game/domain/investigation/investigation_rules.gd")
 const CONTENT = preload("res://game/core/services/content_db.gd")
+const TARGETS := ["DOC_HOME_NOTE", "NPC_DOCK_WORKER", "DOC_STREET_NOTICE"]
 var checks := 0
 var failures: Array[String] = []
 var main: Node
@@ -40,7 +41,7 @@ func _run() -> void:
 
 func _definitions() -> void:
 	var catalog := Catalog.new()
-	check(catalog.configure(source, rules, keys, ["DOC_HOME_NOTE", "NPC_DOCK_WORKER"]).is_empty(), "real bilingual graph loads")
+	check(catalog.configure(source, rules, keys, TARGETS).is_empty(), "real bilingual graph loads")
 	check(keys.has("D_START_TEXT") and keys.has("EV_INDEX_01_TITLE"), "both locale keys loaded")
 	var file := FileAccess.open("res://game/content/localization/investigation.csv", FileAccess.READ)
 	check(file.get_csv_line() == PackedStringArray(["keys", "zh_CN", "en"]), "exact bilingual CSV header")
@@ -97,14 +98,14 @@ func _definitions() -> void:
 	bad["nodes"].append(orphan)
 	mutations.append(bad)
 	for mutation: Dictionary in mutations:
-		check(not catalog.configure(mutation, rules, keys, ["DOC_HOME_NOTE", "NPC_DOCK_WORKER"]).is_empty(), "invalid graph rejected")
+		check(not catalog.configure(mutation, rules, keys, TARGETS).is_empty(), "invalid graph rejected")
 		check(catalog.definitions() == source, "failed graph reload is atomic")
 	var copy := catalog.definitions()
 	copy.clear()
 	check(catalog.definitions() == source, "definition access cannot mutate registry")
 	var missing_locale := keys.duplicate()
 	missing_locale.erase("D_START_TEXT")
-	check(not catalog.configure(source, rules, missing_locale, ["DOC_HOME_NOTE", "NPC_DOCK_WORKER"]).is_empty(), "missing either locale blocks graph")
+	check(not catalog.configure(source, rules, missing_locale, TARGETS).is_empty(), "missing either locale blocks graph")
 	var registry := CONTENT.new()
 	check(registry.reload_content() == OK, "new ContentDB loads all registries")
 	var bootstrap: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CONTENT.BOOTSTRAP_PATH))

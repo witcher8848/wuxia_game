@@ -4,9 +4,12 @@ extends Node
 signal state_replaced
 
 var state: GameState = GameState.new()
+var _handover: Dictionary = {}
+var _handover_sequence := 0
 
 
 func start_new_game() -> GameState:
+	_handover.clear()
 	var next_state: GameState = GameState.new()
 	next_state.route_id = "ROUTE_%d_%d" % [int(Time.get_unix_time_from_system()), Time.get_ticks_usec()]
 	var content: Node = _content_db()
@@ -26,6 +29,7 @@ func replace_state(next_state: GameState) -> Error:
 		return ERR_INVALID_DATA
 	# Own a copy: a UI preview or loaded snapshot cannot mutate the live route later.
 	state = GameState.from_dict(next_state.to_dict())
+	_handover.clear()
 	state_replaced.emit()
 	return OK
 
@@ -102,3 +106,43 @@ func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
 			feedback = result["feedback_key"]
 		return {"error": OK, "next": choice["next"], "feedback_key": feedback}
 	return {"error": ERR_INVALID_PARAMETER}
+
+
+func resolve_inquiry(identifier: String, selected: Array) -> Dictionary:
+	var content: Node = _content_db()
+	if content == null:
+		return {"error": ERR_UNAVAILABLE, "feedback_key": "INV_COMMAND_FAILED"}
+	var proposal: Dictionary = content.prepare_inquiry(state, identifier, selected)
+	if proposal["error"] != OK:
+		return {"error": proposal["error"], "feedback_key": proposal["feedback_key"]}
+	var error: Error = replace_state(proposal["state"])
+	return {"error": error, "feedback_key": proposal["feedback_key"] if error == OK else "INV_COMMAND_FAILED"}
+
+
+func preview_original_handover() -> Dictionary:
+	_handover.clear()
+	var content: Node = _content_db()
+	if content == null or state.scene_id != "SCENE_TOWN_STREET" or not is_inspected("DOC_STREET_NOTICE"):
+		return {"error": ERR_UNAVAILABLE, "feedback_key": "INV_HANDOVER_LOCATION"}
+	var proposal: Dictionary = content.prepare_investigation_step(state, "STEP_HAND_OVER_BLANK")
+	if proposal["error"] != OK:
+		return {"error": proposal["error"], "feedback_key": "INV_ALREADY_RECORDED" if proposal["error"] == ERR_ALREADY_EXISTS else "INV_REQUIREMENTS"}
+	_handover_sequence += 1
+	var token := "HANDOVER_%d_%d" % [_handover_sequence, Time.get_ticks_usec()]
+	_handover = {"token": token, "before": state.to_dict()}
+	return {"error": OK, "token": token, "evidence_id": "EV_BLANK_DEATH_01", "recipient_id": "FACTION_INSPECTOR", "effect_key": "INV_HANDOVER_EFFECT"}
+
+
+func confirm_original_handover(token: String) -> Dictionary:
+	if token.is_empty() or token != _handover.get("token", ""):
+		return {"error": ERR_INVALID_PARAMETER, "feedback_key": "INV_HANDOVER_STALE"}
+	var before: Dictionary = _handover["before"]
+	_handover.clear()
+	if before != state.to_dict():
+		return {"error": ERR_BUSY, "feedback_key": "INV_HANDOVER_STALE"}
+	return apply_investigation_step("STEP_HAND_OVER_BLANK")
+
+
+func cancel_original_handover(token: String) -> void:
+	if not token.is_empty() and token == _handover.get("token", ""):
+		_handover.clear()
