@@ -23,13 +23,7 @@ static func preview(battle: RefCounted, actor: String, skill_id: String, target:
 		return denied
 	var target_id: String = battle.unit_at(target)
 	var distance: int = Grid.distance(origin, target)
-	var valid := false
-	match skill["range_pattern"]:
-		"self": valid = target == origin
-		"adjacent": valid = distance == 1
-		"line": valid = distance >= 1 and distance <= skill["range"] and Grid.line_clear(battle, origin, target)
-		"step":
-			valid = target != origin and battle.is_free(target) and Grid.reachable(battle, actor, int(skill["range"]), origin, true).has(target)
+	var valid := range_matches(battle, actor, skill, origin, target)
 	if skill["target"] == "enemy":
 		valid = valid and not target_id.is_empty() and battle.unit(target_id)["team"] != unit["team"]
 	if not valid:
@@ -45,6 +39,36 @@ static func preview(battle: RefCounted, actor: String, skill_id: String, target:
 			if identifier != actor and other["team"] == unit["team"] and other["hp"] > 0 and Grid.distance(origin, Grid.cell_of(other)) == 1:
 				affected.append(identifier)
 	return {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": int(skill["qi_cost"]), "restore_qi": int(skill["restore_qi"]), "effects": skill["effects"].duplicate()}
+
+
+static func range_matches(battle: RefCounted, actor: String, skill: Dictionary, origin: Vector2i, target: Vector2i) -> bool:
+	if not battle.contains(target) or battle.is_obstacle(target): return false
+	var distance := Grid.distance(origin, target)
+	match skill["range_pattern"]:
+		"self": return target == origin
+		"adjacent": return distance == 1
+		"line": return distance >= 1 and distance <= skill["range"] and Grid.line_clear(battle, origin, target)
+		"step": return target != origin and battle.is_free(target) and Grid.reachable(battle, actor, int(skill["range"]), origin, true).has(target)
+	return false
+
+
+static func target_cells(battle: RefCounted, actor: String, skill_id: String) -> Array[Vector2i]:
+	# Physical range ignores cooldown/qi/ultimate availability and enemy presence.
+	# Execution still checks all of those in preview(); this never grants an action.
+	var cells: Array[Vector2i] = []
+	var unit: Dictionary = battle.unit(actor)
+	var skill: Dictionary = battle.skill(skill_id)
+	if unit.is_empty() or unit["hp"] <= 0 or skill.is_empty() or not skill_id in battle.abilities(actor): return cells
+	var origin := Grid.cell_of(unit)
+	if skill["range_pattern"] == "step":
+		for cell: Vector2i in Grid.reachable(battle, actor, int(skill["range"]), origin, true):
+			if cell != origin and battle.is_free(cell): cells.append(cell)
+		return cells
+	for y: int in range(battle.board_size.y):
+		for x: int in range(battle.board_size.x):
+			var cell := Vector2i(x,y)
+			if range_matches(battle, actor, skill, origin, cell): cells.append(cell)
+	return cells
 
 
 static func unavailable(battle: RefCounted, actor: String, skill_id: String) -> String:

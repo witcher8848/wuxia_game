@@ -2,7 +2,7 @@
 
 一名在户籍中早已死去的少年，循养父留下的《勘亡录》追查仍活着的“死人”，在官府清籍与门派旧怨中习武结伴。
 
-这是两人协作的2D像素武侠RPG项目。六个月目标是60～90分钟垂直切片与Steam Demo候选版；当前有三个区域的探索灰盒、独立可玩的战斗评审原型及调查规则基础，尚未接成完整剧情／调查闭环。探索版已收到约7分钟的Mac试玩与基线确认，速度／独立存档槽反馈已实现但待新版人工复测；战斗原型另待三局试玩。新玩家测试获授权转为P2跟踪。各阶段证据见[第二周评审](./08_week2_review.md)、[反馈处理单](./docs/week2_feedback_followup.md)及[第三周评审](./09_week3_review.md)。
+这是两人协作的2D像素武侠RPG项目。六个月目标是60～90分钟垂直切片与Steam Demo候选版；当前有三个区域的探索灰盒、独立可玩的战斗评审原型及调查规则基础，尚未接成完整剧情／调查闭环。探索版已收到约7分钟的Mac试玩与基线确认，速度／独立存档槽反馈已实现但待新版人工复测；战斗原型已收到并处理三轮对话试玩反馈，不要求重复填表，画面与数值后续细化。新玩家测试获授权转为P2跟踪。各阶段证据见[第二周评审](./08_week2_review.md)、[反馈处理单](./docs/week2_feedback_followup.md)及[第三周评审](./09_week3_review.md)。
 
 第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周Day 15为`eb67fad`，第四周Day 22为`f21e504`。当前在`codex/week3-complete`补齐战斗，继承调查基础；本轮只有本地Git提交，未推送、发布或触发远端CI。
 
@@ -10,13 +10,15 @@
 
 [第四周每日任务](./武侠RPG_第四周每日任务.md)已拆为Day 22～28。Day 22接入了两份样本证据、事实／五态任务规则、有限条件与效果、原子提交和存档回归；入口是`ContentDB`内容注册与`GameSession.apply_investigation_step()`，暂无玩家可操作的调查界面。文字键的CSV与对话节点校验留给Day 23，质证／二项校勘UI留给Day 24。
 
-2026-09-28已在`codex/week3-complete`补齐第三周战斗工程，保留本节的调查基础；Day 21三局人工试玩待确认。Day 26尚未接入，不能试玩完整“调查→战斗”剧情闭环。
+2026-09-28已在`codex/week3-complete`补齐第三周战斗工程并归档用户对话试玩反馈，保留本节的调查基础。第三周工程及反馈修改可作为接续基线；Day 26尚未接入，不能试玩完整“调查→战斗”剧情闭环。
 
 ## 第三周当前入口
 
 [第三周每日任务](./武侠RPG_第三周每日任务.md)的Day 15～20工程已实现：10×8棋盘、稳定顺序、四向移动、普攻／武学、五状态、刀役／弓役AI、条件绝技、胜败／撤离和完整重试。Demo仍是两个我方，规则容量支持四人，不等于已做四人内容和平衡。
 
-macOS双击[Battle.command](./Battle.command)。↑↓选择指令，方向键选格，E／Enter预览后再次确认；Esc返回，F查看单位，F1规则，F2切换目标，R确认重试。当前是完整的独立战斗评审原型，不是正式剧情战斗。`Run.command`仍进入探索灰盒；战斗不写探索存档。试玩说明与待填写的三局记录见[第三周试玩表](./docs/week3_playtest.md)。
+macOS双击[Battle.command](./Battle.command)。↑↓选择指令，方向键选格，E／Enter预览后再次确认；Esc返回，F查看单位，F1规则，F2切换目标，R确认重试。当前是完整的独立战斗评审原型，不是正式剧情战斗。`Run.command`仍进入探索灰盒；战斗不写探索存档。试玩说明与已收到的对话意见见[第三周试玩记录](./docs/week3_playtest.md)。
+
+技能栏可预览类别、效果、伤害及棋盘范围；不可执行项置灰，但允许停留查看条件和恢复办法，确认不会进入施放。绝技显示具体触发条件、进度与每战次数。Esc返回保留原选项，再次进入同一技能记住目标格。移动时叠加敌方移动范围（紫框，非攻击范围），我方仍为青色。画面表现和数值平衡后续细化。当前为本地源码反馈改进，旧Windows候选不包含；截图与复测见[技能栏反馈处理](./docs/week3_skill_feedback.md)。
 
 验证：`./tools/check_project.sh`包含旧骨架及完整战斗规则、边界和键盘流程。实际渲染用`python3 tools/run_checked.py combat_visual ./tools/godot.sh --path . --script res://game/tests/test_combat_ui.gd -- --capture-combat`。独立Windows评审候选用`python3 tools/build_battle_candidate.py`生成，版本`0.3.0-week3-prototype`，独立用户目录；正常探索发行入口／版本不变，开发场景仍排除。逐项结果及人工验收缺口见[第三周评审](./09_week3_review.md)。
 

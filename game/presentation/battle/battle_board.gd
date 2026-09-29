@@ -9,6 +9,11 @@ var highlights: Array = []
 var path: Array = []
 var affected: Array = []
 var inspect_enemy := false
+var range_cells: Array = []
+var valid_targets: Array = []
+var range_disabled := false
+var range_offensive := false
+var enemy_reach: Array = []
 
 
 func _draw() -> void:
@@ -22,7 +27,13 @@ func _draw() -> void:
 			var color := Color("#343f49")
 			if battle.is_obstacle(cell): color = Color("#796f5c")
 			elif cell in highlights: color = Color("#574360") if inspect_enemy else Color("#315a65")
+			elif cell in enemy_reach: color = Color("#574360")
+			elif cell in range_cells:
+				color = Color("#634b48") if range_offensive else Color("#315a65")
+				if range_disabled: color = Color("#51545c")
 			draw_rect(rectangle, color)
+			if cell in enemy_reach: draw_rect(rectangle.grow(-2), Color("#b78bc9"), false, 1)
+			if cell in valid_targets: draw_rect(rectangle.grow(-4), Color("#a5dfeb"), false, 2)
 			if battle.objective.get("kind") == "escape" and cell == Vector2i(battle.objective["cell"][0], battle.objective["cell"][1]):
 				draw_rect(rectangle.grow(-2), Color("#7ccc83"), false, 2)
 	for index: int in range(1, path.size()):

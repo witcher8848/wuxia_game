@@ -33,11 +33,12 @@ func key(code: Key, echo := false) -> void:
 
 
 func bounds(label: String) -> void:
-	for node: Label in [screen.heading, screen.stats, screen.menu, screen.detail, screen.footer]:
+	for node: Label in [screen.heading, screen.stats, screen.menu, screen.disabled_menu, screen.detail, screen.footer]:
 		check(Rect2(0,0,640,360).encloses(node.get_rect()), label + " viewport bounds")
 		check(node.get_minimum_size().y <= node.size.y, label + " text height fits")
 	check(not screen.stats.get_rect().intersects(screen.menu.get_rect()), label + " stats/menu separate")
 	check(not screen.menu.get_rect().intersects(screen.detail.get_rect()), label + " menu/detail separate")
+	check(not screen.disabled_menu.get_rect().intersects(screen.detail.get_rect()), label + " disabled menu/detail separate")
 	check(not screen.detail.get_rect().intersects(screen.footer.get_rect()), label + " detail/footer separate")
 
 
@@ -59,7 +60,11 @@ func cursor_to(target: Vector2i) -> void:
 
 
 func command(index: int) -> void:
-	while screen.selection != index: await key(KEY_DOWN)
+	for attempt: int in range(screen.options().size()):
+		if screen.selection == index: break
+		await key(KEY_DOWN)
+	check(screen.selection == index, "requested command is selectable")
+	if screen.selection != index: return
 	await key(KEY_E)
 
 
@@ -113,7 +118,7 @@ func _run() -> void:
 	await key(KEY_R)
 	await key(KEY_E)
 	check(not lab.battle.moved, "confirm retry restores state")
-	# All menu entries, including long Chinese ultimate reasons, must fit.
+	# Visible enabled and disabled rows, including ultimate reasons, must fit.
 	for index: int in range(screen.options().size()):
 		await capture("combat_option_%d" % index)
 		await key(KEY_DOWN)

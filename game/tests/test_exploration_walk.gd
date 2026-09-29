@@ -128,6 +128,15 @@ func _move_axis(axis: int, destination: float) -> bool:
 	_key(KEY_SHIFT, true)
 	_key(code, true)
 	while absf(destination - region.player_position[axis]) > TOLERANCE:
+		# A delayed rendered frame may contain multiple physics steps and overshoot
+		# the waypoint. Re-steer from the actual position instead of holding the
+		# initial direction until hitting a wall. No teleport or relaxed tolerance.
+		positive = destination > region.player_position[axis]
+		var next_code: Key = (KEY_D if positive else KEY_A) if axis == 0 else (KEY_S if positive else KEY_W)
+		if next_code != code:
+			_key(code, false)
+			code = next_code
+			_key(code, true)
 		# Walk the final few pixels so navigation remains precise at faster sprint
 		# speeds; do not change the real player's position or widen the tolerance.
 		_key(KEY_SHIFT, absf(destination - region.player_position[axis]) > 8.0)

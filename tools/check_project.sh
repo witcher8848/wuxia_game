@@ -16,6 +16,8 @@ python3 tools/run_checked.py battle_foundation ./tools/godot.sh --headless --pat
 python3 tools/run_checked.py combat_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_combat_rules.gd
 python3 tools/run_checked.py combat_edges ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_combat_edges.gd
 python3 tools/run_checked.py combat_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_combat_ui.gd
+python3 tools/run_checked.py skill_preview ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_battle_skill_preview.gd
+python3 tools/run_checked.py command_options ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_battle_command_options.gd
 python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_investigation_rules.gd
 python3 tools/run_checked.py main_smoke ./tools/godot.sh --headless --path "$task_root" -- --smoke-test
 echo "PROJECT_CHECK_PASS"
