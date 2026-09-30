@@ -6,10 +6,13 @@ signal state_replaced
 var state: GameState = GameState.new()
 var _handover: Dictionary = {}
 var _handover_sequence := 0
+var _story: Dictionary = {}
+var _story_sequence := 0
 
 
 func start_new_game() -> GameState:
 	_handover.clear()
+	_story.clear()
 	var next_state: GameState = GameState.new()
 	next_state.route_id = "ROUTE_%d_%d" % [int(Time.get_unix_time_from_system()), Time.get_ticks_usec()]
 	var content: Node = _content_db()
@@ -27,14 +30,19 @@ func start_new_game() -> GameState:
 func replace_state(next_state: GameState) -> Error:
 	if next_state == null or not next_state.validate().is_empty():
 		return ERR_INVALID_DATA
+	var content: Node = _content_db()
+	if content != null and not content.validate_investigation_state(next_state).is_empty():
+		return ERR_INVALID_DATA
 	# Own a copy: a UI preview or loaded snapshot cannot mutate the live route later.
 	state = GameState.from_dict(next_state.to_dict())
 	_handover.clear()
+	_story.clear()
 	state_replaced.emit()
 	return OK
 
 
 func update_player_position(position: Vector2) -> Error:
+	if not _story.is_empty(): return ERR_BUSY
 	if not is_finite(position.x) or not is_finite(position.y):
 		return ERR_INVALID_PARAMETER
 	state.player_state["position"] = {"x": position.x, "y": position.y}
@@ -42,6 +50,7 @@ func update_player_position(position: Vector2) -> Error:
 
 
 func enter_region(scene_id: String, spawn_id: String) -> Error:
+	if not _story.is_empty(): return ERR_BUSY
 	var content: Node = _content_db()
 	if content == null or not content.has_spawn(scene_id, spawn_id):
 		return ERR_INVALID_PARAMETER
@@ -57,6 +66,7 @@ func enter_region(scene_id: String, spawn_id: String) -> Error:
 
 
 func mark_inspected(interaction_id: String) -> Error:
+	if not _story.is_empty(): return ERR_BUSY
 	var content: Node = _content_db()
 	if content == null or not content.has_inspectable(interaction_id):
 		return ERR_INVALID_PARAMETER
@@ -69,6 +79,8 @@ func is_inspected(interaction_id: String) -> bool:
 
 
 func apply_investigation_step(step_id: String) -> Dictionary:
+	if not _story.is_empty() or step_id in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
+		return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE, "message": "ContentDB unavailable.", "feedback_key": ""}
@@ -88,6 +100,7 @@ func _content_db() -> Node:
 
 
 func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
+	if not _story.is_empty(): return {"error": ERR_BUSY}
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE}
@@ -109,6 +122,7 @@ func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
 
 
 func resolve_inquiry(identifier: String, selected: Array) -> Dictionary:
+	if not _story.is_empty(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE, "feedback_key": "INV_COMMAND_FAILED"}
@@ -120,6 +134,7 @@ func resolve_inquiry(identifier: String, selected: Array) -> Dictionary:
 
 
 func preview_original_handover() -> Dictionary:
+	if not _story.is_empty(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	_handover.clear()
 	var content: Node = _content_db()
 	if content == null or state.scene_id != "SCENE_TOWN_STREET" or not is_inspected("DOC_STREET_NOTICE"):
@@ -146,3 +161,49 @@ func confirm_original_handover(token: String) -> Dictionary:
 func cancel_original_handover(token: String) -> void:
 	if not token.is_empty() and token == _handover.get("token", ""):
 		_handover.clear()
+
+
+func begin_story_encounter() -> Dictionary:
+	if not _story.is_empty() or state.scene_id != "SCENE_RIVER_DOCK" or not is_inspected("NPC_DOCK_WORKER"):
+		return {"error": ERR_UNAVAILABLE}
+	var content: Node = _content_db()
+	if content == null: return {"error": ERR_UNAVAILABLE}
+	var prepared: Dictionary = content.prepare_story_encounter(state)
+	if prepared["error"] != OK: return {"error": prepared["error"]}
+	var before := state.to_dict()
+	if replace_state(prepared["state"]) != OK: return {"error": ERR_INVALID_DATA}
+	_story_sequence += 1
+	var token := "GRAVES_%d_%d" % [_story_sequence, Time.get_ticks_usec()]
+	_story = {"token": token, "before": before, "expected": state.to_dict(), "battle": prepared["battle"]}
+	# Only the transient combat authority is shared with presentation. No result
+	# payload supplied by a screen is accepted by the settlement command.
+	return {"error": OK, "token": token, "battle": prepared["battle"], "reveal": prepared["reveal"], "ferry": prepared["ferry"]}
+
+
+func story_encounter_active() -> bool:
+	return not _story.is_empty()
+
+
+func _owns_story(token: String) -> bool:
+	return not token.is_empty() and token == _story.get("token", "") and state.to_dict() == _story.get("expected", {})
+
+
+func finish_story_encounter(token: String) -> Dictionary:
+	if not _owns_story(token): return {"error": ERR_INVALID_PARAMETER}
+	var battle: CombatEncounter = _story["battle"]
+	if battle.outcome != "victory": return {"error": ERR_UNAVAILABLE}
+	var proposal: Dictionary = _content_db().finish_story_encounter(state, battle.result(), token)
+	if proposal["error"] != OK: return {"error": proposal["error"]}
+	var error := replace_state(proposal["state"])
+	return {"error": error, "feedback_key": "INV_GRAVES_VICTORY"}
+
+
+func retry_story_encounter(token: String) -> Error:
+	if not _owns_story(token): return ERR_INVALID_PARAMETER
+	return OK if _story["battle"].retry() else ERR_INVALID_DATA
+
+
+func abort_story_encounter(token: String) -> Error:
+	if not _owns_story(token): return ERR_INVALID_PARAMETER
+	# Return to the pre-encounter snapshot, not a partially changed quest.
+	return replace_state(GameState.from_dict(_story["before"]))

@@ -6,10 +6,11 @@
     {"id":"EV_FERRY_TOKEN_01","title_key":"EV_FERRY_TOKEN_01_TITLE","description_key":"EV_FERRY_TOKEN_01_DESC","source_id":"CHAR_BOATMAN","kind":"object","initial_holder":"PLAYER"},
     {"id":"CL_BOATMAN_01","title_key":"CL_BOATMAN_01_TITLE","description_key":"CL_BOATMAN_01_DESC","source_id":"CHAR_BOATMAN","kind":"testimony","initial_holder":"PLAYER"}
   ],
-  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE"],
+  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE", "FACT_GRAVES_SAFE"],
   "quests": [
     {"id":"QUEST_FIND_GRAVEKEEPER","title_key":"QUEST_FIND_GRAVEKEEPER_TITLE"},
-    {"id":"QUEST_RESCUE_GRAVEKEEPER","title_key":"QUEST_RESCUE_GRAVEKEEPER_TITLE"}
+    {"id":"QUEST_RESCUE_GRAVEKEEPER","title_key":"QUEST_RESCUE_GRAVEKEEPER_TITLE"},
+    {"id":"QUEST_TRACE_LEDGER","title_key":"QUEST_TRACE_LEDGER_TITLE"}
   ],
   "steps": [
     {"id":"STEP_RECEIVE_INDEX","feedback_key":"INV_INDEX_RECEIVED","requires":[],"effects":[
@@ -48,6 +49,16 @@
       {"op":"knowledge","id":"CL_BOATMAN_01","value":"doubt"},
       {"op":"set_fact","id":"FACT_WEST_GRAVES"},
       {"op":"set_fact","id":"FACT_FERRY_ROUTE"}
+    ]},
+    {"id":"STEP_PREPARE_RESCUE","feedback_key":"INV_RESCUE_CHANGED","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}],"effects":[
+      {"op":"set_quest","id":"QUEST_FIND_GRAVEKEEPER","value":"changed","reason_key":"INV_RESCUE_REASON","next_quest":"QUEST_RESCUE_GRAVEKEEPER"},
+      {"op":"set_quest","id":"QUEST_RESCUE_GRAVEKEEPER","value":"available","reason_key":"","next_quest":""},
+      {"op":"set_quest","id":"QUEST_RESCUE_GRAVEKEEPER","value":"active","reason_key":"","next_quest":""}
+    ]},
+    {"id":"STEP_GRAVES_VICTORY","feedback_key":"INV_GRAVES_VICTORY","requires":[{"op":"quest_is","id":"QUEST_RESCUE_GRAVEKEEPER","value":"active"}],"effects":[
+      {"op":"set_quest","id":"QUEST_RESCUE_GRAVEKEEPER","value":"resolved","reason_key":"","next_quest":""},
+      {"op":"set_quest","id":"QUEST_TRACE_LEDGER","value":"available","reason_key":"","next_quest":""},
+      {"op":"set_fact","id":"FACT_GRAVES_SAFE"}
     ]},
     {"id":"STEP_HAND_OVER_BLANK","feedback_key":"INV_ORIGINAL_TRANSFERRED","requires":[
       {"op":"holder_is","id":"EV_BLANK_DEATH_01","value":"PLAYER"},

@@ -30,6 +30,8 @@ static func quest_entries(state: GameState, definitions: Dictionary) -> Array[Di
 				detail += "\n" + _t(next_key)
 		if record["status"] == "changed":
 			detail += "\n" + _t(record["reason_key"]) + "\n→ " + names.get(record["next_quest"], record["next_quest"])
+		if quest["id"] == "QUEST_TRACE_LEDGER" and record["status"] == "available":
+			detail += "\n" + _t("INV_OBJECTIVE_LEDGER")
 		for fact: String in ["FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE"]:
 			if quest["id"] == "QUEST_FIND_GRAVEKEEPER" and state.world_flags.get(fact, false):
 				detail += "\n" + _t("INV_REWARD_FORMATION" if fact == "FACT_YAMEN_FORMATION" else "INV_REWARD_FERRY")

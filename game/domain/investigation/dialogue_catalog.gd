@@ -5,7 +5,7 @@ extends RefCounted
 var _data: Dictionary = {}
 var _nodes: Dictionary = {}
 var _rules: InvestigationRules
-const ACTIVITIES := ["@challenge", "@compare", "@journal", "@handover"]
+const ACTIVITIES := ["@challenge", "@compare", "@journal", "@handover", "@battle"]
 
 func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionary, interactions: Array) -> String:
 	if not GameState.is_json_value(data) or data.size() != 2 or not data.get("nodes") is Array or not data.get("entries") is Dictionary or data["nodes"].is_empty():
@@ -42,6 +42,8 @@ func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionar
 			if not choice["command"].is_empty() and not steps.has(choice["command"]):
 				return "Unknown dialogue command."
 			if not choice["command"].is_empty():
+				if choice["command"] in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
+					return "Story outcomes require an owned battle instance."
 				for effect: Dictionary in steps[choice["command"]]["effects"]:
 					if effect["op"] == "transfer" and effect["from"] == "PLAYER":
 						return "Handing over a player original requires the confirmation flow."

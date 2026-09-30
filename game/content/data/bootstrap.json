@@ -3,6 +3,7 @@
   "exploration_path": "res://game/content/data/exploration.json",
   "investigation_path": "res://game/content/data/investigation.json",
   "dialogue_path": "res://game/content/dialogue/investigation.json",
+  "encounter_path": "res://game/content/data/graves_encounter.json",
   "start_scene_id": "SCENE_TOWN_STREET",
   "start_spawn_id": "SPAWN_START",
   "scenes": [

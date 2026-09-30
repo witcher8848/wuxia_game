@@ -25,11 +25,13 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/domain/investigation/investigation_rules.gd",
 	"res://game/domain/investigation/dialogue_catalog.gd",
 	"res://game/domain/investigation/inquiry_rules.gd",
+	"res://game/domain/investigation/story_encounter_rules.gd",
 	"res://game/presentation/investigation/dialogue_panel.gd",
 	"res://game/presentation/investigation/activity_panel.gd",
 	"res://game/presentation/investigation/journal_view.gd",
 	"res://game/domain/battle/combat_encounter.gd",
 	"res://game/presentation/battle/battle_screen.gd",
+	"res://game/presentation/battle/story_battle_screen.gd",
 	"res://game/core/bootstrap/app.gd",
 	"res://game/core/services/game_session.gd",
 	"res://game/core/services/content_db.gd",
@@ -101,6 +103,12 @@ func _run() -> void:
 		_failures.append("Combat review entry leaked into normal release.")
 	if not FileAccess.file_exists("res://game/content/data/battle_skills.json"):
 		_failures.append("Missing combat skill definitions.")
+	var encounter: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/graves_encounter.json"))
+	if not encounter is Dictionary or encounter.get("id") != "BATTLE_GRAVES_01":
+		_failures.append("Missing actual story encounter definition.")
+	if "--week4-candidate" in OS.get_cmdline_user_args():
+		if ProjectSettings.get_setting("application/config/custom_user_dir_name", "") != "ProjectWumingInvestigationPrototype" or ProjectSettings.get_setting("application/config/version", "") != "0.4.0-week4-prototype":
+			_failures.append("Investigation candidate requires its own version and save directory.")
 	if ProjectSettings.get_setting("application/run/main_scene", "") != expected_main:
 		_failures.append("Pack main scene does not match the expected entry point.")
 	if _files.is_empty():

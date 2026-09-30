@@ -12,10 +12,13 @@ var test_root: String = ""
 
 
 func save_game(slot: String, state: GameState) -> Error:
+	var session: Node = get_node_or_null("/root/GameSession") if is_inside_tree() else null
+	if session != null and session.story_encounter_active(): return ERR_BUSY
 	if not is_valid_slot(slot) or not _is_valid_root():
 		return ERR_INVALID_PARAMETER
 	if state == null or not state.validate().is_empty():
 		return ERR_INVALID_DATA
+	if not _content_error(state).is_empty(): return ERR_INVALID_DATA
 	# Protect every copy before creating directories or restoring rollback files;
 	# callers other than the slot menu must honor the same version boundary.
 	if not slot_summary(slot)["can_overwrite"]:
@@ -31,14 +34,14 @@ func save_game(slot: String, state: GameState) -> Error:
 		var restore_error: Error = IO.rename_file(old, target)
 		if restore_error != OK:
 			return restore_error
-	var current: Dictionary = IO.read_envelope(target)
+	var current: Dictionary = _read_valid_envelope(target)
 	if current["error"] == ERR_UNAVAILABLE:
 		return ERR_UNAVAILABLE
 	var temporary: String = target + ".tmp"
 	var write_error: Error = IO.write_text(temporary, JSON.stringify(_make_envelope(slot, state), "\t"))
 	if write_error != OK:
 		return write_error
-	var validation: Dictionary = IO.read_envelope(temporary)
+	var validation: Dictionary = _read_valid_envelope(temporary)
 	if validation["error"] != OK:
 		return validation["error"]
 	# Never overwrite a valid backup with a damaged primary file.
@@ -49,7 +52,7 @@ func save_game(slot: String, state: GameState) -> Error:
 			ProjectSettings.globalize_path(target), ProjectSettings.globalize_path(backup_temporary))
 		if copy_error != OK:
 			return copy_error
-		var backup_validation: Dictionary = IO.read_envelope(backup_temporary)
+		var backup_validation: Dictionary = _read_valid_envelope(backup_temporary)
 		if backup_validation["error"] != OK:
 			return backup_validation["error"]
 		var backup_error: Error = IO.replace_file(backup_temporary, backup)
@@ -73,7 +76,7 @@ func _read_slot(slot: String) -> Dictionary:
 	# Exact-slot read: never substitute a different route from an automatic slot.
 	if not is_valid_slot(slot) or not _is_valid_root():
 		return IO.failure(ERR_INVALID_PARAMETER, "Invalid save slot or test directory.")
-	var primary: Dictionary = IO.read_envelope(slot_path(slot))
+	var primary: Dictionary = _read_valid_envelope(slot_path(slot))
 	if primary["error"] == OK:
 		primary["source"] = "primary"
 		return primary
@@ -86,7 +89,7 @@ func _read_slot(slot: String) -> Dictionary:
 	]
 	var failure: Dictionary = primary
 	for candidate: Dictionary in candidates:
-		var recovered: Dictionary = IO.read_envelope(candidate["path"])
+		var recovered: Dictionary = _read_valid_envelope(candidate["path"])
 		if recovered["error"] == ERR_UNAVAILABLE:
 			return recovered
 		if recovered["error"] == OK:
@@ -109,7 +112,7 @@ func slot_summary(slot: String) -> Dictionary:
 		if FileAccess.file_exists(path):
 			summary["exists"] = true
 			# Saving replaces backups too, even if a readable primary takes priority.
-			if IO.read_envelope(path)["error"] == ERR_UNAVAILABLE:
+			if _read_valid_envelope(path)["error"] == ERR_UNAVAILABLE:
 				summary["can_overwrite"] = false
 	var result: Dictionary = _read_slot(slot)
 	summary["error"] = result["error"]
@@ -178,7 +181,7 @@ func _load_latest_auto(excluded_slot: String) -> Dictionary:
 		if slot == excluded_slot:
 			continue
 		for path: String in [slot_path(slot), backup_path(slot)]:
-			var candidate: Dictionary = IO.read_envelope(path)
+			var candidate: Dictionary = _read_valid_envelope(path)
 			if candidate["error"] != OK:
 				continue
 			var modified: int = FileAccess.get_modified_time(path)
@@ -188,3 +191,15 @@ func _load_latest_auto(excluded_slot: String) -> Dictionary:
 				best["source"] = slot + ("_backup" if path.ends_with(".bak") else "")
 				best["message"] = "Recovered from automatic slot " + slot + "."
 	return best
+
+
+func _content_error(state: GameState) -> String:
+	var content: Node = get_node_or_null("/root/ContentDB") if is_inside_tree() else null
+	return content.validate_persistent_state(state) if content != null else ""
+
+
+func _read_valid_envelope(path: String) -> Dictionary:
+	var result: Dictionary = IO.read_envelope(path)
+	if result["error"] != OK: return result
+	var error := _content_error(result["state"])
+	return result if error.is_empty() else IO.failure(ERR_INVALID_DATA, error)

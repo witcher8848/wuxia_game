@@ -7,9 +7,11 @@ const PLAYER_FEET: Vector2 = Vector2(20, 12)
 const Investigation = preload("res://game/domain/investigation/investigation_rules.gd")
 const Dialogue = preload("res://game/domain/investigation/dialogue_catalog.gd")
 const Inquiry = preload("res://game/domain/investigation/inquiry_rules.gd")
+const StoryEncounter = preload("res://game/domain/investigation/story_encounter_rules.gd")
 var _investigation: RefCounted = Investigation.new()
 var _dialogue: RefCounted = Dialogue.new()
 var _inquiry: RefCounted = Inquiry.new()
+var _story_encounter: RefCounted = StoryEncounter.new()
 
 var content_version: String = ""
 var start_scene_id: String = ""
@@ -38,7 +40,7 @@ func reload_content(path: String = BOOTSTRAP_PATH) -> Error:
 	return load_definitions(parser.data)
 
 
-func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null, dialogue_data: Variant = null) -> Error:
+func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null, dialogue_data: Variant = null, encounter_data: Variant = null) -> Error:
 	# Only publish the new registry once every definition and reference passes.
 	if not GameState.is_json_value(data):
 		return _invalid("Bootstrap must contain only finite JSON values.")
@@ -145,9 +147,23 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 	var inquiry_error: String = inquiry.configure(investigation.definitions().get("inquiries", []), investigation, dialogue_text_keys())
 	if not inquiry_error.is_empty():
 		return _invalid(inquiry_error)
+	var encounter: RefCounted = StoryEncounter.new()
+	if encounter_data == null and data.has("encounter_path"):
+		var path: Variant = data["encounter_path"]
+		if not path is String or not path.begins_with("res://game/content/data/") or ".." in path or not path.ends_with(".json") or not FileAccess.file_exists(path):
+			return _invalid("Invalid story encounter path.")
+		encounter_data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not encounter_data is Dictionary: return _invalid("Story encounter must be an object.")
+	if encounter_data != null:
+		if not encounter_data is Dictionary: return _invalid("Story encounter must be an object.")
+		var skills: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
+		if not skills is Array: return _invalid("Invalid battle skills.")
+		var encounter_error: String = encounter.configure(encounter_data, skills, investigation)
+		if not encounter_error.is_empty(): return _invalid(encounter_error)
 	_investigation = investigation
 	_dialogue = dialogue
 	_inquiry = inquiry
+	_story_encounter = encounter
 	_scenes = scenes
 	_regions = regions
 	content_version = data["content_version"]
@@ -205,6 +221,24 @@ func inquiry_view(identifier: String, state: GameState, first: String = "") -> D
 
 func prepare_inquiry(state: GameState, identifier: String, selected: Array) -> Dictionary:
 	return _inquiry.prepare(state, identifier, selected)
+
+
+func prepare_story_encounter(state: GameState) -> Dictionary:
+	return _story_encounter.prepare(state)
+
+
+func finish_story_encounter(state: GameState, result: Dictionary, instance_id: String) -> Dictionary:
+	return _story_encounter.finish(state, result, instance_id)
+
+
+func validate_investigation_state(state: GameState) -> String:
+	return _investigation.validate_state(state)
+
+
+func validate_persistent_state(state: GameState) -> String:
+	var error: String = _investigation.validate_state(state)
+	if not error.is_empty(): return error
+	return _story_encounter.validate_persistent_state(state)
 
 
 func has_spawn(scene_id: String, spawn_id: String) -> bool:

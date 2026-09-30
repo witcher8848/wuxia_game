@@ -24,6 +24,10 @@ const ActivityPanel = preload("res://game/presentation/investigation/activity_pa
 var activity_panel: PanelContainer
 var _activity_from_dialogue := false
 var _activity_initial_state: Dictionary = {}
+const StoryBattleScreen = preload("res://game/presentation/battle/story_battle_screen.gd")
+var story_battle_screen: Node2D
+var _story_layer: CanvasLayer
+var _story_token := ""
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
@@ -311,6 +315,9 @@ func _open_activity(activity: String) -> void:
 		return
 	if not activity in DialogueCatalog.ACTIVITIES:
 		return
+	if activity == "@battle":
+		_start_story_battle()
+		return
 	_activity_from_dialogue = App.current_context() == &"dialogue"
 	_activity_initial_state = GameSession.state.to_dict()
 	if _activity_from_dialogue:
@@ -336,6 +343,63 @@ func _close_activity() -> void:
 		else: reading_panel.refresh()
 	_activity_from_dialogue = false
 	_reset_movement()
+
+func _start_story_battle() -> void:
+	if App.current_context() != &"dialogue" or $SceneHost.get_child_count() != 1: return
+	var region: Node = $SceneHost.get_child(0)
+	GameSession.update_player_position(region.player_position)
+	GameSession.state.player_state["facing"] = region.player.facing
+	var prepared: Dictionary = GameSession.begin_story_encounter()
+	if prepared["error"] != OK:
+		reading_panel.feedback.text = tr("INV_COMMAND_FAILED")
+		return
+	_story_token = prepared["token"]
+	_close_reading()
+	App.push_context(&"battle")
+	$SceneHost.process_mode = Node.PROCESS_MODE_DISABLED
+	$SceneHost.hide()
+	$UIRoot.hide()
+	_story_layer = CanvasLayer.new()
+	_story_layer.layer = 3
+	add_child(_story_layer)
+	story_battle_screen = StoryBattleScreen.new()
+	story_battle_screen.battle = prepared["battle"]
+	story_battle_screen.reveal_intent = prepared["reveal"]
+	story_battle_screen.ferry_deployment = prepared["ferry"]
+	story_battle_screen.message = tr("INV_RESCUE_CHANGED")
+	story_battle_screen.settlement_requested.connect(_settle_story_battle)
+	story_battle_screen.retry_requested.connect(_retry_story_battle)
+	story_battle_screen.exit_requested.connect(_abort_story_battle)
+	_story_layer.add_child(story_battle_screen)
+
+func _settle_story_battle() -> void:
+	var result: Dictionary = GameSession.finish_story_encounter(_story_token)
+	if result["error"] == OK: _close_story_battle()
+	else: story_battle_screen.message = tr("INV_COMMAND_FAILED")
+
+func _retry_story_battle() -> void:
+	if GameSession.retry_story_encounter(_story_token) == OK:
+		story_battle_screen.actor_changed()
+	else: story_battle_screen.message = tr("INV_COMMAND_FAILED")
+
+func _abort_story_battle() -> void:
+	if GameSession.abort_story_encounter(_story_token) == OK: _close_story_battle()
+	else: story_battle_screen.message = tr("INV_COMMAND_FAILED")
+
+func _close_story_battle() -> void:
+	_story_layer.hide()
+	_story_layer.process_mode = Node.PROCESS_MODE_DISABLED
+	_story_layer.queue_free()
+	_story_token = ""
+	$SceneHost.process_mode = Node.PROCESS_MODE_INHERIT
+	$SceneHost.show()
+	$UIRoot.show()
+	App.reset_contexts()
+	_reset_movement()
+	if is_instance_valid(reading_panel):
+		App.push_context(&"dialogue")
+		reading_panel.show()
+		reading_panel.go_to("@entry")
 
 func _transition_to(scene_id: String, spawn_id: String) -> void:
 	if transitioning:
@@ -434,6 +498,7 @@ func _save_game(slot: String = "quick") -> Error:
 	return result
 
 func _load_game(slot: String = "quick") -> void:
+	if GameSession.story_encounter_active(): return
 	if transitioning:
 		return
 	# Explicit UI selection may recover this slot's backup, never another slot.
@@ -656,7 +721,7 @@ func _input(event: InputEvent) -> void:
 				_close_reading()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_echo() or transitioning:
+	if event.is_echo() or transitioning or App.current_context() == &"battle":
 		return
 	if event.is_action_pressed("open_codex") and App.current_context() == &"exploration":
 		get_viewport().set_input_as_handled()

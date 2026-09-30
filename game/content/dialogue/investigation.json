@@ -7,6 +7,7 @@
       {"node":"D_HOME","requires":[]}
     ],
     "NPC_DOCK_WORKER": [
+      {"node":"D_AFTER_GRAVES","requires":[{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
       {"node":"D_DOCK_ADMITS","requires":[{"op":"fact_is","id":"FACT_FERRY_ROUTE","value":true}]},
       {"node":"D_START","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"locked"}]},
       {"node":"D_ACCEPT","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"available"}]},
@@ -47,7 +48,7 @@
       {"id":"ask","text_key":"D_ASK_BOAT","next":"D_BOAT","command":"STEP_RECORD_BOATMAN","requires":[]},
       {"id":"review","text_key":"D_REVIEW_CLAIM","next":"D_BOAT","command":"","requires":[{"op":"evidence_at_least","id":"CL_BOATMAN_01","value":"clue"}]},
       {"id":"token","text_key":"D_INSPECT_TOKEN","next":"D_TOKEN","command":"STEP_TAKE_FERRY_TOKEN","requires":[]},
-      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+      {"id":"journey","text_key":"D_JOURNEY","next":"D_JOURNEY","command":"","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}]}
     ]},
     {"id":"D_BOAT","speaker_key":"INV_BOATMAN","text_key":"D_BOAT_TEXT","choices":[
       {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
@@ -56,6 +57,16 @@
       {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
     ]},
     {"id":"D_DOCK_ADMITS","speaker_key":"INV_BOATMAN","text_key":"INV_BOATMAN_ADMITS","choices":[
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"journey","text_key":"D_JOURNEY","next":"D_JOURNEY","command":"","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_JOURNEY","speaker_key":"INV_PRISONER","text_key":"D_JOURNEY_TEXT","choices":[
+      {"id":"depart","text_key":"D_DEPART","next":"@battle","command":"","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}]},
+      {"id":"intel","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"back","text_key":"INV_LATER","next":"@entry","command":"","requires":[]}
+    ]},
+    {"id":"D_AFTER_GRAVES","speaker_key":"INV_PRISONER","text_key":"D_AFTER_GRAVES_TEXT","choices":[
       {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
       {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
     ]},

@@ -191,5 +191,30 @@ func retry() -> bool:
 	return true
 
 
+func forecast_turn(actor: String) -> CombatEncounter:
+	# A disposable copy at today's positions, not a prediction of intervening
+	# allies' actions. Never reorder, move or spend resources on the live battle.
+	if outcome != "ongoing" or not actor in _pending: return null
+	var forecast := CombatEncounter.new()
+	forecast.board_size = board_size
+	forecast._blocked = _blocked.duplicate()
+	forecast._units = _units.duplicate(true)
+	forecast._order.assign(_order)
+	forecast._pending.assign(_pending)
+	forecast.round_number = round_number
+	forecast.objective = objective.duplicate(true)
+	forecast._skills = _skills.duplicate(true)
+	forecast.revision = revision
+	forecast.events.assign(events)
+	forecast.moved = moved
+	forecast.move_spent = move_spent
+	forecast.move_budget = move_budget
+	if actor != current_actor_id():
+		forecast._pending.erase(actor)
+		forecast._pending.push_front(actor)
+		Effects.start_turn(forecast)
+	return forecast
+
+
 static func _denied(reason: String) -> Dictionary:
 	return {"ok": false, "reason": reason}

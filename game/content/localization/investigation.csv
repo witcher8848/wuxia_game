@@ -64,9 +64,9 @@ INV_EMPTY_EVIDENCE,暂无已知证据。可去住所或码头展开调查。,No 
 INV_OBJECTIVE_START,下一步：在住所文书或码头船夫处整理索引。,Next: unfold the index at home or by the boatman.
 INV_OBJECTIVE_ACCEPT,下一步：在住所或码头接受寻找老妇的目标。,Next: accept the search at home or by the boatman.
 INV_OBJECTIVE_SEARCH,下一步：校勘住所文书，或用渡船痕迹质证船夫。两条路均可继续。,Next: compare the papers at home or challenge the boatman. Either route can advance the search.
-INV_OBJECTIVE_GRAVES,下一目标：河西罪坟，寻找守墓老妇。前往遭遇的入口将在本周战斗接入时开放。,Next: find the gravekeeper at the west-bank graves. The encounter entry is being connected this week.
-INV_REWARD_FORMATION,已获情报：县衙便衣编组（首轮意图优势，待战斗接入）。,Intel: constable formation (first-round intent advantage; battle integration pending).
-INV_REWARD_FERRY,已获情报：西岸近道（较近部署，待战斗接入）。,Intel: closer west-bank landing (nearer deployment; battle integration pending).
+INV_OBJECTIVE_GRAVES,下一步：到码头与船夫交谈，商议前往河西罪坟；出发前仍可补查另一条线索。,Next: discuss the west-bank journey with the boatman. You can investigate the other lead before departure.
+INV_REWARD_FORMATION,已获情报：县衙便衣编组。首轮按 F 查看敌人，可推演其当前站位下的行动与射程。,Intel: constable formation. In round one press F and inspect an enemy to forecast its action and range at current positions.
+INV_REWARD_FERRY,已获情报：西岸近道。主角与女囚将从较近的渡口部署。,Intel: closer west-bank landing. You and the prisoner will deploy nearer the pursuers.
 INV_STATUS_locked,未开启,Locked
 INV_STATUS_available,可接受,Available
 INV_STATUS_active,进行中,Active
@@ -89,3 +89,13 @@ INV_HANDOVER_CONFIRM,确认投交原件,Confirm submission of original
 INV_HANDOVER_KEEP,保留原件，返回,Keep the original and return
 INV_HANDOVER_STALE,预览已失效，原件未交出；请重新查看。,This preview has expired. No original was handed over. Review again.
 INV_HANDOVER_LOCATION,请到县城街口告示旁的收证匣查看交付。,Visit the evidence box by the town notice to preview submission.
+INV_PRISONER,同行女囚,The prisoner
+QUEST_TRACE_LEDGER_TITLE,追查迁坟旧账,Trace the burial ledger
+INV_RESCUE_REASON,抵达罪坟时追兵已到；老妇先撤，我们留下截住刀役与弓役。寻找证人转为保住证人。,Pursuers have reached the graves. The gravekeeper withdraws while we hold off the blade and bow. Finding a witness becomes protecting her.
+INV_RESCUE_CHANGED,目标转变：击退追兵，掩护老妇脱身。,Objective changed: repel the pursuers to cover the gravekeeper's withdrawal.
+INV_GRAVES_VICTORY,老妇脱险；迁坟旧账成为下一条线索。女囚信任 +1，推进 1 时段。,The gravekeeper is safe. The burial ledger is the next lead. Prisoner trust +1; time advances by one slot.
+D_JOURNEY,商议前往河西罪坟,Discuss going to the west-bank graves
+D_JOURNEY_TEXT,女囚：我认得河西旧坟道，没问出近路也能绕过去。到了那里若有追兵，我与你断后，让老妇先走。可先补查；出发后不存战中进度，退出恢复出发前。只有胜利结算才推进一时段。详细情报可查《命卷》。,Prisoner: I know the old grave road; we can go without a shortcut. If pursuers arrive we cover her retreat. You may investigate first. No mid-battle saves; leaving restores the departure snapshot. Only settling a victory spends one time slot. Check the journal for intel.
+D_DEPART,确认出发；遇追兵则掩护老妇,Depart and cover the gravekeeper if pursued
+D_AFTER_GRAVES_TEXT,老妇脱险后只留下一句：迁坟旧账里，埋下的未必都是死人。女囚收好她留下的记号，与你返回码头。下一目标是追查旧账与改籍往事；本周样本到此，不开放后续地区。可查看命卷并存档。,After escaping she leaves a warning: not everyone buried in the old ledger was dead. The prisoner keeps her mark and returns to the docks with you. Trace the ledger next; this week's sample ends here with no new region. Review the journal and save.
+INV_OBJECTIVE_LEDGER,下一目标：追查迁坟旧账与改籍往事。本周样本已结束；可回码头听战后对话、查看命卷并存档。后续剧情尚未开放。,Next: trace the burial ledger and altered identities. This sample ends here. Return to the boatman for the aftermath; review the journal and save. Further story is unavailable.
