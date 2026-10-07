@@ -4,7 +4,15 @@
 
 这是两人协作的2D像素武侠RPG项目。六个月目标是60～90分钟垂直切片与Steam Demo候选版；当前已连接三个区域探索、质证／校勘、情报影响实际战斗、一次性结算与跨进程存读的首个灰盒闭环，尚非完整剧情Demo。探索版已收到约7分钟的Mac试玩与基线确认，速度／独立存档槽反馈已实现但待新版人工复测；战斗原型已收到并处理三轮对话试玩反馈，不要求重复填表，画面与数值后续细化。新玩家测试获授权转为P2跟踪。各阶段证据见[第二周评审](./08_week2_review.md)、[反馈处理单](./docs/week2_feedback_followup.md)及[第三周评审](./09_week3_review.md)。
 
-第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周反馈收口为`cf83a35`，第四周Day 22为`f21e504`。当前在`codex/week4-complete`继续调查闭环；本轮只有本地Git提交，未推送、发布或触发远端CI。
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周反馈收口为`cf83a35`，第四周Day 22为`f21e504`、第四周反馈收口为`355ada7`。当前在`codex/week5-character-pipeline`开发主角测试资源；本轮只有本地Git提交，未推送、发布或触发远端CI。
+
+## 第五周当前进度
+
+第四周已本地提交`355ada7`，当前分支为`codex/week5-character-pipeline`，未推送。第五周交付一名主角的测试像素素材与动画管线：四向行走、拳／剑／守势、受击／倒地，探索与战斗共用PNG＋帧表；不改变移动／战斗规则，也不是正式人设定稿。
+
+双击[Character.command](./Character.command)看四向全动作样本：↑↓动作、1/2/3倍率、空格暂停、Shift步频；[Run.command](./Run.command)看实际游戏。源格式、57帧槽和再导出方法见[像素源说明](./assets/source/characters/README.md)，进度与验证见[第五周评审](./11_week5_review.md)，意见写入[第五周试玩表](./docs/week5_playtest.md)。独立候选：`python3 tools/build_week5_candidate.py`，输出`builds/week5/`，独立存档目录`ProjectWumingCharacterPrototype`；不覆盖旧版档案。
+
+其他角色／地图仍灰盒。imagegen只用于内部方向参考；实机图集独立整数像素制作。角色风格、第四周引导体验和首月人工门仍待确认，不自动开始正式美术量产。
 
 ## 第四周当前进度
 
@@ -68,7 +76,7 @@ macOS 后续可双击仓库中的 [Run.command](./Run.command)，或执行 `./to
 
 靠近并面向 NPC、文书或出口时按 E；普通阅读面板可用 E／Esc 关闭。住所文书、码头船夫与街口告示已接入对白：↑↓／W S选择，E／Enter确认，Esc离开；长文用PageUp／PageDown滚动。出示证物不标正确答案，错误尝试不扣时间／关系；校勘先选一条，再选关联候选。面板期间锁定探索移动及保存，取消回到来源对白。《命卷》人物／路线页尚未开放，不将页签当作内容完成。实体手柄验收移至第 19 周输入完善阶段，或首次对外提供手柄支持之前；自动注入事件仍单独记为模拟验证。
 
-场景与角色仍用程序绘制占位形状，不是正式像素资产；[美术规范](./05_art_bible.md)中的明亮县城图是已认可的概念参考，不是实机截图。第二周的角色碰撞、镜头、交互和区域往返已实现，逐项状态见[任务板](./docs/week2_task_board.md)。第四周调查后到码头选择“商议前往河西罪坟”，进入同一场实际战斗；解救后出现迁坟旧账线索，本周样本到此。没有后续地区或恋爱内容。[人工试玩记录](./docs/week2_playtest.md)保留第二周的体验验收表。
+场景与其他人物仍用程序绘制占位形状；第五周主角已替换为测试像素图集，不是正式美术定稿。[美术规范](./05_art_bible.md)中的明亮县城图是已认可的概念参考，不是实机截图。第二周的角色碰撞、镜头、交互和区域往返已实现，逐项状态见[任务板](./docs/week2_task_board.md)。第四周调查后到码头选择“商议前往河西罪坟”，进入同一场实际战斗；解救后出现迁坟旧账线索，本周样本到此。没有后续地区或恋爱内容。[人工试玩记录](./docs/week2_playtest.md)保留第二周的体验验收表。
 
 游戏状态写到 Godot 的 `user://`，不写回工程目录。自定义数据目录为 `ProjectWuming`：macOS 通常为 `~/Library/Application Support/ProjectWuming/`，Windows 为 `%APPDATA%\ProjectWuming\`。快速档为 `saves/quick.sav`，五个手动槽为 `saves/manual_01.sav`～`manual_05.sav`，互不覆盖；旧版本备份位于 `saves/backups/`。F5 更新快速档，手动槽覆盖前确认，标题／暂停的读档列表可独立选择。自动存档触发逻辑尚未接入，不因保留自动槽而宣称已实现。实际路径可通过日志／存档服务查询。存档测试只使用独立的 `user://tests/` 子目录，不覆盖玩家档位。
 

@@ -32,11 +32,14 @@ func _tap(code: Key) -> void:
 
 func _capture(label: String) -> void:
 	if not captures: return
+	print("ONBOARDING_CAPTURE_BEGIN ",label)
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute("res://builds/qa")
 	check(root.get_texture().get_image().save_png("res://builds/qa/onboarding_" + label + ".png") == OK, "capture " + label)
+	print("ONBOARDING_CAPTURE_SAVED ",label)
 
 func _run() -> void:
+	create_timer(60).timeout.connect(func() -> void: printerr("ONBOARDING_FAIL watchdog"); quit(1))
 	await _frames()
 	captures = "--capture-onboarding" in OS.get_cmdline_user_args()
 	if "--require-pack" in OS.get_cmdline_user_args():

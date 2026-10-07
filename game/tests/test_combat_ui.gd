@@ -105,6 +105,7 @@ func _run() -> void:
 	await key(KEY_ESCAPE)
 	await key(KEY_ESCAPE)
 	check(screen.mode == "command" and lab.battle.snapshot() == snapshot, "cancel preview preserves state")
+	check(screen.board.hero_visual._action.is_empty() and screen.board._motion.is_empty(), "cancel preview does not animate hero")
 	await key(KEY_E)
 	await key(KEY_E)
 	await key(KEY_E)
@@ -154,10 +155,16 @@ func _run() -> void:
 			await cursor_to(next["target"])
 			await key(KEY_E)
 			check(screen.mode == "action_confirm", "keyboard action preview")
+			if actor == "CHAR_PROTAGONIST":
+				check(screen.board.hero_visual._action.is_empty(), "hero action is not played during preview")
 			if turns < 5: await capture("combat_action_%d" % turns)
 			var revision: int = lab.battle.revision
 			await key(KEY_E)
 			check(lab.battle.revision == revision+1, "exactly one action per confirm")
+			if actor == "CHAR_PROTAGONIST":
+				var skill: Dictionary = lab.battle.skill(next["skill_id"])
+				var expected := "guard" if skill["target"] != "enemy" else ("slash" if skill["ultimate"] else "thrust") if skill["weapon_tag"] == "剑" else "strike"
+				check(screen.board.hero_visual._action == expected, "confirmed keyboard action triggers matching hero animation")
 	check(lab.battle.outcome == "victory" and screen.mode == "result", "keyboard encounter reaches real victory")
 	await capture("combat_victory")
 	await key(KEY_E)

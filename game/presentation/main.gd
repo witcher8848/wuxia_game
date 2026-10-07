@@ -409,6 +409,7 @@ func _settle_story_battle() -> void:
 
 func _retry_story_battle() -> void:
 	if GameSession.retry_story_encounter(_story_token) == OK:
+		story_battle_screen.board.reset_presentation()
 		story_battle_screen.actor_changed()
 	else: story_battle_screen.message = tr("INV_COMMAND_FAILED")
 

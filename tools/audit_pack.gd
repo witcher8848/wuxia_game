@@ -41,6 +41,9 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/persistence/save_file_io.gd",
 	"res://game/platform/offline/offline_platform_service.gd",
 	"res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf",
+	"res://assets/runtime/characters/chr_protagonist_atlas.png",
+	"res://game/presentation/characters/hero_visual.gd",
+	"res://game/presentation/characters/character_lab.tscn",
 ]
 
 var _files: Array[String] = []
@@ -74,6 +77,9 @@ func _run() -> void:
 		if not ResourceLoader.exists(resource):
 			_failures.append("Missing required runtime resource: " + resource)
 	var bootstrap_path: String = "res://game/content/data/bootstrap.json"
+	var hero_data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://assets/runtime/characters/chr_protagonist_atlas.json"))
+	if not hero_data is Dictionary or hero_data.get("frame_count") != 57:
+		_failures.append("Missing character atlas metadata.")
 	if not FileAccess.file_exists("res://game/content/data/exploration.json"):
 		_failures.append("Missing exploration map content.")
 	var investigation: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/investigation.json"))
@@ -111,6 +117,9 @@ func _run() -> void:
 	if "--week4-candidate" in OS.get_cmdline_user_args():
 		if ProjectSettings.get_setting("application/config/custom_user_dir_name", "") != "ProjectWumingInvestigationPrototype" or ProjectSettings.get_setting("application/config/version", "") != "0.4.0-week4-prototype":
 			_failures.append("Investigation candidate requires its own version and save directory.")
+	if "--week5-candidate" in OS.get_cmdline_user_args():
+		if ProjectSettings.get_setting("application/config/custom_user_dir_name", "") != "ProjectWumingCharacterPrototype" or ProjectSettings.get_setting("application/config/version", "") != "0.5.0-week5-prototype":
+			_failures.append("Character candidate requires its own version and save directory.")
 	if ProjectSettings.get_setting("application/run/main_scene", "") != expected_main:
 		_failures.append("Pack main scene does not match the expected entry point.")
 	if _files.is_empty():

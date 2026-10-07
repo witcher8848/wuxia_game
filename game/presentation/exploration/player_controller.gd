@@ -1,7 +1,7 @@
 class_name ExplorationPlayer
 extends CharacterBody2D
 ## Scene-local movement only. The region owns persistence and interaction state.
-## Origin is the feet anchor (16, 44) of the 32 × 48 placeholder canvas.
+## Origin is the feet anchor (16, 44) of the shared 32 × 48 character atlas.
 
 const WALK_SPEED := 180.0
 const SPRINT_SPEED := 300.0
@@ -18,51 +18,10 @@ var _requires_release := false
 var _window_focused := true
 var _visual: PlayerVisual
 
-class PlayerVisual extends Node2D:
-	var facing: String = "down"
-	var walking := false
-	var sprinting := false
-	var step_time := 0.0
-
-	func _draw() -> void:
-		# Deliberately procedural greybox, not a production sprite or AI asset.
-		var stride := 1.0 if walking and fmod(step_time, 0.32) < 0.16 else 0.0
-		# Small integer-pixel dust marks plus a faster gait distinguish sprinting.
-		# No stamina resource, camera shake, screen flash or persistent effect state.
-		if sprinting:
-			var behind := Vector2.DOWN
-			match facing:
-				"down": behind = Vector2.UP
-				"left": behind = Vector2.RIGHT
-				"right": behind = Vector2.LEFT
-			var side := Vector2(-behind.y, behind.x)
-			var spread := 15.0 if behind.y != 0.0 else 4.0
-			var phase := 2.0 if fmod(step_time, 0.24) < 0.12 else 0.0
-			draw_rect(Rect2((behind * (12 + phase) + side * spread).round(), Vector2(4, 2)), Color("#d19a5c"))
-			draw_rect(Rect2((behind * (17 + phase) - side * spread).round(), Vector2(3, 2)), Color("#a9ada4"))
-		draw_rect(Rect2(-12, -2, 24, 5), Color("#343b38"))
-		draw_rect(Rect2(-8, -10 + stride, 6, 11), Color("#303745"))
-		draw_rect(Rect2(2, -10 - stride, 6, 11), Color("#303745"))
-		draw_rect(Rect2(-9, -1 + stride, 7, 3), Color("#232a31"))
-		draw_rect(Rect2(2, -1 - stride, 7, 3), Color("#232a31"))
-		draw_rect(Rect2(-10, -28, 20, 21), Color("#34586b"))
-		draw_rect(Rect2(-6, -28, 5, 17), Color("#517e89"))
-		draw_rect(Rect2(-11, -12, 22, 4), Color("#ba935a"))
-		draw_rect(Rect2(-13, -26, 4, 14), Color("#426676"))
-		draw_rect(Rect2(9, -26, 4, 14), Color("#426676"))
-		draw_rect(Rect2(-13, -13, 4, 5), Color("#d5ad80"))
-		draw_rect(Rect2(9, -13, 4, 5), Color("#d5ad80"))
-		draw_rect(Rect2(-7, -40, 14, 12), Color("#d5ad80"))
-		draw_rect(Rect2(-8, -42, 16, 6), Color("#283138"))
-		draw_rect(Rect2(-3, -44, 6, 3), Color("#283138"))
-		if facing == "up":
-			draw_rect(Rect2(-7, -38, 14, 9), Color("#283138"))
-			draw_rect(Rect2(-2, -29, 4, 13), Color("#283138"))
-		else:
-			var eye_x := -4.0 if facing == "left" else 3.0
-			draw_rect(Rect2(eye_x, -35, 2, 2), Color("#30353c"))
-			if facing == "down":
-				draw_rect(Rect2(-4, -35, 2, 2), Color("#30353c"))
+class PlayerVisual extends "res://game/presentation/characters/hero_visual.gd":
+	func _ready() -> void:
+		external_clock = true
+		super._ready()
 
 func _ready() -> void:
 	collision_layer = 2

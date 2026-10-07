@@ -83,6 +83,7 @@ func _process(delta: float) -> void:
 	ai_delay += delta
 	if ai_delay < 0.85: return
 	var result: Dictionary = AI.take_turn(battle)
+	if result["ok"]: board.animate_action(result["plan"])
 	message = "" if result["ok"] else result["reason"]
 	actor_changed()
 
@@ -162,6 +163,7 @@ func confirm() -> void:
 		"quit": exit_requested.emit()
 		"retry":
 			battle.retry()
+			board.reset_presentation()
 			message = "已恢复战前快照"
 			actor_changed()
 		"help": cancel()
@@ -195,10 +197,12 @@ func confirm() -> void:
 			else: message = preview["reason"]
 		"move_confirm":
 			var result := battle.move_actor(actor, cursor, preview["revision"])
+			if result["ok"]: board.animate_move(actor,preview["path"])
 			message = "移动已确认，请选择一次行动" if result["ok"] else result["reason"]
 			actor_changed()
 		"action_confirm":
 			var result := battle.perform_action(actor, selected_skill, cursor, preview["revision"])
+			if result["ok"]: board.animate_action(result["plan"])
 			message = "" if result["ok"] else result["reason"]
 			actor_changed()
 
@@ -214,6 +218,7 @@ func refresh() -> void:
 	heading.text = "第%d轮 · %s｜%s" % [battle.round_number, goal, "→".join(order)]
 	stats.text = "战斗结束：" + ("胜利" if battle.outcome == "victory" else "失败") if unit.is_empty() else "%s  气血%d/%d  内力%d/%d\n状态：%s" % [unit["name"], unit["hp"], unit["max_hp"], unit["qi"], unit["max_qi"], Text.statuses(unit)]
 	board.battle = battle
+	board.sync_visuals()
 	board.cursor = cursor
 	board.highlights = []
 	board.path = []
