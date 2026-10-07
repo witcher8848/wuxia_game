@@ -42,6 +42,11 @@ func _run() -> void:
 		quit(1)
 		return
 	var yard: Node2D = main.get_node("SceneHost").get_child(0)
+	check(app.current_context() == &"dialogue" and main.reading_panel.page == 0, "New Game starts prologue")
+	# Movement/save fixture; prologue keyboard journey tested separately.
+	main._close_reading()
+	await physics_frame
+	await physics_frame
 	var before: Vector2 = yard.player_position
 	_key(KEY_D, true)
 	for _frame in range(8):

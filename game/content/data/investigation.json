@@ -6,13 +6,15 @@
     {"id":"EV_FERRY_TOKEN_01","title_key":"EV_FERRY_TOKEN_01_TITLE","description_key":"EV_FERRY_TOKEN_01_DESC","source_id":"CHAR_BOATMAN","kind":"object","initial_holder":"PLAYER"},
     {"id":"CL_BOATMAN_01","title_key":"CL_BOATMAN_01_TITLE","description_key":"CL_BOATMAN_01_DESC","source_id":"CHAR_BOATMAN","kind":"testimony","initial_holder":"PLAYER"}
   ],
-  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE", "FACT_GRAVES_SAFE"],
+  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE", "FACT_GRAVES_SAFE", "FACT_FIRST_HOME", "FACT_FIRST_DOCK"],
   "quests": [
     {"id":"QUEST_FIND_GRAVEKEEPER","title_key":"QUEST_FIND_GRAVEKEEPER_TITLE"},
     {"id":"QUEST_RESCUE_GRAVEKEEPER","title_key":"QUEST_RESCUE_GRAVEKEEPER_TITLE"},
     {"id":"QUEST_TRACE_LEDGER","title_key":"QUEST_TRACE_LEDGER_TITLE"}
   ],
   "steps": [
+    {"id":"STEP_FIRST_HOME","feedback_key":"INV_SEARCH_ACCEPTED","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"},{"op":"fact_is","id":"FACT_FIRST_DOCK","value":false}],"effects":[{"op":"set_fact","id":"FACT_FIRST_HOME"}]},
+    {"id":"STEP_FIRST_DOCK","feedback_key":"INV_SEARCH_ACCEPTED","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"},{"op":"fact_is","id":"FACT_FIRST_HOME","value":false}],"effects":[{"op":"set_fact","id":"FACT_FIRST_DOCK"}]},
     {"id":"STEP_RECEIVE_INDEX","feedback_key":"INV_INDEX_RECEIVED","requires":[],"effects":[
       {"op":"discover","id":"EV_INDEX_01"},
       {"op":"transfer","id":"EV_INDEX_01","from":"CHAR_PRISONER","to":"PLAYER"},

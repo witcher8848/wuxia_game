@@ -182,6 +182,10 @@ func _run() -> void:
 	await _step(2)
 	check(app.current_context() == &"system_menu", "title starts with menu context")
 	await _tap(KEY_E)
+	check(app.current_context() == &"dialogue" and main.reading_panel.page == 0, "keyboard new game opens prologue")
+	# This suite isolates free exploration; onboarding has its own keyboard suite.
+	main._close_reading()
+	await _step(2)
 	if not _check_region("SCENE_TOWN_STREET", "keyboard new game"):
 		await _finish()
 		return
@@ -217,7 +221,9 @@ func _run() -> void:
 	await _step(2)
 	check(main.get_node("SceneHost").get_child_count() == 0, "return to title unloads old region")
 	check(not _reading_visible() and app.current_context() == &"system_menu", "return to title owns menu input with no reading overlay")
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	await _step(2)
 	_check_region("SCENE_TOWN_STREET", "new route")
 	check(session.state.route_id != original_route, "new route obtains a distinct identity")

@@ -3,8 +3,8 @@ extends CharacterBody2D
 ## Scene-local movement only. The region owns persistence and interaction state.
 ## Origin is the feet anchor (16, 44) of the 32 × 48 placeholder canvas.
 
-const WALK_SPEED := 100.0
-const SPRINT_SPEED := 180.0
+const WALK_SPEED := 180.0
+const SPRINT_SPEED := 300.0
 const MOVE_ACTIONS := [&"move_left", &"move_right", &"move_up", &"move_down", &"sprint"]
 
 var facing: String = "down"

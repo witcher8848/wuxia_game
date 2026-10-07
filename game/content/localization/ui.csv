@@ -1,6 +1,6 @@
 keys,zh_CN,en
 UI_TITLE,无名 · 灰盒探索,WUMING / EXPLORATION
-UI_ENTER_YARD,进入小镇,Enter town
+UI_ENTER_YARD,新游戏（含序章）,New game (with prologue)
 UI_LOAD,读取存档,Load game
 UI_SAVE,快速存档,Quick save
 UI_QUIT,退出,Quit
@@ -17,7 +17,7 @@ UI_LOAD_FAILED,没有可读取的快速存档。,No valid quick save.
 UI_INVALID_SCENE,存档引用的地图或出生点无效。,Invalid saved scene or spawn.
 UI_PAD_DISCONNECTED,手柄已断开；可继续使用键盘。,Controller disconnected. Keyboard remains available.
 SCENE_TEST_YARD_NAME,测试庭院,Test yard
-UI_GREYBOX,第二周灰盒,Week 2 greybox
+UI_GREYBOX,剧情灰盒,Story greybox
 UI_EXPLORATION_CONTROLS,WASD／方向键移动 · Shift 冲刺 · E 交互 · F 观察 · F5 存档 · Esc 菜单,WASD/arrows move · Shift sprint · E interact · F observe · F5 save · Esc menu
 UI_INTERACT_PROMPT,E／Enter · %s,E / Enter · %s
 UI_CLOSE_READING,E／Enter／Esc 关闭 · 占位文本，不推进时段,E / Enter / Esc close · Prototype text; no time advance

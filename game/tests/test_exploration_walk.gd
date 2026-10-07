@@ -241,7 +241,9 @@ func _run() -> void:
 	main = load(MAIN_SCENE).instantiate()
 	root.add_child(main)
 	await _step(2)
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	await _step(2)
 	if not check(_region() != null and session.state.scene_id == "SCENE_TOWN_STREET", "normal new game enters authored street"):
 		await _finish()

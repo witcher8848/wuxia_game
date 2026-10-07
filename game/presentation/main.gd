@@ -21,6 +21,9 @@ var slot_entries: Array[Dictionary] = []
 const SLOT_PAGE_SIZE: int = 3
 const DialoguePanel = preload("res://game/presentation/investigation/dialogue_panel.gd")
 const ActivityPanel = preload("res://game/presentation/investigation/activity_panel.gd")
+const ProloguePanel = preload("res://game/presentation/investigation/prologue_panel.gd")
+const ObjectiveGuide = preload("res://game/presentation/investigation/objective_guide.gd")
+var objective_label: Label
 var activity_panel: PanelContainer
 var _activity_from_dialogue := false
 var _activity_initial_state: Dictionary = {}
@@ -76,6 +79,16 @@ func _build_ui() -> void:
 	region_label.add_theme_color_override("font_shadow_color", Color("#171820"))
 	region_label.add_theme_constant_override("shadow_outline_size", 4)
 	$UIRoot.add_child(region_label)
+	objective_label = Label.new()
+	objective_label.theme = ui_theme
+	objective_label.position = Vector2(12, 35)
+	objective_label.size = Vector2(616, 46)
+	objective_label.add_theme_font_size_override("font_size", 13)
+	objective_label.add_theme_color_override("font_shadow_color", Color("#171820"))
+	objective_label.add_theme_constant_override("shadow_outline_size", 5)
+	objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	objective_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$UIRoot.add_child(objective_label)
 	interaction_hint = Label.new()
 	interaction_hint.theme = ui_theme
 	interaction_hint.position = Vector2(16, 286)
@@ -161,7 +174,23 @@ func _show_title() -> void:
 
 func _start_game() -> void:
 	GameSession.start_new_game()
-	_enter_yard()
+	if _enter_yard() != OK: return
+	App.push_context(&"dialogue")
+	_reset_movement()
+	if is_instance_valid(reading_panel): reading_panel.queue_free()
+	reading_panel = ProloguePanel.new()
+	reading_panel.theme = ui_theme
+	reading_panel.activity_requested.connect(_open_activity)
+	reading_panel.departed.connect(_finish_prologue)
+	$UIRoot.add_child(reading_panel)
+
+func _finish_prologue(lead: String) -> void:
+	if not reading_panel is ProloguePanel or reading_panel.page != 6: return
+	var accepted: Dictionary = GameSession.apply_investigation_step("STEP_ACCEPT_SEARCH")
+	if accepted["error"] not in [OK, ERR_ALREADY_EXISTS]: return
+	var chosen: Dictionary = GameSession.apply_investigation_step("STEP_FIRST_DOCK" if lead == "dock" else "STEP_FIRST_HOME")
+	if chosen["error"] != OK: return
+	_close_reading()
 
 func _prepare_region(scene_id: String) -> Node:
 	var path: String = ContentDB.get_scene_path(scene_id)
@@ -328,6 +357,7 @@ func _open_activity(activity: String) -> void:
 	activity_panel = ActivityPanel.new()
 	activity_panel.theme = ui_theme
 	activity_panel.activity = activity
+	activity_panel.onboarding = reading_panel is ProloguePanel and _activity_from_dialogue
 	activity_panel.close_requested.connect(_close_activity)
 	$UIRoot.add_child(activity_panel)
 
@@ -742,8 +772,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	var controls_at_top := false
+	objective_label.visible = App.current_context() == &"exploration"
 	if App.current_context() == &"exploration" and $SceneHost.get_child_count() == 1:
 		var region: Node = $SceneHost.get_child(0)
+		var guidance: Dictionary = ObjectiveGuide.project(GameSession.state)
+		objective_label.text = tr(guidance["key"]) + "  ·  J " + tr("INV_CODEX_TITLE")
+		for destination: Dictionary in region.definition.get("interactions", []):
+			if destination["id"] != guidance["target"]: continue
+			var offset: Vector2 = Vector2(destination["position"][0], destination["position"][1]) - region.player_position
+			var direction := "GUIDE_NEAR" if offset.length() < 58 else ("GUIDE_EAST" if offset.x > 0 else "GUIDE_WEST") if absf(offset.x) > absf(offset.y) else ("GUIDE_SOUTH" if offset.y > 0 else "GUIDE_NORTH")
+			objective_label.text += "\n" + tr(direction) + " · " + tr(destination["name_key"]) + " · " + tr("GUIDE_FREE")
 		var target: Variant = region.get("selected_target")
 		interaction_hint.text = tr("UI_INTERACT_PROMPT") % tr(target["name_key"]) if target is Dictionary and not target.is_empty() else ""
 		if region.get("player") is CharacterBody2D:
@@ -755,6 +793,7 @@ func _process(_delta: float) -> void:
 	controls_backdrop.position.y = 48 if controls_at_top else 310
 	status.position.y = 53 if controls_at_top else 315
 	interaction_hint.position.y = 104 if controls_at_top else 286
+	objective_label.position.y = 235 if controls_at_top else 35
 	if debug_label.visible:
 		debug_label.text = "DEV | FPS %d | %s | pads %d" % [Engine.get_frames_per_second(), App.current_context(), Input.get_connected_joypads().size()]
 
@@ -767,7 +806,9 @@ func _run_smoke() -> void:
 	await get_tree().process_frame
 	if "--capture-week1" in OS.get_cmdline_user_args() and DisplayServer.get_name() != "headless":
 		await _capture("title")
-	_start_game()
+	# This smoke covers movement; the separate onboarding test covers New Game.
+	GameSession.start_new_game()
+	_enter_yard()
 	await get_tree().physics_frame
 	await get_tree().process_frame
 	await get_tree().physics_frame

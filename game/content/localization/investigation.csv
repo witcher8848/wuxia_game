@@ -1,4 +1,54 @@
 keys,zh_CN,en
+BATTLE_STORY_TITLE,找到证人，却不能立刻问话,Witness found - questions must wait
+BATTLE_STORY_CAUSE,你们找到老妇时，刀役与弓役已追到罪坟。女囚让老妇先走，与你留下截住追兵。目标由「寻找老妇」变为「击退追兵，保护证人脱身」：活人能作证，不能让旧账的线索断在这里。,You find the gravekeeper as two constables arrive. The prisoner sends her away while you hold them off. FIND the witness becomes PROTECT her escape: repel both pursuers so she survives to testify.
+BATTLE_INTEL_HOME,因住所校勘读懂父亲的编组批注 → 已解锁首轮敌方意图推演。按 F 会先选中一个待行动敌人，可看预计落点、招式、目标和攻击范围；可据此避开射程。仅首轮有效，随站位重算，不增加伤害。,Home comparison decoded Father's formation notes: round-one forecasts unlocked. F selects a pending enemy to show its predicted move / skill / target / attack range. Use this to avoid its reach. Recomputed from current positions; no damage bonus.
+BATTLE_NO_HOME,未完成住所校勘 → 没有首轮敌方意图推演。仍可按 F 看移动范围，但要自行判断对方会怎样进攻；敌人属性不额外提高，可返回出发前补查。,No home comparison: no first-round forecast. F still shows movement range but you must judge the attack yourself. Enemy stats are unchanged. You can return to departure and investigate.
+BATTLE_INTEL_DOCK,因码头质证问出西岸近道 → 两名同伴已从更靠近追兵的渡口部署。只改变起始位置，不加攻击或防御。,Dock challenge revealed a closer landing: both allies now deploy nearer the pursuers. Only starting positions change; attack and defence do not.
+BATTLE_NO_DOCK,未问出西岸近道 → 两人从旧坟道部署，接敌需走更远。仍可取胜，不要求穷举调查。,No landing shortcut: the party starts on the old grave road with farther to travel. Victory remains possible without exhaustive investigation.
+BATTLE_STORY_LIMITS,本场击退刀役与弓役即完成掩护；老妇已先行撤离，不是可受攻击的护送单位。只有确认胜利结算才推进时段。战中 F1 可随时重看目标与情报。,Repel both constables to cover her escape. She is already withdrawing; there is no attackable escort unit. Time advances only on confirmed victory settlement. F1 reopens this briefing.
+BATTLE_STORY_KEYS,E / Esc / Tab 关闭说明 · F1 随时重看 · PgUp/Dn 翻文,E / Esc / Tab: close · F1: review · PgUp/Dn: scroll
+INTRO_SKIP_TITLE,跳过序章与教学？,Skip prologue and tutorial?
+INTRO_SKIP_SUMMARY,父亲因亡籍案遇害，你与女囚暂时同行，寻找经手旧账的守墓老妇。跳过后会取得同一张索引，直接让你选择住所或码头；不会自动选路线、授予调查情报或进入战斗。J 可随时查看命卷。,Your father died in the false death-record case. You and the prisoner seek the gravekeeper who handled the records. Skipping grants the same index then stops at your first-lead choice. No route / intel / battle is selected for you. J opens the journal later.
+INTRO_SKIP_CONFIRM,确认跳过，自己选择第一站,Skip and choose my first lead
+INTRO_SKIP_CANCEL,继续阅读,Keep reading
+INV_FASTREAD_READY,已到选择处；请自行选择并按 E 确认。,Choose an option and confirm with E.
+INTRO_TITLE,序章 · 一纸亡籍,Prologue: A false death
+INTRO_FATHER,刑场。父亲跪在台上，你挤过人群喊他。\n他抬眼，却对差役说：「认错了。我没有儿子。」\n差役转头打量你。父亲的手在背后攥紧了。,Execution ground. Your father kneels on the platform. You call to him.\nHe looks up: You are mistaken. I have no son.\nA guard turns toward you. Your father's fists tighten behind his back.
+INTRO_EXECUTION,你想再往前，身旁一个带着镣铐的女人忽然撞开差役，拽住你的手腕。\n落令声被人群的惊呼盖住。再回头时，父亲已倒在台上。\n「想活着问清楚，就跟我走！」,You push forward. A shackled woman knocks a guard aside and grabs your wrist.\nA shouted order vanishes beneath the crowd. Your father falls on the platform.\nIf you want answers alive then come with me!
+INTRO_ESCAPE,巷口有人掀翻柴车，追兵被堵在后面。女人拖着你穿过窄巷。\n你挣开她：「他为什么不认我？」\n她没有回答，只将你推入一座废祠堂。外面的搜捕声渐渐远去。,Someone overturns a cart across the alley to block pursuit. The woman pulls you through.\nYou break free: Why did he deny me?\nShe offers no answer and pushes you into an abandoned ancestral hall. The search moves away.
+INTRO_CONFLICT,祠堂。你认出了她——告发亡籍有假的女囚。\n「是你把我爹送上刑场的！」\n她没有躲：「我只想拿回自己的名字，没想到他们会提前杀人。你可以恨我。但现在，我们都被盯上了。」,In the hall you recognize her: the prisoner who exposed the false death record.\nYou sent my father to the execution ground!\nI wanted my own name back. I did not expect them to rush the execution. Hate me if you must. They are hunting us both now.
+INTRO_REASON,女囚：「守墓老妇经手过埋尸记录，知道亡籍上的名字怎样对上坟。她本来要接应我，现在失约了。」\n「我爹的事，她也知道？」\n「我不能保证。但要查他为何卷进去，得先找到一个还活着、经手过旧账的人。」,The prisoner says: The gravekeeper handled burial records. She can match names to graves. She was meant to meet me but never came.\nDoes she know about my father?\nI cannot promise. But to find why he was involved we need someone alive who handled those records.
+INTRO_INDEX,她递来一张残纸：「河西、七步、三牌、无骨。我还没解开这些记号。」\n你将它夹进随身手册——命卷。它不是另一份神秘名册，只是记录目标、证据和调查结果的地方。\n先按 J 打开看看；Esc 回来后决定第一站。,She hands you a scrap: west bank; seven paces; third tablet; no bones. I have not decoded it.\nYou file it in your journal. This is your goals and evidence notebook; not another secret register.\nPress J to inspect it. Return with Esc and choose your first lead.
+INTRO_ROUTE,你：「我会查清我爹的事。找到她之前，暂且同行。」\n家中可能留有父亲的文书；码头船夫可能见过老妇。\n先选一处即可；路上随时可改去另一处。调查能带来战斗情报，不必把所有选项试遍才出发。,I will find out what happened to my father. Until we find her we travel together.\nYour home may hold his papers; the boatman may have seen the gravekeeper.\nChoose a first lead. You can change course later. Investigation earns battle intel; you need not exhaust every option.
+INTRO_NEXT,继续,Continue
+INTRO_PREVIOUS,回看上一段,Read previous passage
+INTRO_CALL,喊他：爹！,Call out: Father!
+INTRO_WATCH,看向父亲攥紧的手,Look at his clenched fists
+INTRO_JOURNAL,打开命卷（J）,Open journal (J)
+INTRO_CHOOSE_ROUTE,明白了，决定第一站,Choose the first lead
+INTRO_HOME,先回住所查看父亲的文书,First check Father's papers at home
+INTRO_DOCK,先去码头询问船夫,First ask the boatman at the docks
+INTRO_KEYS,↑↓ 选择 · E 确认 · 空格快进叙述 · Tab 跳过（确认）,Arrows: choose · E: confirm · Space: fast read · Tab: skip prompt
+INTRO_NO_SKIP,空格快进叙述；或按 Tab 确认跳过，停在第一站选择。,Space advances narration. Tab offers a skip to the first-lead choice.
+INTRO_JOURNAL_HELP,命卷是随身笔记：当前案看目标，证据页看材料。Q/R 切换；Esc 回到祠堂选第一站。,Your notebook: Case shows goals; Evidence holds clues. Q/R changes tabs. Esc returns to the hall to choose a lead.
+INV_DONE,已记录,Recorded
+INV_TRACE_HINT,再想想船夫说的时间：这件物件能说明谁在何时乘船吗？返回证物界面时，读清细节再出示。,Compare this with the date in his claim. Can the item tell you who crossed and when? Read its details before presenting it.
+INTRO_JOURNAL_GOAL,当前目标：找到守墓老妇，追查父亲为何卷入亡籍案。\n下一步：Esc 回到祠堂，选择住所文书或码头船夫作为第一条线索。,Goal: find the gravekeeper to investigate Father's involvement in the false death records. Next: Esc returns to the hall; choose the home papers or the boatman as your first lead.
+GUIDE_HOME,查父亲旧案：先回住所找文书,Investigate Father's case: check his papers at home
+GUIDE_DOCK,查父亲旧案：先去码头问老妇去向,Investigate Father's case: ask at the docks
+GUIDE_DOCUMENT,找守墓老妇：查看父亲留下的文书,Find the gravekeeper: examine Father's papers
+GUIDE_COMPARE,找守墓老妇：打开文书或命卷，对照已有记号,Find the gravekeeper: compare markings in your records
+GUIDE_BOATMAN,找守墓老妇：靠近船夫，按 E 询问,Find the gravekeeper: approach the boatman and press E
+GUIDE_CHALLENGE,核对船夫的说法：读材料，再决定是否出示,Check the boatman's claim: read clues before presenting one
+GUIDE_LEAVE_HOME,去向已确认：返回小镇，再去码头会合,Location found: return to town and go to the docks
+GUIDE_DEPART,去向已确认：找船夫，选择前往罪坟,Location found: ask the boatman about the grave journey
+GUIDE_COMPLETE,老妇已脱险：本段结束，可查看命卷并存档,Gravekeeper safe: sample complete. Review journal and save
+GUIDE_FREE,仅提示目的地方向，可自由探索,Destination direction only; explore freely
+GUIDE_NORTH,↑ 往北,North
+GUIDE_SOUTH,↓ 往南,South
+GUIDE_EAST,→ 往东,East
+GUIDE_WEST,← 往西,West
+GUIDE_NEAR,附近：面向目标按 E,Nearby: face the target and press E
 INV_SELF,主角,Protagonist
 INV_BOATMAN,码头船夫,Boatman
 INV_LEAVE,离开,Leave
@@ -7,7 +57,7 @@ INV_LATER,暂不行动,Not yet
 INV_REQUIREMENTS,尚不满足条件；可先查看已有线索。,Requirements not met. Review the clues you know.
 INV_ALREADY_RECORDED,已经记录；不重复领取。,Already recorded. Nothing is granted twice.
 INV_COMMAND_FAILED,情况已变化，请重新查看选项。,The situation has changed. Review the choices again.
-INV_DIALOGUE_KEYS,↑↓ / W S 选择 · E / Enter 确认 · Esc 离开,Arrows / W S: choose · E / Enter: confirm · Esc: leave
+INV_DIALOGUE_KEYS,↑↓ 选择 · E 确认 · 空格快读 · Tab/Esc 离开 · PgUp/Dn 翻文,Arrows: choose · E: confirm · Space: text end · Tab/Esc: leave
 EV_INDEX_01_TITLE,《勘亡录》首条索引,First index of the Death Register
 EV_INDEX_01_DESC,女囚在祠堂交给你的残纸上写着：河西、七步、三牌、无骨。不是完整地址；需要弄清记号的用法。,The prisoner's scrap reads: west bank; seven paces; third tablet; no bones. A code rather than a full address.
 EV_BLANK_DEATH_01_TITLE,预盖空白亡籍,Pre-sealed blank death record
@@ -17,7 +67,7 @@ QUEST_RESCUE_GRAVEKEEPER_TITLE,保护守墓老妇,Protect the gravekeeper
 INV_INDEX_RECEIVED,已整理女囚交来的索引。可接受寻找老妇的目标。,The prisoner's index is recorded. You may take up the search.
 INV_SEARCH_ACCEPTED,下一步：查住所的文书，或向码头船夫问话。,Next: inspect the papers at home or question the dock boatman.
 INV_BLANK_FOUND,取得空白亡籍。县印与书吏批注都已记入线索。,Blank death record acquired. The seal and clerk's notes are recorded.
-INV_WEST_GRAVES_FOUND,校勘成立：河西罪坟第七列第三牌。另辨认出县衙便衣的编组。,Comparison confirmed: third marker of row seven at the west-bank graves. You also recognize the constables' formation.
+INV_WEST_GRAVES_FOUND,校勘成立：去向是河西罪坟第七列第三牌。父亲的编组批注还解锁战斗情报：首轮按 F 看敌人预计落点、招式、目标与射程，以便避开攻击；不加伤害，首轮后失效。下一步去码头商议出发。,Comparison solved: third marker of row seven at the west-bank graves. Father's formation notes unlock round-one forecasts: F shows predicted moves / skills / targets / range to help avoid attacks. No damage bonus. Next: discuss departure at the docks.
 INV_ORIGINAL_TRANSFERRED,原件已交清籍使团，已知内容仍可查阅。,The original is now with the inspector's delegation. Your knowledge remains available.
 D_START_TEXT,祠堂脱身后，女囚交给你的索引还折在衣内。她要找守墓老妇：官府迁坟之前，须弄清那本埋尸簿为何被带走。,After escaping the ancestral hall you still carry the prisoner's folded index. She seeks the gravekeeper and the burial ledger before the county moves the graves.
 D_RECEIVE,展开并记录索引,Unfold and record the index
@@ -30,7 +80,7 @@ D_INSPECT_BLANK,取出并检查空白亡籍,Take and inspect the blank death rec
 D_READ_BLANK,重看已记录的批注,Read the recorded notes again
 D_DOCK_TEXT,船夫指着铜钉补过的铁牌嘀咕：这种补法，只有守墓老妇会。你问起她近日的去向，他收缆绳的手停了一瞬。,The boatman points to a token repaired with a copper nail: only the gravekeeper mends them that way. His hands pause when you ask where she has been recently.
 D_ASK_BOAT,她近日可曾渡河？,Has she crossed the river recently?
-D_BOAT_TEXT,船夫：她三个月没坐过我的船。河西那边不太平，你们也少去。船舷旁还挂着一串渡船铁牌。,Boatman: She has not taken my boat in three months. The west bank is dangerous; stay away. A string of ferry tokens hangs beside the boat.
+D_BOAT_TEXT,船夫：她三个月没坐过我的船，河西那边不太平。女囚低声提醒：先记住这句「三个月」。质证不是再问一遍，是找出与这句话矛盾的材料，请他解释。没把握就先查看船边的物件。,Boatman: She has not taken my boat in three months. The prisoner whispers: Remember that claim. A challenge means presenting a conflicting detail and asking him to explain. Look around the boat first if unsure.
 EV_FERRY_TOKEN_01_TITLE,新近使用的渡船铁牌,Recently used ferry token
 EV_FERRY_TOKEN_01_DESC,验痕还是今日的新印；断角用铜钉补过。船夫方才说，这种补法只有守墓老妇用。你问能否带走这块旧牌，他不耐烦地摆了摆手。,The inspection mark is fresh today. A copper nail repairs a broken corner; the boatman said only the gravekeeper mends tokens that way. He waves you away when you ask to keep it.
 CL_BOATMAN_01_TITLE,船夫的三月未渡说,The boatman's three-month claim
@@ -39,9 +89,9 @@ D_REVIEW_CLAIM,重问已经记下的说法,Return to the recorded claim
 D_INSPECT_TOKEN,检查船舷的旧铁牌,Inspect the old ferry token
 INV_CLAIM_RECORDED,已记录证言；尚未证实。,Testimony recorded; not yet verified.
 INV_TOKEN_FOUND,取得铁牌；验痕和修补痕迹已记下。,Token acquired; inspection and repair marks noted.
-INV_BOATMAN_ADMITS,船夫改口：今晨送她去了河西罪坟。她说不能让迁坟抹平旧账；可从西岸近道上岸。,He admits taking her to the west-bank graves this morning. She feared the relocation would erase old records. He describes a closer landing.
+INV_BOATMAN_ADMITS,质证成功：船夫承认今晨送老妇去了河西罪坟，并说出西岸近道。去向已确认；出发迎战时，你与女囚会从更近的位置部署。Esc 返回船夫处，选择前往罪坟；情报已记入命卷。,Claim corrected: he took her to the west-bank graves this morning and reveals a closer landing. Your party will deploy nearer the enemy. Esc returns to the boatman; choose the grave journey. Intel is saved in your journal.
 INV_CHALLENGE_TITLE,出示证物,Present evidence
-INV_CHALLENGE_PROMPT,要质证的是「三个月没有渡河」。选一条已知材料，先看细节，再确认出示。,Challenge the claim of no crossing in three months. Read a known item and confirm to present it.
+INV_CHALLENGE_PROMPT,目标：让船夫解释「她三个月没坐过我的船」。读材料，找时间或人物归属的矛盾；E 出示，不确定可 Esc 回去调查。尝试不耗时。,Question his claim: she has not taken my boat in three months. Look for conflicting dates or ownership. E presents an item; Esc returns to investigate. Attempts cost no time.
 INV_CHALLENGE_WRONG,这不能核实她最近有没有渡河。说法本身也不能证明说法；需看能对应到人的近期痕迹。不扣时间。,This does not verify a recent crossing. A claim cannot prove itself; look for a recent trace tied to her. No time is spent.
 INV_COMPARE_TITLE,二项校勘,Compare two records
 INV_COMPARE_PROMPT,先选一条材料，再选一条可对照的材料。比较记号的含义，不必穷举所有物品。,Choose one record and then a relevant counterpart. Compare what the markings mean.
@@ -52,7 +102,7 @@ INV_FIRST_SELECTED,已选：%s。再选一条材料。,Selected: %s. Choose a co
 INV_NO_ITEMS,还没有可用材料。可以返回住所或码头补查。,No relevant items yet. Check home or the docks.
 INV_CHALLENGE_RETRY,可暂时退出补查。错误出示不会扣时间或关系。,You can leave and investigate. Wrong evidence costs no time or trust.
 INV_RETURN_DIALOGUE,回到对话,Return to dialogue
-INV_CODEX_TITLE,命卷,Case journal
+INV_CODEX_TITLE,命卷：任务与证据,Journal: goals & evidence
 INV_TAB_CASE,当前案,Current case
 INV_TAB_EVIDENCE,证据,Evidence
 INV_TAB_PEOPLE,人物（未开放）,People (unavailable)

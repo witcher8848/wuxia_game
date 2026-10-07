@@ -21,6 +21,8 @@ python3 tools/run_checked.py command_options ./tools/godot.sh --headless --path 
 python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_investigation_rules.gd
 python3 tools/run_checked.py dialogue ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_dialogue.gd
 python3 tools/run_checked.py inquiry ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_inquiry.gd
+python3 tools/run_checked.py onboarding ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_onboarding.gd
+python3 tools/run_checked.py week4_feedback ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week4_feedback.gd
 python3 tools/run_checked.py handover ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_handover.gd
 python3 tools/run_checked.py story_encounter ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_story_encounter.gd
 python3 tools/check_story_persistence.py

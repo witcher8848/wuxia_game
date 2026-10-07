@@ -143,7 +143,9 @@ func _run() -> void:
 	check(main._menu_kind == &"title" and app.current_context() == &"system_menu", "Escape from title list returns to title")
 	await _tap(KEY_ESCAPE)
 	check(app.current_context() == &"system_menu" and main.get_node("SceneHost").get_child_count() == 0, "Escape on title cannot resume nonexistent map")
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	check(session.enter_region("SCENE_HOME_COURTYARD", "SPAWN_FROM_TOWN") == OK, "home-map fixture enters valid region")
 	main._enter_yard()
 	await _step(3)

@@ -169,7 +169,9 @@ func _ui() -> void:
 	main = load("res://game/presentation/main.tscn").instantiate()
 	root.add_child(main)
 	await _frames()
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	for home: bool in [false,true]:
 		_prepare(home, home)
 		check(main._enter_yard() == OK, "actual dock scene")
@@ -190,6 +192,10 @@ func _ui() -> void:
 		if not session.story_encounter_active(): continue
 		var screen: Node = main.story_battle_screen
 		screen.auto_ai = false
+		check(screen.briefing.visible and screen.briefing_body.text.contains("目标由"), "arrival explains finding becomes protecting")
+		await _capture("story_arrival_intel" if home else "story_arrival_no_intel")
+		await _tap(KEY_E)
+		check(not screen.briefing.visible and screen.mode == "command", "briefing confirmation does not execute a command")
 		var frozen: Dictionary = session.state.to_dict()
 		check(not main.get_node("UIRoot").visible and main.get_node("SceneHost").process_mode == Node.PROCESS_MODE_DISABLED, "exploration hidden and stopped")
 		await _tap(KEY_F2)
@@ -216,6 +222,7 @@ func _ui() -> void:
 		check(session.story_encounter_active(), "abort permits returning to the same actual encounter")
 		screen = main.story_battle_screen
 		screen.auto_ai = false
+		await _tap(KEY_E) # Acknowledge actual arrival, not a battle action.
 		for turn: int in 4: _one_turn(screen.battle)
 		check(screen.battle.round_number == 2, "real actions advance into round two")
 		screen.mode = "inspect"

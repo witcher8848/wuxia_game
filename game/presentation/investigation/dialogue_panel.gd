@@ -80,6 +80,8 @@ func refresh() -> void:
 	cursor = clampi(cursor, 0, view["choices"].size() - 1)
 	heading.text = tr(view["speaker_key"])
 	body.text = tr(view["text_key"])
+	if node_id == "D_TOKEN" and GameSession.state.evidence_states.has("CL_BOATMAN_01"):
+		body.text += "\n" + tr("INV_TRACE_HINT")
 	hint.text = tr("INV_DIALOGUE_KEYS")
 	for index: int in choices.size():
 		choices[index].visible = index < view["choices"].size()
@@ -87,12 +89,21 @@ func refresh() -> void:
 			continue
 		var option: Dictionary = view["choices"][index]
 		choices[index].text = ("▶ " if index == cursor else "   ") + tr(option["text_key"])
+		if not option["enabled"] and option["reason"] == "INV_ALREADY_RECORDED":
+			choices[index].text += " · " + tr("INV_DONE")
 		choices[index].modulate = Color.WHITE if option["enabled"] else Color("#92939c")
 
 func handle_input(event: InputEvent) -> void:
 	# Consume all events while open: no quick save, held movement or GUI fallback.
 	get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_SPACE:
+		body.scroll_to_line(maxi(0, body.get_line_count() - 1))
+		feedback.text = tr("INV_FASTREAD_READY")
+		return
 	if event.is_echo():
+		return
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_TAB:
+		close_requested.emit()
 		return
 	if event.is_action_pressed("cancel") or event.is_action_pressed("pause"):
 		close_requested.emit()

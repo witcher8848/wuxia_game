@@ -29,6 +29,8 @@ const REQUIRED_RESOURCES: Array[String] = [
 	"res://game/presentation/investigation/dialogue_panel.gd",
 	"res://game/presentation/investigation/activity_panel.gd",
 	"res://game/presentation/investigation/journal_view.gd",
+	"res://game/presentation/investigation/prologue_panel.gd",
+	"res://game/presentation/investigation/objective_guide.gd",
 	"res://game/domain/battle/combat_encounter.gd",
 	"res://game/presentation/battle/battle_screen.gd",
 	"res://game/presentation/battle/story_battle_screen.gd",

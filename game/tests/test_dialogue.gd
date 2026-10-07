@@ -150,7 +150,9 @@ func _ui() -> void:
 	main = load("res://game/presentation/main.tscn").instantiate()
 	root.add_child(main)
 	await _frames()
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	await _frames()
 	await _open_home()
 	var panel: Control = main.reading_panel

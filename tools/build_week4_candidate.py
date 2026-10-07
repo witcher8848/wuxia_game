@@ -47,6 +47,8 @@ with tempfile.TemporaryDirectory(prefix="week4-stage-", dir=root / "builds") as 
     checked("week4_candidate_export", "--headless", "--path", stage, "--export-release", "Windows Release", out / "ProjectWumingWeek4.exe")
     checked("week4_candidate_audit", "--headless", "--path", out, "--main-pack", pack, "--script", root / "tools/audit_pack.gd", "--", "--week4-candidate")
     checked("week4_candidate_story", "--headless", "--path", out, "--main-pack", pack, "--script", root / "game/tests/test_story_encounter.gd", "--", "--require-pack")
+    checked("week4_candidate_onboarding", "--headless", "--path", out, "--main-pack", pack, "--script", root / "game/tests/test_onboarding.gd", "--", "--require-pack")
+    checked("week4_candidate_feedback", "--headless", "--path", out, "--main-pack", pack, "--script", root / "game/tests/test_week4_feedback.gd", "--", "--require-pack")
     subprocess.run([sys.executable, str(root / "tools/check_story_persistence.py"), "--pack", str(pack)], cwd=root, check=True)
     with (out / "ProjectWumingWeek4.exe").open("rb") as stream:
         if stream.read(2) != b"MZ": raise SystemExit("Missing PE header")
@@ -76,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix="week4-stage-", dir=root / "builds") as 
     (out / "build_info.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (out / "validation").mkdir()
     for label in ("week4_candidate_import", "week4_candidate_export", "week4_candidate_audit",
-                  "week4_candidate_story", "week4_pack_story_persistence_write", "week4_pack_story_persistence_read"):
+                  "week4_candidate_story", "week4_candidate_onboarding", "week4_candidate_feedback", "week4_pack_story_persistence_write", "week4_pack_story_persistence_read"):
         shutil.copy2(root / "builds/qa" / f"{label}.log", out / "validation" / f"{label}.log")
     sums = []
     for path in sorted(out.rglob("*")):

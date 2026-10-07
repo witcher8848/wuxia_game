@@ -11,6 +11,7 @@ var wrong_attempts := 0
 var _tab_focus: Dictionary = {}
 var _first_cursor := 0
 var handover_preview: Dictionary = {}
+var onboarding := false
 
 func _ready() -> void:
 	_build_layout()
@@ -48,10 +49,16 @@ func refresh() -> void:
 		hint.text = tr("INV_CODEX_KEYS" if tab == 1 else "INV_JOURNAL_NAV_KEYS")
 		if tab == 0:
 			entries = Journal.quest_entries(GameSession.state, ContentDB.get_investigation_definitions())
+			# Future locked quests are not actionable and spoil the first objective.
+			entries = entries.filter(func(item: Dictionary) -> bool: return GameSession.state.quest_states.has(item["id"]))
 		elif tab == 1:
 			entries = evidence
 		else:
 			prompt = tr("INV_UNAVAILABLE_PAGE")
+		if onboarding:
+			prompt = tr("INTRO_JOURNAL_HELP")
+			if tab == 0 and not entries.is_empty():
+				entries[0]["detail"] = tr("INTRO_JOURNAL_GOAL").replace("\\n", "\n")
 	else:
 		var identifier := "INQ_BOATMAN" if mode == "challenge" else "INQ_INDEX"
 		view = ContentDB.inquiry_view(identifier, GameSession.state, first_selected)
@@ -106,7 +113,8 @@ func handle_input(event: InputEvent) -> void:
 		else: close_requested.emit()
 	elif mode == "journal" and (event.is_action_pressed("tab_next") or event.is_action_pressed("tab_previous")):
 		_tab_focus[tab] = cursor
-		tab = posmod(tab + (1 if event.is_action_pressed("tab_next") else -1), TABS.size())
+		# Keep future page definitions, but cycle only through usable pages.
+		tab = posmod(tab + (1 if event.is_action_pressed("tab_next") else -1), 2)
 		cursor = _tab_focus.get(tab, 0)
 		message_key = ""
 		refresh()

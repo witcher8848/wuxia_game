@@ -51,7 +51,9 @@ func _run() -> void:
 	quit(0 if failures.is_empty() else 1)
 
 func _write() -> void:
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	for step: String in ["STEP_RECEIVE_INDEX","STEP_ACCEPT_SEARCH","STEP_INSPECT_BLANK"]:
 		check(session.apply_investigation_step(step)["error"] == OK, "starting investigation " + step)
 	check(session.resolve_inquiry("INQ_INDEX", ["EV_INDEX_01","EV_BLANK_DEATH_01"])["error"] == OK, "actual comparison before save")

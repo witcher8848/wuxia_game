@@ -25,7 +25,9 @@ func _run() -> void:
 	var main: Node = load("res://game/presentation/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
-	main._start_game()
+	# Explicit exploration fixture; New Game onboarding has its own UI tests.
+	root.get_node("GameSession").start_new_game()
+	main._enter_yard()
 	await process_frame
 	check(session.enter_region("SCENE_HOME_COURTYARD", "SPAWN_FROM_TOWN") == OK, "packed home spawn")
 	check(main._enter_yard() == OK, "packed region creation")
