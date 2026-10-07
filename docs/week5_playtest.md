@@ -1,6 +1,6 @@
 # 第五周：主角动画试玩意见
 
-日期／版本：待填写。工程测试不代替这份人工意见；不必重复确认已反馈的第四周内容。
+试玩日期：待填写。推荐版本：`0.5.0-week5-prototype_418e721_20261007T135109Z`（`builds/week5/`）。工程测试不代替这份人工意见；不必重复确认已反馈的第四周内容。
 
 入口：仓库根目录`Character.command`查看样本，`Run.command`进入实际游戏；独立候选使用`Character-on-Mac.command`／`Play-on-Mac.command`。候选目录为`builds/week5/`，存档与旧版隔离，不能用旧版启动器判断新版效果。
 

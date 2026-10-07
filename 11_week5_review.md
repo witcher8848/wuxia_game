@@ -25,7 +25,19 @@
 
 `./tools/check_project.sh`全量通过，末尾`PROJECT_CHECK_PASS`，日志`builds/qa/week5_project_check.log`。包含以上源／运行时测试，以及探索控制器85、实际脚本步行196、战斗UI346、技能预览559、剧情遭遇622、新手流程212、第四周反馈198、跨进程存读130／23等既有回归。不是只跑新样本自测。
 
-最终独立候选待下方补记；历史中间候选不替代最终状态。
+## 最终独立候选与提交
+
+实现提交`418e721`（`feat: add week five protagonist art and animation pipeline`）。从干净工作树运行`python3 tools/build_week5_candidate.py`，得到：
+
+`builds/week5/0.5.0-week5-prototype_418e721_20261007T135109Z/`
+
+- 版本`0.5.0-week5-prototype`，元数据`dirty=false`，源快照SHA-256为`608a94d57f1f2c04dd47b7a579a72fa0ba3942f5f6ff0406a16967eed5c004fb`。
+- PCK SHA-256：`9bde575acc4ed749b2d4f43666a4aa3e461dde82507aa2da493d4b501dcf78f7`。`SHA256SUMS.txt`全部18个文件校验通过；含Windows EXE／PCK、许可证、试玩表、元数据、包内日志及两个Mac启动脚本。
+- `PACK_AUDIT_PASS resources=110 required=34`，实际PNG与JSON存在，开发源／参考／测试文件均未进包；主入口保持真实游戏。包内角色144、剧情623、引导213、第四周反馈199、跨进程存读131／24均零失败。
+- Mac实际包内渲染168项通过，使用`--require-pack`确认无源码覆盖；3×样本截图与源码版逐字节一致。`character_lab.tscn`以包内独立场景实际启动并正常退出，无脚本错误。没有执行Windows EXE的真机测试。
+- `Play-on-Mac.command`玩实际游戏，`Character-on-Mac.command`看角色；二者调用本机固定Godot，不是独立分发的Mac App。候选使用`ProjectWumingCharacterPrototype`独立存档目录，不覆盖旧版。
+
+这次Day29～35的工程交付与候选验证完成；以下人设认可和体验遗留继续保留，不据此宣称整周人工验收或首月门通过。此后的交付记录提交仅改文档，不更换上述候选的运行时代码／素材。
 
 ## 人工评审与边界
 
