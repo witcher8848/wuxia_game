@@ -53,6 +53,17 @@ func sync_visuals() -> void:
 func _feet(cell: Vector2i) -> Vector2:
 	return ORIGIN+Vector2(cell)*CELL+Vector2(16,29)
 
+func _sorted_actor_ids() -> Array[String]:
+	var sorted: Array[String] = battle.unit_ids()
+	# A confirmed move updates the logical cell immediately, while its visual
+	# feet travel through the path. Occlusion follows the visible feet.
+	sorted.sort_custom(func(a: String,b: String) -> bool:
+		var a_y := hero_position.y if a == "CHAR_PROTAGONIST" else _feet(Grid.cell_of(battle.unit(a))).y
+		var b_y := hero_position.y if b == "CHAR_PROTAGONIST" else _feet(Grid.cell_of(battle.unit(b))).y
+		return a_y < b_y
+	)
+	return sorted
+
 func _direction(offset: Vector2) -> String:
 	if offset == Vector2.ZERO: return hero_visual.facing
 	if absf(offset.x) >= absf(offset.y): return "right" if offset.x > 0 else "left"
@@ -116,8 +127,7 @@ func _draw() -> void:
 				draw_rect(rectangle.grow(-2), Color("#7ccc83"), false, 2)
 	for index: int in range(1, path.size()):
 		draw_line(ORIGIN + Vector2(path[index-1]) * CELL + Vector2(16,16), ORIGIN + Vector2(path[index]) * CELL + Vector2(16,16), Color("#b0dcce"), 3)
-	var sorted: Array[String] = battle.unit_ids()
-	sorted.sort_custom(func(a: String,b: String) -> bool: return Grid.cell_of(battle.unit(a)).y < Grid.cell_of(battle.unit(b)).y)
+	var sorted := _sorted_actor_ids()
 	for identifier: String in sorted:
 		var unit := battle.unit(identifier)
 		var at := ORIGIN + Vector2(Grid.cell_of(unit)) * CELL

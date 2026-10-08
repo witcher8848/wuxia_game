@@ -38,6 +38,11 @@ func _run() -> void:
 	hero.set_process(false)
 	check(hero.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,"nearest filter")
 	check(Hero.ATLAS.get_size() == Vector2(256,384),"runtime imported atlas")
+	var shadow_bounds: Rect2 = Hero.SHADOW_ROWS[0]
+	for row: Rect2 in Hero.SHADOW_ROWS:
+		check(row.position == row.position.round() and row.size == row.size.round(),"shadow keeps integer pixel geometry")
+		shadow_bounds = shadow_bounds.merge(row)
+	check(shadow_bounds == Rect2(-8,-3,16,6),"fixed 16x6 shadow centered on feet")
 	for direction: String in ["up","down","left","right"]:
 		hero.facing = direction
 		hero.walking = true
@@ -154,6 +159,20 @@ func _combat() -> void:
 	board.reset_presentation()
 	check(board.hero_visual._action.is_empty() and board._motion.is_empty(),"retry removes death and motion")
 	var snapshot := battle.snapshot()
+	var other_id := ""
+	for identifier: String in battle.unit_ids():
+		if identifier != "CHAR_PROTAGONIST":
+			other_id = identifier
+			break
+	check(not other_id.is_empty(),"occlusion test has another real actor")
+	var other_feet: Vector2 = board._feet(Grid.cell_of(battle.unit(other_id)))
+	board.hero_position = other_feet-Vector2(0,1)
+	var order: Array[String] = board._sorted_actor_ids()
+	check(order.find("CHAR_PROTAGONIST") < order.find(other_id),"moving hero behind actor uses visible feet not destination cell")
+	board.hero_position = other_feet+Vector2(0,1)
+	order = board._sorted_actor_ids()
+	check(order.find("CHAR_PROTAGONIST") > order.find(other_id),"moving hero in front uses visible feet not destination cell")
+	board.sync_visuals()
 	# Mapping is a read-only presentation contract; legality is covered by the
 	# confirmed keyboard commands in test_combat_ui, not fabricated successes.
 	for mapping: Array in [["SK_FIST_BASIC","strike"],["SK_YUE_THRUST","thrust"],["ULT_SWORD","slash"],["SK_YUE_GUARD","guard"]]:

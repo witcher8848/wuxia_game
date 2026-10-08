@@ -2,6 +2,8 @@ extends Node2D
 ## Presentation-only shared atlas. No damage, action or save state is decided here.
 const ATLAS = preload("res://assets/runtime/characters/chr_protagonist_atlas.png")
 const DATA_PATH := "res://assets/runtime/characters/chr_protagonist_atlas.json"
+# Fixed 16x6 pixel ellipse. Rows share the feet anchor in every scene.
+const SHADOW_ROWS := [Rect2(-4,-3,8,1),Rect2(-7,-2,14,1),Rect2(-8,-1,16,2),Rect2(-7,1,14,1),Rect2(-4,2,8,1)]
 static var data: Dictionary = {}
 var facing := "down"
 var walking := false
@@ -58,8 +60,8 @@ func draw_at(canvas: CanvasItem, at: Vector2) -> void:
 	if data.is_empty(): return
 	var frame := frame_number()
 	# Separate fixed pixel shadow; anchor always follows physics feet exactly.
-	canvas.draw_rect(Rect2(at+Vector2(-7,-1),Vector2(14,3)),Color("#333b46"))
-	canvas.draw_rect(Rect2(at+Vector2(-5,-2),Vector2(10,5)),Color("#333b46"))
+	for row: Rect2 in SHADOW_ROWS:
+		canvas.draw_rect(Rect2(at+row.position,row.size),Color("#333b46"))
 	var source := Rect2((frame % 8)*32,int(frame/8)*48,32,48)
 	canvas.draw_texture_rect_region(ATLAS,Rect2(at+Vector2(-16,-44),Vector2(32,48)),source)
 	if sprinting and walking:
