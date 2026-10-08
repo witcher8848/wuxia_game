@@ -74,6 +74,20 @@ imagegen内置工具生成的[四向参考与提示规格](./docs/art_reference/
 
 已实际查看[1×](./docs/week5_evidence/refinement_20261008/week5_walk_1x.png)、[3×](./docs/week5_evidence/refinement_20261008/week5_walk_3x.png)、[直刺](./docs/week5_evidence/refinement_20261008/week5_thrust.png)、[横斩](./docs/week5_evidence/refinement_20261008/week5_slash.png)、[护剑](./docs/week5_evidence/refinement_20261008/week5_guard.png)、[倒地](./docs/week5_evidence/refinement_20261008/week5_down.png)、[探索](./docs/week5_evidence/refinement_20261008/exploration.png)、[战斗](./docs/week5_evidence/refinement_20261008/battle.png)。正面和侧面有更大的连续亮肤色色块，袖裤与朝向清楚；预览文字在640×360内，地面锚点稳定。图像审阅属于主代理检查，不代替用户对气质／动作自然程度的判断。
 
-新版PNG SHA-256：`e13be6ae0ed90c069bcd195d396b3557b13ac8cfbea97fb95c9dd05f632c0358`；JSON仍为`d600fddcbe1def27e727ef0ebaa41e39535018e0f4ac281a1a73a3dbf55d8146`，固定导出契约未改变。候选包待以本轮已验证源重新生成，完成后追加精确路径和包内检查结果。旧候选保持原记录，不把旧包标作新版。
+新版PNG SHA-256：`e13be6ae0ed90c069bcd195d396b3557b13ac8cfbea97fb95c9dd05f632c0358`；JSON仍为`d600fddcbe1def27e727ef0ebaa41e39535018e0f4ac281a1a73a3dbf55d8146`，固定导出契约未改变。
+
+### 更新的独立候选
+
+美术／逐帧实现本地提交`e946a41`，试玩包链接修订本地提交`243ebb9`。由干净工作树构建的**本轮推荐包**为：
+
+`builds/week5/0.5.0-week5-prototype_243ebb9_20261008T154756Z/`
+
+- 版本`0.5.0-week5-prototype`，`dirty=false`，提交完整值`243ebb9d3eb402f25f18277f649db94ff331e80e`；源快照SHA-256：`bc022b58c926be4856cf9388b79cdedfb56214808836d4007dabaf36f1618122`。
+- PCK SHA-256：`8467e7a29a6e9293023e1dded21407ed616b42929e8e6caa6fe46bfc4cae2d62`；SHA256SUMS列出的22个文件全部通过校验。包内运行时审计`PACK_AUDIT_PASS resources=110 required=34`，开发源与生成参考未进入PCK；四张实绘参考作为包外`review/`资料随试玩表提供。
+- 实际包内角色151、剧情623、引导213、第四周反馈199、跨进程存读131／24项全部零失败。Mac Apple M4实际包内渲染183项通过，`--require-pack`确认没有源码覆盖，16张角色截图经`cmp`与源码实绘逐字节一致；日志`builds/qa/week5_refined_final_pack_render.log`，截图在`builds/qa/week5_refined_final_pack_visual/`。
+- 实际启动包内`character_lab.tscn`并于12帧后正常退出，无脚本错误；日志`builds/qa/week5_refined_lab_entry.log`。可执行的`Character-on-Mac.command`看样本、`Play-on-Mac.command`玩流程；使用本机固定Godot，不是独立Mac App。存档目录仍为`ProjectWumingCharacterPrototype`。
+- 发现初次修订包的`PLAYTEST.md`链接仍指向仓库里的评审／截图，已修正构建器：附带四张实际截图，构建信息链接改为本包文件；`PLAYTEST_LINKS_PASS files=5`，全部链接在候选目录内可解析。首次中间包`..._e946a41_20261008T154300Z`保留，但不作为最终推荐。两次PCK字节有差异，因此最终包单独执行了渲染验证，没有用中间包结果替代。
+
+构建完整日志`builds/qa/week5_refined_bundle_build.log`。上述是本地Mac验证，没有执行Windows EXE真机测试，也未推送或商店发布。此后的文档记录提交不改变本候选的运行时代码或素材。
 
 本周剩余的是新版外观／步态人工评审，以及先前明确保留的体验／硬件检查。已经处理的脸部反馈不要求重写；[试玩表](./docs/week5_playtest.md)只需填写修订后意见。未获得用户确认前，不启动第六周地图／NPC量产，不声称第五周人工验收或首月体验门通过。
