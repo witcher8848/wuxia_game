@@ -2,6 +2,7 @@
 """Build a local investigation/combat candidate in isolation; never publish."""
 import hashlib
 import json
+import re
 import shlex
 import shutil
 import struct
@@ -64,7 +65,25 @@ with tempfile.TemporaryDirectory(prefix=f"week{week}-stage-", dir=root / "builds
         if stream.read(4) != b"PE\0\0" or struct.unpack("<H", stream.read(2))[0] != 0x8664:
             raise SystemExit("Not Windows x86_64")
     shutil.copytree(root / "licenses", out / "licenses")
-    shutil.copy2(root / f"docs/week{week}_playtest.md", out / "PLAYTEST.md")
+    playtest = (root / f"docs/week{week}_playtest.md").read_text()
+    if week == 5:
+        # The review bundle must remain readable after it is copied off-repo.
+        # Ship the referenced render evidence, not links into the source tree.
+        playtest = playtest.replace("[第五周评审追加记录](../11_week5_review.md#2026-10-08脸部反馈修订)",
+                                    "[本包构建信息](./build_info.json)")
+
+        def copy_review_image(match):
+            relative = Path(match.group(1))
+            source = (root / "docs/week5_evidence" / relative).resolve()
+            if not source.is_relative_to((root / "docs/week5_evidence").resolve()) or not source.is_file():
+                raise SystemExit(f"Missing/invalid review evidence: {relative}")
+            destination = out / "review" / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+            return f"](./review/{relative.as_posix()})"
+
+        playtest = re.sub(r"\]\(\./week5_evidence/([^\)]+\.png)\)", copy_review_image, playtest)
+    (out / "PLAYTEST.md").write_text(playtest)
     # Local convenience launcher uses the installed, pinned runtime. It is not a
     # self-contained macOS app and has no relationship to the Windows EXE test.
     launcher = out / "Play-on-Mac.command"
@@ -86,6 +105,13 @@ with tempfile.TemporaryDirectory(prefix=f"week{week}-stage-", dir=root / "builds
         "validated_on": "macOS automated PCK combat and two-process persistence; Windows hardware and human playtest pending",
     }
     (out / "build_info.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    if week == 5:
+        links = re.findall(r"\]\(([^\)]+)\)", playtest)
+        for link in links:
+            target = (out / link.split("#", 1)[0]).resolve()
+            if not target.is_relative_to(out.resolve()) or not target.is_file():
+                raise SystemExit(f"Review bundle link is not self-contained: {link}")
+        print(f"PLAYTEST_LINKS_PASS files={len(links)}")
     (out / "validation").mkdir()
     labels = [f"week{week}_candidate_{name}" for name in ("import", "export", "audit", "story", "onboarding", "feedback")]
     labels += ["week4_pack_story_persistence_write", "week4_pack_story_persistence_read"]
