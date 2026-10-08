@@ -50,3 +50,30 @@
 ## 来源
 
 imagegen内置工具生成的[四向参考与提示规格](./docs/art_reference/protagonist_week5_prompt.md)仅供内部讨论。运行时像素源由Codex按既有规范编写，不读取生成图、不使用其他游戏图像；源码和生成内容已分别登记。无配音／音乐／新字体引入，无商店上传。
+
+## 2026-10-08脸部反馈修订
+
+用户指出实际像素主角脸太黑、与生成参考差距大，并初步肯定首版新外观候选后继续要求完成第五周。本轮将反馈落实到原生32×48测试素材；[生成候选及修订记录](./docs/art_reference/protagonist_front_pixel_trial_20261008.md)继续作为内部参考。没有把高清候选缩小或取色，也没有更改11色色板、脚底(16,44)、57帧槽、播放时序、碰撞和移动／战斗数值。
+
+### 实际改动
+
+- 正／侧／背面头部改为独立几何模板，正面脸颊与额头扩大亮肤色色块、下颌用暖影收边；侧脸有独立鼻眼与发际，不再在正脸上盖深色矩形。背面保持后脑，镜像只用于侧头与方向衣物，文袋和持剑手仍按解剖侧别处理。
+- 重做交领、衣襟折叠、宽袖与松裤；四向步帧的脚部区域交替改变，一只脚抬高一像素、一只脚保持row43，倒地也贴同一落地线。仍是最小测试动作族，不宣称人物外观已定稿。
+- 样本预览新增←／→暂停逐帧；能回绕末帧、四向同步前后检查，空格继续播放。旧入口和1／2／3倍率保留。
+
+### 验证与实际截图
+
+| 范围 | 新版结果与证据 |
+|---|---|
+| 像素源／PNG | `CHARACTER_SOURCE: 220 checks, 0 failures`；原有源／导出／11色／二值透明契约保留，另检验头部亮肤色面积和连通性、两侧皮肤一致性、脚部交替和落地线；日志`builds/qa/character_source.log` |
+| 运行时与逐帧预览 | `CHARACTER_PIPELINE: 150 checks, 0 failures`；逐帧暂停／回绕、同步方向以及原有动作／受伤／倒地／重试通过；日志`builds/qa/character_pipeline.log` |
+| 实际角色渲染 | Mac Apple M4 Compatibility，182项零失败，另捕获四向全部4个行走相位；`builds/qa/week5_refined_character_render.log` |
+| 实际战斗键盘流程 | 433项零失败，真实命令、取消、胜利／重试和界面边界；`builds/qa/week5_refined_combat_render.log` |
+| 实际开场／探索渲染 | 中英、住所／码头入口与质证教学234项零失败；`builds/qa/week5_refined_onboarding_render.log` |
+| 完整回归 | `./tools/check_project.sh`输出`PROJECT_CHECK_PASS`；状态、探索／碰撞、技能预览、剧情闭环和跨进程存读全部通过，各子步骤日志在`builds/qa/`；不是只跑源生成自测 |
+
+已实际查看[1×](./docs/week5_evidence/refinement_20261008/week5_walk_1x.png)、[3×](./docs/week5_evidence/refinement_20261008/week5_walk_3x.png)、[直刺](./docs/week5_evidence/refinement_20261008/week5_thrust.png)、[横斩](./docs/week5_evidence/refinement_20261008/week5_slash.png)、[护剑](./docs/week5_evidence/refinement_20261008/week5_guard.png)、[倒地](./docs/week5_evidence/refinement_20261008/week5_down.png)、[探索](./docs/week5_evidence/refinement_20261008/exploration.png)、[战斗](./docs/week5_evidence/refinement_20261008/battle.png)。正面和侧面有更大的连续亮肤色色块，袖裤与朝向清楚；预览文字在640×360内，地面锚点稳定。图像审阅属于主代理检查，不代替用户对气质／动作自然程度的判断。
+
+新版PNG SHA-256：`e13be6ae0ed90c069bcd195d396b3557b13ac8cfbea97fb95c9dd05f632c0358`；JSON仍为`d600fddcbe1def27e727ef0ebaa41e39535018e0f4ac281a1a73a3dbf55d8146`，固定导出契约未改变。候选包待以本轮已验证源重新生成，完成后追加精确路径和包内检查结果。旧候选保持原记录，不把旧包标作新版。
+
+本周剩余的是新版外观／步态人工评审，以及先前明确保留的体验／硬件检查。已经处理的脸部反馈不要求重写；[试玩表](./docs/week5_playtest.md)只需填写修订后意见。未获得用户确认前，不启动第六周地图／NPC量产，不声称第五周人工验收或首月体验门通过。

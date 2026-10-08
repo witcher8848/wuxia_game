@@ -50,8 +50,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_1: zoom = 1
 		KEY_2: zoom = 2
 		KEY_3: zoom = 3
+		KEY_LEFT: _step_frame(-1)
+		KEY_RIGHT: _step_frame(1)
 	_update_figures()
 	queue_redraw()
+
+func _step_frame(step: int) -> void:
+	paused = true
+	var clip: Dictionary = Hero.data["clips"][figures[0].clip_name()]
+	elapsed = posmod(int(floor(elapsed*clip.fps))+step,clip.cells.size())/float(clip.fps)
 
 func _draw() -> void:
 	draw_rect(Rect2(0,0,640,360),Color("#171820"))
@@ -66,5 +73,5 @@ func _draw() -> void:
 		figures[index].draw_at(self,Vector2.ZERO)
 		draw_set_transform(Vector2.ZERO)
 		draw_string(FONT,Vector2(x-42,284),"帧 %02d" % figures[index].frame_number(),HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#171820") if index%2==0 else Color("#f1e6cf"))
-	draw_string(FONT,Vector2(16,322),"↑↓ / W S 动作 · 1/2/3 倍率 · 空格暂停 · Shift 切换时序",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#f1e6cf"))
+	draw_string(FONT,Vector2(16,322),"↑↓ 动作 · 1/2/3 倍率 · 空格暂停 · Shift 步频 · ←→逐帧",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#f1e6cf"))
 	draw_string(FONT,Vector2(16,346),"32×48 · 脚底(16,44) · 文袋固定角色左侧 · Esc 退出",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#a9ada4"))

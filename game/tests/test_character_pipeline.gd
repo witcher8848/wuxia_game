@@ -81,12 +81,29 @@ func _run() -> void:
 	await key(KEY_SHIFT)
 	check(not lab.paused and lab.sprint,"preview keyboard resume and sprint")
 	await key(KEY_SHIFT)
+	lab.elapsed = 0.0
+	lab._update_figures()
+	var neutral_frames: Array[int] = []
+	for figure: Node in lab.figures: neutral_frames.append(figure.frame_number())
+	await key(KEY_RIGHT)
+	check(lab.paused and is_equal_approx(lab.elapsed,0.125),"single frame stepping pauses on next walk phase")
+	for index: int in lab.figures.size(): check(lab.figures[index].frame_number() == neutral_frames[index]+1,"all directions step together")
+	await key(KEY_LEFT)
+	check(lab.elapsed == 0.0,"single frame previous returns neutral")
+	await key(KEY_LEFT)
+	check(is_equal_approx(lab.elapsed,0.375),"previous frame wraps without negative clip index")
+	await key(KEY_SPACE)
 	for zoom: int in [1,2,3]:
 		lab.zoom = zoom
 		lab.elapsed = 0.13
 		lab._update_figures()
 		lab.queue_redraw()
 		await capture("walk_%dx" % zoom)
+	for phase: int in 4:
+		lab.elapsed = phase/8.0
+		lab._update_figures()
+		lab.queue_redraw()
+		await capture("walk_phase_%d" % phase)
 	for action: int in range(lab.ACTIONS.size()):
 		lab.action_index = action
 		lab.elapsed = 0.13

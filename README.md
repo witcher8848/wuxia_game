@@ -10,7 +10,7 @@
 
 第四周已本地提交`355ada7`，当前分支为`codex/week5-character-pipeline`，未推送。第五周交付一名主角的测试像素素材与动画管线：四向行走、拳／剑／守势、受击／倒地，探索与战斗共用PNG＋帧表；不改变移动／战斗规则，也不是正式人设定稿。
 
-双击[Character.command](./Character.command)看四向全动作样本：↑↓动作、1/2/3倍率、空格暂停、Shift步频；[Run.command](./Run.command)看实际游戏。源格式、57帧槽和再导出方法见[像素源说明](./assets/source/characters/README.md)，进度与验证见[第五周评审](./11_week5_review.md)，意见写入[第五周试玩表](./docs/week5_playtest.md)。独立候选：`python3 tools/build_week5_candidate.py`，输出`builds/week5/`，独立存档目录`ProjectWumingCharacterPrototype`；不覆盖旧版档案。
+双击[Character.command](./Character.command)看四向全动作样本：↑↓动作、1/2/3倍率、空格暂停、Shift步频、←／→暂停逐帧；[Run.command](./Run.command)看实际游戏。2026-10-08已按脸太黑／参考差距反馈修订32×48像素源、四向轮廓与脚步，最新截图见[3×样本](./docs/week5_evidence/refinement_20261008/week5_walk_3x.png)。源格式、57帧槽和再导出方法见[像素源说明](./assets/source/characters/README.md)，进度与验证见[第五周评审](./11_week5_review.md)，意见写入[第五周试玩表](./docs/week5_playtest.md)。独立候选：`python3 tools/build_week5_candidate.py`，输出`builds/week5/`，独立存档目录`ProjectWumingCharacterPrototype`；不覆盖旧版档案。
 
 其他角色／地图仍灰盒。imagegen只用于内部方向参考；实机图集独立整数像素制作。角色风格、第四周引导体验和首月人工门仍待确认，不自动开始正式美术量产。
 
