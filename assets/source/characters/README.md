@@ -21,3 +21,5 @@ walk8FPS、冲刺乘300/180；strike/thrust/slash10FPS；guard3FPS、hit5FPS（�
 `Character.command`中←／→会暂停并前后逐帧，跨动作末帧会循环；空格恢复播放。先在1×检查朝向和脸部，在3×检查像素轮廓与脚底。源回归新增脸部亮色面积／连通性、侧脸一致性和脚部相位检查；这些能防止已知问题回归，但不能自动判断好看或动作自然。
 
 共享表现层另外绘制16×6的固定整数像素椭圆阴影，不写入角色atlas；探索和战斗使用同一阴影几何。战斗插值移动的遮挡顺序按当前显示脚底排序，不按已提交的目标格提前跳层。
+
+2026-10-09独立静态候选源`hero_static_candidate_20261009.gd`只包含正面与左侧，用于造型评审，不参与现有atlas导出器。开发工具`tools/preview_hero_static_candidate.gd`导出原生PNG、1×／3×对比与临时真实场景展示；结果在`docs/art_reference/hero_static_20261009/`，详见[评审记录](../../../docs/hero_static_candidate_review_20261009.md)。候选未经认可前不替换57帧槽或改变动画契约。

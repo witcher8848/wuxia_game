@@ -6,6 +6,7 @@
 
 | ID | 名称／作者 | 来源与许可证 | 用途 | 文件／版本与引入状态 | 修改与发布要求 |
 |---|---|---|---|---|---|
+| HERO-STATIC-20261009 | 主角正面／左侧静态候选／Codex辅助像素源 | 本项目独立整数像素源与既有色板，无外部像素输入；AI-ART-023 | 内部造型评审 | `assets/source/characters/hero_static_candidate_20261009.gd`与`docs/art_reference/hero_static_20261009/`；[来源／哈希／检查](./hero_static_candidate_review_20261009.md) | 原生32×48，不采样或缩小其他图像；用户尚未认可，不接入atlas、不入包或商店 |
 | REF-AI-HERO-FACE-20261008 | 同一主角的正面像素候选及修订／imagegen | 本项目四向参考与首版候选；内置生成与编辑。另观看《逸剑风云决》Steam官方实机作为描述参考，无第三方图像输入；[完整记录](./art_reference/protagonist_front_pixel_trial_20261008.md) | 内部外观试验 | `docs/art_reference/protagonist_front_pixel_trial_20261008.png`、`_v2.png`、`_v3.png`及`_v3_edge_trial.png`，均原样复制，AI-ART-022 | 用户初步肯定首版方向，v3为新主要候选待评；精确像素网格／透明度仍未满足生产规格，不入包、不替换当前角色 |
 | REF-AI-HERO-W5 | 主角四向比例参考／imagegen | 本项目文字规范，内置生成＋一次编辑，无外部图像；详见[记录](./art_reference/protagonist_week5_prompt.md) | 内部参考 | `docs/art_reference/protagonist_turnaround_week5.png`，未进包 | 原样复制；不声称获用户认可或可直接作生产精灵 |
 | HERO-PIXEL-W5 | 主角测试图集／Codex辅助代码源 | 本项目独立整数像素源，无第三方像素输入；AI-ART-021 | 内部候选探索／战斗 | `assets/source/characters/hero_pixel_source.gd` → `assets/runtime/characters/chr_protagonist_atlas.png`及JSON；2026-10-08按脸部反馈重做四向轮廓与步态，PNG哈希`e13be6ae0ed90c069bcd195d396b3557b13ac8cfbea97fb95c9dd05f632c0358` | 工程验证与正式美术／发行审核分离，未缩放或采样生成参考；用户新版外观评审待完成 |
