@@ -26,6 +26,7 @@ var message := ""
 var ai_delay := 0.0
 var auto_ai := true
 var startup_error := ""
+var inspect_status := false
 var _navigation: Array[Dictionary] = []
 var _target_cursors: Dictionary = {}
 
@@ -64,6 +65,7 @@ func _label(at: Vector2, extent: Vector2, font_size: int) -> Label:
 
 
 func actor_changed() -> void:
+	inspect_status = false
 	_navigation.clear()
 	_target_cursors.clear()
 	selected_skill = ""
@@ -106,7 +108,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or battle == null: return
 	# Scene switching may detach this node during a confirmation callback.
 	get_viewport().set_input_as_handled()
-	if event.keycode == KEY_F1:
+	if event.keycode == KEY_V and mode == "inspect":
+		inspect_status = not inspect_status
+	elif event.keycode == KEY_F1:
 		if mode == "help": cancel()
 		else: _open_mode("help")
 	elif event.keycode == KEY_R:
@@ -133,8 +137,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _open_mode(next_mode: String, reset_selection := false) -> void:
 	if next_mode == mode: return
-	_navigation.append({"mode":mode, "selection":selection, "cursor":cursor, "skill":selected_skill, "preview":preview.duplicate(true)})
+	_navigation.append({"mode":mode, "selection":selection, "cursor":cursor, "skill":selected_skill, "preview":preview.duplicate(true), "inspect_status":inspect_status})
 	mode = next_mode
+	if next_mode == "inspect": inspect_status = false
 	if reset_selection: selection = 0
 	message = ""
 
@@ -151,9 +156,11 @@ func cancel() -> void:
 		cursor = previous["cursor"]
 		selected_skill = previous["skill"]
 		preview = previous["preview"]
+		inspect_status = previous.get("inspect_status",false)
 	else:
 		mode = "result" if battle.outcome != "ongoing" else "command"
 		preview.clear()
+		inspect_status = false
 	message = ""
 
 
@@ -212,7 +219,10 @@ func refresh() -> void:
 	if mode == "command": _select()
 	var actor := battle.current_actor_id()
 	var unit := battle.unit(actor)
-	var goal := "击退全部敌人" if battle.objective["kind"] == "eliminate" else "主角抵达右下绿框"
+	var command_spacing: int = -5 if mode == "command" and options().size() >= 9 else -4
+	menu.add_theme_constant_override("line_spacing",command_spacing)
+	disabled_menu.add_theme_constant_override("line_spacing",command_spacing)
+	var goal: String = Text.objective_summary(battle)
 	var order: Array[String] = []
 	for identifier: String in battle.pending_ids(): order.append(battle.unit(identifier)["name"])
 	heading.text = "第%d轮 · %s｜%s" % [battle.round_number, goal, "→".join(order)]
@@ -280,10 +290,14 @@ func refresh() -> void:
 				menu.text += "\n" + intent["kind"]
 				board.highlights = intent["reachable"]
 				board.inspect_enemy = true
-			detail.text = "紫色为移动范围；没有额外情报时\n不显示具体攻击目标。Esc返回。"
-		"help": menu.text = Text.STATUS_HELP; detail.text = goal + "\n普攻回内力1；吐纳回2并守势。"
+			detail.text = Text.status_detail(battle,inspected) if inspect_status and not inspected.is_empty() else "紫色为移动范围；没有额外情报时\n不显示具体攻击目标。V查看状态到期；Esc返回。"
+			footer.text = "方向键查看单位 · V状态/意图切换 · Esc返回 · R重试（确认）"
+		"help": menu.text = Text.STATUS_HELP; detail.text = goal + "\n" + Text.resource_help(battle,actor if not unit.is_empty() else "CHAR_PROTAGONIST")
 		"retry": menu.text = "重试当前配置？\n全部临时战斗进度将恢复。\nE确认，Esc保留当前战斗。"
 		"quit": menu.text = "退出战斗实验场？\n不会影响探索进度。\nE退出，Esc继续。"
+	# Reset requested extent after replacing text; Label may grow to its minimum.
+	menu.size = Vector2(282,120)
+	disabled_menu.size = menu.size
 	board.queue_redraw()
 
 

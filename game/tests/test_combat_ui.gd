@@ -68,6 +68,23 @@ func command(index: int) -> void:
 	await key(KEY_E)
 
 
+func await_previous_hero_animation() -> void:
+	# A preceding successful enemy hit can still be playing when fast injected
+	# input reaches the hero. An action preview must not start a NEW animation;
+	# it is not responsible for erasing an already-confirmed hit/attack clip.
+	var visual: Node2D = screen.board.hero_visual
+	if visual._action.is_empty(): return
+	var previous_action: String = visual._action
+	var before: Dictionary = lab.battle.snapshot()
+	var clip: Dictionary = visual.clip_data()
+	var duration: float = clip["cells"].size()/float(clip["fps"])
+	check(previous_action in ["hit", "guard", "strike", "thrust", "slash"] and visual._elapsed < duration, "prior confirmed non-looping animation still naturally in progress")
+	print("COMBAT_UI_PRIOR_ANIMATION action=%s elapsed=%.4f duration=%.4f" % [previous_action, visual._elapsed, duration])
+	await create_timer(maxf(0.0, duration-visual._elapsed)+0.05).timeout
+	check(visual._action.is_empty(), "prior confirmed animation finishes naturally before new preview")
+	check(lab.battle.snapshot() == before, "waiting for prior animation never alters battle state")
+
+
 func _run() -> void:
 	create_timer(100).timeout.connect(func() -> void: printerr("COMBAT_UI_FAIL watchdog"); quit(1))
 	if "--combat-exit-probe" in OS.get_cmdline_user_args():
@@ -143,6 +160,7 @@ func _run() -> void:
 			check(lab.battle.revision > revision, "actual view schedules enemy turn")
 			screen.auto_ai = false
 		else:
+			if actor == "CHAR_PROTAGONIST": await await_previous_hero_animation()
 			var next: Dictionary = AI.plan(lab.battle, actor, true)
 			if next["destination"] != Grid.cell_of(lab.battle.unit(actor)):
 				await command(0)

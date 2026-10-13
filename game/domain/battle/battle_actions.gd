@@ -38,7 +38,12 @@ static func preview(battle: RefCounted, actor: String, skill_id: String, target:
 			var other: Dictionary = battle.unit(identifier)
 			if identifier != actor and other["team"] == unit["team"] and other["hp"] > 0 and Grid.distance(origin, Grid.cell_of(other)) == 1:
 				affected.append(identifier)
-	return {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": int(skill["qi_cost"]), "restore_qi": int(skill["restore_qi"]), "effects": skill["effects"].duplicate()}
+	var qi_before: int = int(unit["qi"])
+	var qi_cost: int = int(skill["qi_cost"])
+	var nominal_restore: int = battle.action_restore_qi(actor, skill_id)
+	var qi_after: int = mini(int(unit["max_qi"]), qi_before - qi_cost + nominal_restore)
+	var actual_restore: int = qi_after - (qi_before - qi_cost)
+	return {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": qi_cost, "restore_qi": actual_restore, "qi_before": qi_before, "qi_after": qi_after, "cooldown_ready_round": battle.round_number + int(skill["cooldown_rounds"]) + 1 if skill["cooldown_rounds"] > 0 else 0, "destination": target if skill["range_pattern"] == "step" else origin, "effects": skill["effects"].duplicate()}
 
 
 static func range_matches(battle: RefCounted, actor: String, skill: Dictionary, origin: Vector2i, target: Vector2i) -> bool:
@@ -47,9 +52,24 @@ static func range_matches(battle: RefCounted, actor: String, skill: Dictionary, 
 	match skill["range_pattern"]:
 		"self": return target == origin
 		"adjacent": return distance == 1
-		"line": return distance >= 1 and distance <= skill["range"] and Grid.line_clear(battle, origin, target)
+		"line": return distance >= 1 and distance <= skill["range"] and _line_clear(battle, actor, origin, target)
 		"step": return target != origin and battle.is_free(target) and Grid.reachable(battle, actor, int(skill["range"]), origin, true).has(target)
 	return false
+
+
+static func _line_clear(battle: RefCounted, actor: String, origin: Vector2i, target: Vector2i) -> bool:
+	# AI previews a move without mutating the live board. Its old cell becomes
+	# empty after that move, but other units and walls must still block the ray.
+	if origin == Grid.cell_of(battle.unit(actor)):
+		return Grid.line_clear(battle, origin, target)
+	if origin == target or (origin.x != target.x and origin.y != target.y): return false
+	var direction := Vector2i(signi(target.x-origin.x), signi(target.y-origin.y))
+	var cell := origin+direction
+	while cell != target:
+		var occupant: String = battle.unit_at(cell)
+		if battle.is_obstacle(cell) or (not occupant.is_empty() and occupant != actor): return false
+		cell += direction
+	return battle.contains(target) and not battle.is_obstacle(target)
 
 
 static func target_cells(battle: RefCounted, actor: String, skill_id: String) -> Array[Vector2i]:

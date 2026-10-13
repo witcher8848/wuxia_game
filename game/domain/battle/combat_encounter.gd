@@ -5,6 +5,8 @@ const Grid = preload("res://game/domain/battle/battle_grid.gd")
 const Skills = preload("res://game/domain/battle/battle_skills.gd")
 const Actions = preload("res://game/domain/battle/battle_actions.gd")
 const Effects = preload("res://game/domain/battle/battle_effects.gd")
+const Loadout = preload("res://game/domain/battle/martial_loadout.gd")
+const AIProfiles = preload("res://game/domain/battle/battle_ai_profiles.gd")
 var revision := 0
 var outcome := "ongoing"
 var objective: Dictionary = {}
@@ -13,26 +15,36 @@ var move_spent := 0
 var move_budget := 0
 var events: Array[String] = []
 var _skills: Dictionary = {}
+var _ai_profiles: Dictionary = {}
 var _initial: Dictionary = {}
 
 
 func configure(definition: Dictionary) -> String:
 	if not GameState.is_json_value(definition):
 		return "Combat definition must be finite JSON."
-	var probe := BattleState.new()
-	var error := probe.configure(definition)
-	if not error.is_empty():
-		return error
-	error = Skills.validate(definition.get("skill_definitions"))
+	var error := Skills.validate(definition.get("skill_definitions"))
 	if not error.is_empty():
 		return error
 	var indexed: Dictionary = Skills.index(definition["skill_definitions"])
-	for unit_data: Dictionary in definition["units"]:
+	if not definition.get("units") is Array: return "Missing combat units."
+	var candidate: Dictionary = definition.duplicate(true)
+	for index: int in range(candidate["units"].size()):
+		if not candidate["units"][index] is Dictionary: return "Invalid combat unit."
+		var normalized: Dictionary = Loadout.normalize_unit(candidate["units"][index], indexed)
+		if not normalized["error"].is_empty(): return normalized["error"]
+		candidate["units"][index] = normalized["unit"]
+	# Passive capacity must be applied before checking qi <= max_qi.
+	var probe := BattleState.new()
+	error = probe.configure(candidate)
+	if not error.is_empty(): return error
+	error = AIProfiles.validate(candidate.get("ai_profiles", {}), indexed, candidate["units"])
+	if not error.is_empty(): return error
+	for unit_data: Dictionary in candidate["units"]:
 		if not unit_data.get("skills") is Array:
 			return "Unit needs skill loadout."
 		var unique: Dictionary = {}
 		for identifier: Variant in unit_data["skills"]:
-			if not identifier is String or not indexed.has(identifier) or indexed[identifier]["ultimate"] or unique.has(identifier):
+			if not identifier is String or not indexed.has(identifier) or indexed[identifier]["ultimate"] or indexed[identifier]["category"] == "内功" or unique.has(identifier):
 				return "Invalid skill loadout."
 			unique[identifier] = true
 		var ultimate: Variant = unit_data.get("ultimate")
@@ -40,8 +52,8 @@ func configure(definition: Dictionary) -> String:
 			return "Unit needs a registered ultimate."
 		if not ultimate.get("kind") in ["damage_received", "takedowns"] or not BattleState._whole(ultimate.get("threshold")) or ultimate["threshold"] < 1 or ultimate["threshold"] > 999:
 			return "Invalid ultimate requirement."
-	var goal: Variant = definition.get("objective")
-	if not goal is Dictionary or not goal.get("kind") in ["eliminate", "escape"]:
+	var goal: Variant = candidate.get("objective")
+	if not goal is Dictionary or not goal.get("kind") in ["eliminate", "escape", "survive"]:
 		return "Unsupported prototype objective."
 	if goal["kind"] == "escape":
 		if not goal.get("unit_id") is String or probe.unit(goal["unit_id"]).get("team", "") != "ally" or not BattleState._pair(goal.get("cell")):
@@ -49,6 +61,9 @@ func configure(definition: Dictionary) -> String:
 		var cell := Vector2i(goal["cell"][0], goal["cell"][1])
 		if not probe.contains(cell) or probe.is_obstacle(cell):
 			return "Escape cell must be walkable."
+	if goal["kind"] == "survive":
+		if not BattleState._whole(goal.get("rounds")) or goal["rounds"] < 1 or goal["rounds"] > 99 or not goal.get("protected_unit_id") is String or probe.unit(goal["protected_unit_id"]).get("team", "") != "ally" or probe.unit(goal["protected_unit_id"]).get("hp", 0) <= 0:
+			return "Survival requires positive rounds and a living allied protected unit."
 	var teams := {"ally": false, "enemy": false}
 	for identifier: String in probe.unit_ids():
 		if probe.unit(identifier)["hp"] > 0:
@@ -56,8 +71,9 @@ func configure(definition: Dictionary) -> String:
 	if not teams["ally"] or not teams["enemy"]:
 		return "Encounter requires two live sides."
 	# All checks complete before replacing the live encounter.
-	super.configure(definition)
+	super.configure(candidate)
 	_skills = indexed
+	_ai_profiles = candidate.get("ai_profiles", {}).duplicate(true)
 	objective = goal.duplicate(true)
 	outcome = "ongoing"
 	events.clear()
@@ -79,12 +95,25 @@ func skill(identifier: String) -> Dictionary:
 	return _skills.get(identifier, {}).duplicate(true)
 
 
+func ai_profile(actor: String) -> Dictionary:
+	return _ai_profiles.get(_units.get(actor, {}).get("ai_profile", ""), {}).duplicate(true)
+
+
+func action_restore_qi(actor: String, skill_id: String) -> int:
+	var unit_data: Dictionary = _units.get(actor, {})
+	if unit_data.has("loadout"):
+		var rules: Dictionary = unit_data["passive_rules"]
+		if skill_id == "SK_FIST_BASIC": return int(rules["basic_restore_qi"])
+		if skill_id == "ACT_BREATH": return int(rules["breath_restore_qi"])
+	return int(_skills.get(skill_id, {}).get("restore_qi", 0))
+
+
 func abilities(actor: String) -> Array[String]:
 	var result: Array[String] = []
 	if not _units.has(actor):
 		return result
 	for identifier: String in Skills.BASE + _units[actor]["skills"] + [_units[actor]["ultimate"]["skill_id"]]:
-		if not identifier in result:
+		if not identifier in result and _skills[identifier]["category"] != "内功":
 			result.append(identifier)
 	return result
 
@@ -158,6 +187,12 @@ func _check_outcome() -> void:
 		outcome = "victory"
 	elif objective["kind"] == "eliminate" and live["enemy"] == 0:
 		outcome = "victory"
+	elif objective["kind"] == "survive":
+		if _units[objective["protected_unit_id"]]["hp"] == 0:
+			outcome = "defeat"
+		elif round_number >= int(objective["rounds"]) and _pending.is_empty():
+			# This check precedes _begin_round(): all live units completed N rounds.
+			outcome = "victory"
 	# In escape mode defeating enemies is not the objective; movement continues.
 	if outcome != "ongoing":
 		_pending.clear()
@@ -204,6 +239,7 @@ func forecast_turn(actor: String) -> CombatEncounter:
 	forecast.round_number = round_number
 	forecast.objective = objective.duplicate(true)
 	forecast._skills = _skills.duplicate(true)
+	forecast._ai_profiles = _ai_profiles.duplicate(true)
 	forecast.revision = revision
 	forecast.events.assign(events)
 	forecast.moved = moved

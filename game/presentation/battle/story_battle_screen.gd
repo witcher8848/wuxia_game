@@ -47,7 +47,7 @@ func _open_briefing() -> void:
 		tr("BATTLE_INTEL_HOME" if reveal_intent else "BATTLE_NO_HOME"),
 		tr("BATTLE_INTEL_DOCK" if ferry_deployment else "BATTLE_NO_DOCK"),
 		tr("BATTLE_STORY_LIMITS"),
-		"战斗规则（PgDn）\n" + Text.STATUS_HELP + "\n普攻回内力1；吐纳回2并守势。"])
+		"战斗规则（PgDn）\n" + Text.STATUS_HELP + "\n" + Text.resource_help(battle, "CHAR_PROTAGONIST")])
 	briefing_body.scroll_to_line(0)
 	briefing.show()
 
@@ -108,7 +108,13 @@ func confirm() -> void:
 func refresh() -> void:
 	super.refresh()
 	if battle == null or board == null: return
-	if mode in ["command", "result", "retry", "quit", "help"]:
+	if mode == "command" and selection > 0 and battle.unit(battle.current_actor_id()).get("team") == "ally":
+		# Keep both the shared range legend and the focused command's explanation.
+		# Replacing the shared controls line makes room for story context without
+		# hiding the reason a gray skill cannot execute or overflowing the footer.
+		var shared_lines := footer.text.split("\n")
+		footer.text = shared_lines[0] + "\n" + shared_lines[-1] + "\nE确认 · Esc返回 · F查看 · F1情报 · R重试｜首轮推演:%s · 近道:%s" % ["有" if reveal_intent else "无", "有" if ferry_deployment else "无"]
+	elif mode in ["command", "result", "retry", "quit", "help"]:
 		footer.text = "E 确认 · Esc 返回 · F 查看单位 · F1 目标/情报 · R 重试\n" + ("住所校勘→首轮F推演" if reveal_intent else "未校勘→无首轮推演") + " · " + ("码头质证→近道部署" if ferry_deployment else "未质证→旧道部署")
 		footer.text += "\n" + (message if not message.is_empty() else "击退追兵，掩护证人撤离；只有胜利结算才推进时段")
 	if mode == "result":
@@ -119,7 +125,12 @@ func refresh() -> void:
 		detail.text = "击退刀役与弓役，掩护老妇撤离。\nF查看敌人；情报只在首轮有效。"
 	elif mode == "inspect":
 		footer.text = "方向键查看单位 · Esc返回 · R重试（确认）\n战中不能保存；只有胜利结算才推进时段"
+		var inspected := battle.unit(battle.unit_at(cursor))
+		if not inspected.is_empty(): detail.text = Text.status_detail(battle, inspected)
 		_show_forecast()
+		if get("inspect_status") == true and not inspected.is_empty():
+			detail.text = Text.status_detail(battle, inspected)
+		footer.text += "\nV 状态期限／推演说明"
 	board.queue_redraw()
 
 func _show_forecast() -> void:
@@ -140,10 +151,21 @@ func _show_forecast() -> void:
 	var ability: Dictionary = forecast.skill(plan["skill_id"])
 	var range_skill: String = plan["skill_id"]
 	if ability["target"] != "enemy":
-		range_skill = "EN_BOW_SHOT" if inspected["archetype"] == "EN_YAMEN_BOW" else "EN_BLADE_PIN"
-	var model := SkillPreview.build(forecast, inspected["id"], range_skill, plan["target"])
+		range_skill = ""
+		# Show a theoretical attack shape only for a registered attack in this
+		# actor's own loadout; no archetype-specific phantom skills are injected.
+		for identifier: String in inspected.get("skills", []):
+			if forecast.skill(identifier).get("target") == "enemy":
+				range_skill = identifier
+				break
+		if range_skill.is_empty():
+			for identifier: String in forecast.abilities(inspected["id"]):
+				if forecast.skill(identifier).get("target") == "enemy":
+					range_skill = identifier
+					break
+	var model: Dictionary = SkillPreview.build(forecast, inspected["id"], range_skill, plan["target"]) if not range_skill.is_empty() else {"range": [], "affected": []}
 	board.range_cells = model["range"]
-	board.range_offensive = true
+	board.range_offensive = not range_skill.is_empty()
 	board.valid_targets = [plan["target"]] if ability["target"] == "enemy" else []
 	board.affected = model["affected"] if ability["target"] == "enemy" else []
 	board.path = [Grid.cell_of(inspected), destination]
@@ -151,5 +173,5 @@ func _show_forecast() -> void:
 	if ability["target"] != "enemy": target_name = "自身"
 	menu.text += "\n住所校勘情报：预计移至(%d,%d)" % [destination.x, destination.y]
 	menu.text += "\n%s → %s" % [ability["name"], target_name]
-	detail.text = "攻击距离 %d 格（非移动距离）。\n按当前站位推演，行动前会重算。\n首轮有效；不保证后续站位不变。" % int(forecast.skill(range_skill)["range"])
+	detail.text = "攻击距离 %d 格（非移动距离）。\n按当前站位推演，行动前会重算。\n首轮有效；不保证后续站位不变。" % int(forecast.skill(range_skill).get("range", 0))
 	footer.text = "紫色移动 · 淡色为推演落点攻击范围（不等于本轮会攻击）\n亮框为预计攻击目标 · 方向键查看 · Esc返回；推演不消耗行动"

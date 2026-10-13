@@ -89,6 +89,7 @@ func animate_action(plan: Dictionary) -> void:
 	var clip := "guard"
 	if skill["target"] == "enemy":
 		clip = ("slash" if skill["ultimate"] else "thrust") if skill["weapon_tag"] == "剑" else "strike"
+		if skill.get("presentation_key","") == "SLASH": clip = "slash"
 	hero_visual.play_action(clip,direction)
 
 func _process(delta: float) -> void:

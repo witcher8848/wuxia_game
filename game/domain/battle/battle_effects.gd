@@ -23,7 +23,7 @@ static func execute(battle: RefCounted, plan: Dictionary) -> void:
 	var actor: String = plan["actor"]
 	var unit: Dictionary = battle._units[actor]
 	var skill: Dictionary = battle.skill(plan["skill_id"])
-	unit["qi"] = mini(int(unit["max_qi"]), int(unit["qi"]) - int(skill["qi_cost"]) + int(skill["restore_qi"]))
+	unit["qi"] = plan["qi_after"]
 	if skill["cooldown_rounds"] > 0:
 		unit["cooldowns"][skill["id"]] = battle.round_number + int(skill["cooldown_rounds"]) + 1
 	if skill["ultimate"]:

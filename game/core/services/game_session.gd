@@ -8,9 +8,12 @@ var _handover: Dictionary = {}
 var _handover_sequence := 0
 var _story: Dictionary = {}
 var _story_sequence := 0
+var _trial_token := ""
 
 
 func start_new_game() -> GameState:
+	if combat_active(): return state
+	_trial_token = ""
 	_handover.clear()
 	_story.clear()
 	var next_state: GameState = GameState.new()
@@ -28,21 +31,25 @@ func start_new_game() -> GameState:
 
 
 func replace_state(next_state: GameState) -> Error:
+	if not _trial_token.is_empty(): return ERR_BUSY
 	if next_state == null or not next_state.validate().is_empty():
 		return ERR_INVALID_DATA
 	var content: Node = _content_db()
 	if content != null and not content.validate_investigation_state(next_state).is_empty():
 		return ERR_INVALID_DATA
+	if content != null and not content.martial_configuration(next_state).get("error","").is_empty():
+		return ERR_INVALID_DATA
 	# Own a copy: a UI preview or loaded snapshot cannot mutate the live route later.
 	state = GameState.from_dict(next_state.to_dict())
 	_handover.clear()
 	_story.clear()
+	_trial_token = ""
 	state_replaced.emit()
 	return OK
 
 
 func update_player_position(position: Vector2) -> Error:
-	if not _story.is_empty(): return ERR_BUSY
+	if combat_active(): return ERR_BUSY
 	if not is_finite(position.x) or not is_finite(position.y):
 		return ERR_INVALID_PARAMETER
 	state.player_state["position"] = {"x": position.x, "y": position.y}
@@ -50,7 +57,7 @@ func update_player_position(position: Vector2) -> Error:
 
 
 func enter_region(scene_id: String, spawn_id: String) -> Error:
-	if not _story.is_empty(): return ERR_BUSY
+	if combat_active(): return ERR_BUSY
 	var content: Node = _content_db()
 	if content == null or not content.has_spawn(scene_id, spawn_id):
 		return ERR_INVALID_PARAMETER
@@ -66,7 +73,7 @@ func enter_region(scene_id: String, spawn_id: String) -> Error:
 
 
 func mark_inspected(interaction_id: String) -> Error:
-	if not _story.is_empty(): return ERR_BUSY
+	if combat_active(): return ERR_BUSY
 	var content: Node = _content_db()
 	if content == null or not content.has_inspectable(interaction_id):
 		return ERR_INVALID_PARAMETER
@@ -79,7 +86,7 @@ func is_inspected(interaction_id: String) -> bool:
 
 
 func apply_investigation_step(step_id: String) -> Dictionary:
-	if not _story.is_empty() or step_id in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
+	if combat_active() or step_id in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
 		return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	var content: Node = _content_db()
 	if content == null:
@@ -100,7 +107,7 @@ func _content_db() -> Node:
 
 
 func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
-	if not _story.is_empty(): return {"error": ERR_BUSY}
+	if combat_active(): return {"error": ERR_BUSY}
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE}
@@ -122,7 +129,7 @@ func choose_dialogue(node_id: String, choice_id: String) -> Dictionary:
 
 
 func resolve_inquiry(identifier: String, selected: Array) -> Dictionary:
-	if not _story.is_empty(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
+	if combat_active(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE, "feedback_key": "INV_COMMAND_FAILED"}
@@ -134,7 +141,7 @@ func resolve_inquiry(identifier: String, selected: Array) -> Dictionary:
 
 
 func preview_original_handover() -> Dictionary:
-	if not _story.is_empty(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
+	if combat_active(): return {"error": ERR_BUSY, "feedback_key": "INV_COMMAND_FAILED"}
 	_handover.clear()
 	var content: Node = _content_db()
 	if content == null or state.scene_id != "SCENE_TOWN_STREET" or not is_inspected("DOC_STREET_NOTICE"):
@@ -164,7 +171,7 @@ func cancel_original_handover(token: String) -> void:
 
 
 func begin_story_encounter() -> Dictionary:
-	if not _story.is_empty() or state.scene_id != "SCENE_RIVER_DOCK" or not is_inspected("NPC_DOCK_WORKER"):
+	if combat_active() or state.scene_id != "SCENE_RIVER_DOCK" or not is_inspected("NPC_DOCK_WORKER"):
 		return {"error": ERR_UNAVAILABLE}
 	var content: Node = _content_db()
 	if content == null: return {"error": ERR_UNAVAILABLE}
@@ -182,6 +189,44 @@ func begin_story_encounter() -> Dictionary:
 
 func story_encounter_active() -> bool:
 	return not _story.is_empty()
+
+func combat_active() -> bool:
+	return not _story.is_empty() or not _trial_token.is_empty()
+
+
+func martial_configuration() -> Dictionary:
+	var content: Node = _content_db()
+	return content.martial_configuration(state) if content != null else {"error":"ContentDB unavailable.","state":{}}
+
+
+func set_martial_loadout(loadout: Dictionary) -> Error:
+	if not _story.is_empty() or not _trial_token.is_empty(): return ERR_BUSY
+	var content: Node = _content_db()
+	if content == null: return ERR_UNAVAILABLE
+	var normalized: Dictionary = content.martial_configuration(state)
+	if not normalized["error"].is_empty(): return ERR_INVALID_DATA
+	var proposed: Dictionary = normalized["state"].duplicate(true)
+	proposed["loadout"] = loadout.duplicate(true)
+	var checked: Dictionary = preload("res://game/domain/battle/martial_loadout.gd").normalize_state(proposed,content.martial_definitions())
+	if not checked["error"].is_empty(): return ERR_INVALID_DATA
+	var candidate: GameState = GameState.from_dict(state.to_dict())
+	if candidate == null: return ERR_INVALID_DATA
+	candidate.martial_states = checked["state"].duplicate(true)
+	# Only a confirmed out-of-combat configuration changes persistent state.
+	# It spends no story time and leaves HP, quests, relationships/evidence intact.
+	return replace_state(candidate)
+
+
+func lock_martial_trial() -> String:
+	if not _story.is_empty() or not _trial_token.is_empty(): return ""
+	_trial_token = "TRIAL_%d" % Time.get_ticks_usec()
+	return _trial_token
+
+
+func unlock_martial_trial(token: String) -> bool:
+	if token.is_empty() or token != _trial_token: return false
+	_trial_token = ""
+	return true
 
 
 func _owns_story(token: String) -> bool:

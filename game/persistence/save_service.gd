@@ -13,7 +13,7 @@ var test_root: String = ""
 
 func save_game(slot: String, state: GameState) -> Error:
 	var session: Node = get_node_or_null("/root/GameSession") if is_inside_tree() else null
-	if session != null and session.story_encounter_active(): return ERR_BUSY
+	if session != null and session.combat_active(): return ERR_BUSY
 	if not is_valid_slot(slot) or not _is_valid_root():
 		return ERR_INVALID_PARAMETER
 	if state == null or not state.validate().is_empty():

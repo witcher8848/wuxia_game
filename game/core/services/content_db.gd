@@ -238,7 +238,19 @@ func validate_investigation_state(state: GameState) -> String:
 func validate_persistent_state(state: GameState) -> String:
 	var error: String = _investigation.validate_state(state)
 	if not error.is_empty(): return error
+	var martial: Dictionary = martial_configuration(state)
+	if not martial.get("error","").is_empty(): return martial["error"]
 	return _story_encounter.validate_persistent_state(state)
+
+
+func martial_definitions() -> Array:
+	var definitions: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
+	return definitions.duplicate(true) if definitions is Array else []
+
+
+func martial_configuration(state: GameState) -> Dictionary:
+	if state == null: return {"error":"Missing martial state.","state":{}}
+	return preload("res://game/domain/battle/martial_loadout.gd").normalize_state(state.martial_states,martial_definitions())
 
 
 func has_spawn(scene_id: String, spawn_id: String) -> bool:

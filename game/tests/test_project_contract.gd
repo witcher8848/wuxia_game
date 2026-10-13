@@ -48,7 +48,7 @@ func _run() -> void:
 	app.reset_contexts()
 	app.pop_context()
 	check(app.current_context() == &"exploration", "cannot pop base context")
-	for action in ["move_up", "move_down", "move_left", "move_right", "confirm", "cancel", "sprint", "inspect", "open_codex", "tab_previous", "tab_next", "pause", "quick_save", "toggle_threat"]:
+	for action in ["move_up", "move_down", "move_left", "move_right", "confirm", "cancel", "sprint", "inspect", "open_codex", "open_martial", "tab_previous", "tab_next", "pause", "quick_save", "toggle_threat"]:
 		check(InputMap.has_action(action), "input exists " + action)
 		check(not InputMap.action_get_events(action).is_empty(), "input bound " + action)
 	var key := InputEventKey.new()

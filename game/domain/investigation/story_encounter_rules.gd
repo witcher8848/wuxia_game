@@ -44,6 +44,15 @@ func prepare(state: GameState) -> Dictionary:
 	if not _valid_relationship(state): return _failure(ERR_INVALID_DATA)
 	var ferry: bool = state.world_flags.get(_data["ferry_fact"], false)
 	var definition: Dictionary = _with_deployment(_data) if ferry else _data["battle"].duplicate(true)
+	# Empty schema-1 records preserve the original story seed. An explicitly
+	# confirmed preparation is applied to the protagonist, not the companion.
+	if not state.martial_states.get("loadout",{}).is_empty():
+		var prepared: Dictionary = preload("res://game/domain/battle/martial_loadout.gd").normalize_state(state.martial_states,definition["skill_definitions"])
+		if not prepared["error"].is_empty(): return _failure(ERR_INVALID_DATA)
+		for unit: Dictionary in definition["units"]:
+			if unit["id"] != "CHAR_PROTAGONIST": continue
+			unit["loadout"] = prepared["state"]["loadout"].duplicate(true)
+			unit["mastery"] = prepared["state"]["mastery"].duplicate(true)
 	var battle := Combat.new()
 	if not battle.configure(definition).is_empty(): return _failure(ERR_INVALID_DATA)
 	return {"error": OK, "state": proposal["state"], "battle": battle, "id": _data["id"], "reveal": state.world_flags.get(_data["formation_fact"], false), "ferry": ferry}

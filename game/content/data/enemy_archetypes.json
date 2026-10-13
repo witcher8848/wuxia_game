@@ -1,0 +1,20 @@
+{
+  "EN_YAMEN_BLADE": {
+    "name": "刀役", "team": "enemy", "archetype": "EN_YAMEN_BLADE",
+    "hp": 8, "max_hp": 8, "qi": 3, "max_qi": 3, "agility": 2, "move": 3, "power": 2, "guard": 2,
+    "skills": ["EN_BLADE_PIN"], "ultimate": {"skill_id": "ULT_FIST", "kind": "takedowns", "threshold": 99},
+    "ai_profile": "AI_PRESSURE"
+  },
+  "EN_YAMEN_BOW": {
+    "name": "弓役", "team": "enemy", "archetype": "EN_YAMEN_BOW",
+    "hp": 6, "max_hp": 6, "qi": 3, "max_qi": 3, "agility": 3, "move": 2, "power": 2, "guard": 1,
+    "skills": ["EN_BOW_SHOT", "EN_BOW_BLEED"], "ultimate": {"skill_id": "ULT_FIST", "kind": "takedowns", "threshold": 99},
+    "ai_profile": "AI_RANGED"
+  },
+  "EN_YAMEN_CATCHER": {
+    "name": "县衙捕手", "team": "enemy", "archetype": "EN_YAMEN_CATCHER",
+    "hp": 9, "max_hp": 9, "qi": 3, "max_qi": 3, "agility": 1, "move": 3, "power": 2, "guard": 1,
+    "skills": ["EN_CATCHER_LOCK"], "ultimate": {"skill_id": "ULT_FIST", "kind": "takedowns", "threshold": 99},
+    "ai_profile": "AI_CAPTURE"
+  }
+}

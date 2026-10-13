@@ -28,9 +28,13 @@ var activity_panel: PanelContainer
 var _activity_from_dialogue := false
 var _activity_initial_state: Dictionary = {}
 const StoryBattleScreen = preload("res://game/presentation/battle/story_battle_screen.gd")
+const MartialPanel = preload("res://game/presentation/battle/martial_preparation_panel.gd")
+var martial_panel: PanelContainer
 var story_battle_screen: Node2D
 var _story_layer: CanvasLayer
 var _story_token := ""
+var _combat_v1_screen: Node
+var _combat_v1_layer: CanvasLayer
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
@@ -171,6 +175,36 @@ func _show_title() -> void:
 	_button(box, tr("UI_ENTER_YARD"), _start_game, true)
 	_button(box, tr("UI_LOAD"), _show_load_slots)
 	_button(box, tr("UI_QUIT"), func() -> void: get_tree().quit())
+	_button(box, "战斗V1演武（测试）", _open_combat_v1)
+	box.add_theme_constant_override("separation", 5)
+	menu.size.y = 218
+
+func _open_combat_v1() -> void:
+	if GameSession.combat_active() or transitioning: return
+	var packed: PackedScene = load("res://game/presentation/battle/combat_v1_trial.tscn")
+	if packed == null: return
+	_combat_v1_screen = packed.instantiate()
+	_combat_v1_layer = CanvasLayer.new()
+	_combat_v1_layer.layer = 4
+	add_child(_combat_v1_layer)
+	$UIRoot.hide()
+	$SceneHost.hide()
+	$SceneHost.process_mode = Node.PROCESS_MODE_DISABLED
+	_combat_v1_screen.exit_requested.connect(_close_combat_v1)
+	_combat_v1_layer.add_child(_combat_v1_screen)
+
+func _close_combat_v1() -> void:
+	if not is_instance_valid(_combat_v1_layer): return
+	_combat_v1_layer.hide()
+	_combat_v1_layer.process_mode = Node.PROCESS_MODE_DISABLED
+	# Exit the trial synchronously before rebuilding title input contexts.
+	remove_child(_combat_v1_layer)
+	_combat_v1_layer.queue_free()
+	_combat_v1_screen = null
+	$SceneHost.process_mode = Node.PROCESS_MODE_INHERIT
+	$SceneHost.show()
+	$UIRoot.show()
+	_show_title()
 
 func _start_game() -> void:
 	GameSession.start_new_game()
@@ -372,6 +406,29 @@ func _close_activity() -> void:
 			reading_panel.go_to("@entry")
 		else: reading_panel.refresh()
 	_activity_from_dialogue = false
+	_reset_movement()
+
+func _open_martial() -> void:
+	if transitioning or App.current_context() != &"exploration" or GameSession.combat_active(): return
+	var configuration: Dictionary = GameSession.martial_configuration()
+	if not configuration["error"].is_empty():
+		status.text = "武学数据无效；未改变当前配置。"
+		return
+	_reset_movement()
+	App.push_context(&"codex")
+	if is_instance_valid(martial_panel): martial_panel.queue_free()
+	martial_panel = MartialPanel.new()
+	martial_panel.configure(configuration["state"], ContentDB.martial_definitions())
+	martial_panel.closed.connect(_close_martial)
+	martial_panel.loadout_submitted.connect(func(loadout: Dictionary) -> void:
+		var error: Error = GameSession.set_martial_loadout(loadout)
+		martial_panel.set_message("已应用；退出后F5存档。" if error == OK else "无法应用；当前战斗或熟练状态已改变。"))
+	$UIRoot.add_child(martial_panel)
+
+func _close_martial() -> void:
+	if not is_instance_valid(martial_panel) or not martial_panel.visible: return
+	martial_panel.hide()
+	if App.current_context() == &"codex": App.pop_context()
 	_reset_movement()
 
 func _start_story_battle() -> void:
@@ -730,6 +787,10 @@ func _input(event: InputEvent) -> void:
 	if transitioning:
 		get_viewport().set_input_as_handled()
 		return
+	if App.current_context() == &"codex" and is_instance_valid(martial_panel) and martial_panel.visible:
+		get_viewport().set_input_as_handled()
+		martial_panel.handle_input(event)
+		return
 	if App.current_context() == &"codex" and is_instance_valid(activity_panel) and activity_panel.visible:
 		activity_panel.handle_input(event)
 		return
@@ -754,6 +815,10 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo() or transitioning or App.current_context() == &"battle":
 		return
+	if event.is_action_pressed("open_martial") and App.current_context() == &"exploration":
+		get_viewport().set_input_as_handled()
+		_open_martial()
+		return
 	if event.is_action_pressed("open_codex") and App.current_context() == &"exploration":
 		get_viewport().set_input_as_handled()
 		_open_activity("@journal")
@@ -777,7 +842,7 @@ func _process(_delta: float) -> void:
 	if App.current_context() == &"exploration" and $SceneHost.get_child_count() == 1:
 		var region: Node = $SceneHost.get_child(0)
 		var guidance: Dictionary = ObjectiveGuide.project(GameSession.state)
-		objective_label.text = tr(guidance["key"]) + "  ·  J " + tr("INV_CODEX_TITLE")
+		objective_label.text = tr(guidance["key"]) + "  ·  J " + tr("INV_CODEX_TITLE") + " · M武学"
 		for destination: Dictionary in region.definition.get("interactions", []):
 			if destination["id"] != guidance["target"]: continue
 			var offset: Vector2 = Vector2(destination["position"][0], destination["position"][1]) - region.player_position
