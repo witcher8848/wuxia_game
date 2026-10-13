@@ -4,15 +4,15 @@
 
 这是两人协作的2D像素武侠RPG项目。六个月目标是60～90分钟垂直切片与Steam Demo候选版；当前已连接三个区域探索、质证／校勘、情报影响实际战斗、一次性结算与跨进程存读的首个灰盒闭环，尚非完整剧情Demo。探索版已收到约7分钟的Mac试玩与基线确认，速度／独立存档槽反馈已实现但待新版人工复测；战斗原型已收到并处理三轮对话试玩反馈，不要求重复填表，画面与数值后续细化。新玩家测试获授权转为P2跟踪。各阶段证据见[第二周评审](./08_week2_review.md)、[反馈处理单](./docs/week2_feedback_followup.md)及[第三周评审](./09_week3_review.md)。
 
-第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周反馈收口为`cf83a35`，第四周Day 22为`f21e504`、第四周反馈收口为`355ada7`。当前在`codex/week5-character-pipeline`开发主角测试资源；本轮只有本地Git提交，未推送、发布或触发远端CI。
+第一周工程已推送到 [codex/week1-foundation 候选分支](https://github.com/witcher8848/wuxia_game/tree/codex/week1-foundation)，尚未合并到`main`；`week1-local-2026-09-15`标签保留当时里程碑。第二周为本地`c8c1e28`，第三周反馈收口为`cf83a35`，第四周Day 22为`f21e504`、第四周反馈收口为`355ada7`。第五周新版主角交付已本地提交为`8d72416`；未推送、发布或触发远端CI。
 
 ## 第五周当前进度
 
-第四周已本地提交`355ada7`，当前分支为`codex/week5-character-pipeline`，未推送。第五周交付一名主角的测试像素素材与动画管线：四向行走、拳／剑／守势、受击／倒地，探索与战斗共用PNG＋帧表；不改变移动／战斗规则，也不是正式人设定稿。
+第五周Day29～35工程交付完成：原imagegen PNG／原alpha已接入，四向行走、拳／剑／守势、受击／倒地共57逻辑槽／29clips，探索、战斗和角色样本共用新默认。一名主角的显示采用约48×72名义框，碰撞20×12、步速180／冲刺300和战斗规则保持不变；不是正式人设定稿或Steam发行版。
 
-双击[Character.command](./Character.command)看四向全动作样本：↑↓动作、1/2/3倍率、空格暂停、Shift步频、←／→暂停逐帧；[Run.command](./Run.command)看实际游戏。2026-10-08已按脸太黑／参考差距反馈修订32×48像素源、四向轮廓与脚步，最新截图见[3×样本](./docs/week5_evidence/refinement_20261008/week5_walk_3x.png)。源格式、57帧槽和再导出方法见[像素源说明](./assets/source/characters/README.md)，进度与验证见[第五周评审](./11_week5_review.md)，意见写入[第五周试玩表](./docs/week5_playtest.md)。独立候选：`python3 tools/build_week5_candidate.py`，输出`builds/week5/`，独立存档目录`ProjectWumingCharacterPrototype`；不覆盖旧版档案。
+双击[Character.command](./Character.command)看四向全动作样本：↑↓动作、1/2/3倍率、空格暂停、Shift步频、←／→暂停逐帧；[Run.command](./Run.command)看当前开发源码。新版截图见[2×四向](./docs/week5_evidence/imagegen_20261012/walk_2x.png)，原图／帧表生产方式见[生产记录](./docs/art_reference/hero_imagegen_production_20261012.md)，逐日证据见[第五周评审](./11_week5_review.md)，意见写入[第五周试玩表](./docs/week5_playtest.md)。旧32×48源仅为历史fixture，不是本轮默认角色。
 
-最新已验候选：`builds/week5/0.5.0-week5-prototype_92fd2ae_20261008T155755Z/`。用包内`Character-on-Mac.command`看角色、`Play-on-Mac.command`玩流程；`PLAYTEST.md`附有可在本包打开的实绘截图。本轮还修正16×6阴影和移动中的可见脚底遮挡排序。源／完整回归／Mac包内渲染通过，用户新版外观与动作体验仍待确认。
+第五周推荐冻结候选：`builds/week5/0.5.0-week5-prototype_imagegen_645127f_20261012T154536Z/`。用包内`Character-on-Mac.command`看角色、`Play-on-Mac.command`玩流程，先读`HANDOFF.md`，意见写在`PLAYTEST.md`；Mac脚本依赖本机Godot，不是独立Mac App。源码完整回归、同包Mac实际渲染和跨进程存读通过，167文件校验通过。包保留构建时HEAD／dirty元数据，后续本地提交不改写它；当前工作树的第六周实验代码不属于这个第五周包。最终外观、旧体验门、Windows／实体手柄真机仍待验。
 
 其他角色／地图仍灰盒。imagegen只用于内部方向参考；实机图集独立整数像素制作。角色风格、第四周引导体验和首月人工门仍待确认，不自动开始正式美术量产。
 
