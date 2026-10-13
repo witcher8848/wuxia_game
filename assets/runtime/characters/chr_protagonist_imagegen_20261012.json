@@ -1,0 +1,1910 @@
+{
+  "schema_version": 2,
+  "frame_count": 57,
+  "nominal_display_size": [
+    48,
+    72
+  ],
+  "contract": "imagegen originals; original alpha; GPU regions; physics unchanged",
+  "frames": [
+    {
+      "id": "walk_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "region": [
+        84,
+        25,
+        333,
+        841
+      ],
+      "display_size": [
+        27.086124401913874,
+        68.4066985645933
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "44bcfc55bda0e80df1d33d907e9888920874487724c60fcdf1bce0c32fbd4188",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        248,
+        864
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_down_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "region": [
+        503,
+        25,
+        334,
+        834
+      ],
+      "display_size": [
+        27.167464114832534,
+        67.83732057416267
+      ],
+      "anchor": [
+        14,
+        67.83732057416267
+      ],
+      "source_sha256": "44bcfc55bda0e80df1d33d907e9888920874487724c60fcdf1bce0c32fbd4188",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        672,
+        857
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "walk_down_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "region": [
+        941,
+        25,
+        326,
+        841
+      ],
+      "display_size": [
+        26.51674641148325,
+        68.4066985645933
+      ],
+      "anchor": [
+        14,
+        68
+      ],
+      "source_sha256": "44bcfc55bda0e80df1d33d907e9888920874487724c60fcdf1bce0c32fbd4188",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1107,
+        864
+      ],
+      "source_pose_index": 2
+    },
+    {
+      "id": "walk_down_3",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_down_20261012.png",
+      "region": [
+        1374,
+        24,
+        330,
+        842
+      ],
+      "display_size": [
+        26.842105263157894,
+        68.48803827751196
+      ],
+      "anchor": [
+        14,
+        68
+      ],
+      "source_sha256": "ba5c29790df4430e2159962d0a3d12ddc34974b8998f3b337f462e1942b2557b",
+      "source_reference": "docs/art_reference/hero_walk_down_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1544,
+        864
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "strike_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_fist_thrust_20261012.png",
+      "region": [
+        56,
+        8,
+        463,
+        699
+      ],
+      "display_size": [
+        45.30071942446043,
+        68.39136690647481
+      ],
+      "anchor": [
+        23,
+        68
+      ],
+      "source_sha256": "22a8cbd0d55dd426d147b7f0d644f5f4f783b7638275771ead7980dc971a1377",
+      "source_reference": "docs/art_reference/hero_front_fist_thrust_20261012.png",
+      "source_size": [
+        2172,
+        724
+      ],
+      "anchor_source": [
+        286,
+        705
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "strike_down_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_fist_thrust_20261012.png",
+      "region": [
+        600,
+        8,
+        466,
+        699
+      ],
+      "display_size": [
+        45.59424460431654,
+        68.39136690647481
+      ],
+      "anchor": [
+        23,
+        68
+      ],
+      "source_sha256": "22a8cbd0d55dd426d147b7f0d644f5f4f783b7638275771ead7980dc971a1377",
+      "source_reference": "docs/art_reference/hero_front_fist_thrust_20261012.png",
+      "source_size": [
+        2172,
+        724
+      ],
+      "anchor_source": [
+        831.5,
+        705
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "thrust_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_fist_thrust_20261012.png",
+      "region": [
+        1166,
+        8,
+        455,
+        699
+      ],
+      "display_size": [
+        44.51798561151079,
+        68.39136690647481
+      ],
+      "anchor": [
+        22,
+        68
+      ],
+      "source_sha256": "22a8cbd0d55dd426d147b7f0d644f5f4f783b7638275771ead7980dc971a1377",
+      "source_reference": "docs/art_reference/hero_front_fist_thrust_20261012.png",
+      "source_size": [
+        2172,
+        724
+      ],
+      "anchor_source": [
+        1392,
+        705
+      ],
+      "source_pose_index": 2
+    },
+    {
+      "id": "thrust_down_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_fist_thrust_20261012.png",
+      "region": [
+        1688,
+        8,
+        459,
+        699
+      ],
+      "display_size": [
+        44.90935251798561,
+        68.39136690647481
+      ],
+      "anchor": [
+        22,
+        68
+      ],
+      "source_sha256": "22a8cbd0d55dd426d147b7f0d644f5f4f783b7638275771ead7980dc971a1377",
+      "source_reference": "docs/art_reference/hero_front_fist_thrust_20261012.png",
+      "source_size": [
+        2172,
+        724
+      ],
+      "anchor_source": [
+        1916.5,
+        705
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "thrust_down_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "region": [
+        84,
+        25,
+        333,
+        841
+      ],
+      "display_size": [
+        27.086124401913874,
+        68.4066985645933
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "44bcfc55bda0e80df1d33d907e9888920874487724c60fcdf1bce0c32fbd4188",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        248,
+        864
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_down_0"
+    },
+    {
+      "id": "slash_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_windup_guard_20261012.png",
+      "region": [
+        155,
+        127,
+        620,
+        821
+      ],
+      "display_size": [
+        54.611398963730565,
+        72.3160621761658
+      ],
+      "anchor": [
+        24,
+        72
+      ],
+      "source_sha256": "8ba02b3c7d82e2a51b6e887cdcee05d2eded0a257faeeb71ac3a14d78987db6c",
+      "source_reference": "docs/art_reference/hero_front_windup_guard_20261012.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "anchor_source": [
+        430,
+        946
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "slash_down_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_down_sheet_20261011.png",
+      "region": [
+        580,
+        787,
+        407,
+        363
+      ],
+      "display_size": [
+        73.80266666666667,
+        65.824
+      ],
+      "anchor": [
+        26,
+        65.824
+      ],
+      "source_sha256": "db2547046794b50902d9e6abe5c26f50c81f0673445eb9a80aa5dba53616d91b",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_down_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        722.5,
+        1149
+      ],
+      "source_pose_index": 5
+    },
+    {
+      "id": "slash_down_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "region": [
+        84,
+        25,
+        333,
+        841
+      ],
+      "display_size": [
+        27.086124401913874,
+        68.4066985645933
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "44bcfc55bda0e80df1d33d907e9888920874487724c60fcdf1bce0c32fbd4188",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_down_sheet_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        248,
+        864
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_down_0"
+    },
+    {
+      "id": "guard_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_front_windup_guard_20261012.png",
+      "region": [
+        874,
+        172,
+        542,
+        776
+      ],
+      "display_size": [
+        47.740932642487046,
+        68.35233160621762
+      ],
+      "anchor": [
+        24,
+        68
+      ],
+      "source_sha256": "8ba02b3c7d82e2a51b6e887cdcee05d2eded0a257faeeb71ac3a14d78987db6c",
+      "source_reference": "docs/art_reference/hero_front_windup_guard_20261012.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "anchor_source": [
+        1145,
+        946
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "hit_down_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_down_sheet_20261011.png",
+      "region": [
+        617,
+        1149,
+        277,
+        373
+      ],
+      "display_size": [
+        50.22933333333334,
+        67.63733333333334
+      ],
+      "anchor": [
+        26,
+        67
+      ],
+      "source_sha256": "db2547046794b50902d9e6abe5c26f50c81f0673445eb9a80aa5dba53616d91b",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_down_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        759.5,
+        1521
+      ],
+      "source_pose_index": 7
+    },
+    {
+      "id": "walk_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "region": [
+        41,
+        34,
+        390,
+        812
+      ],
+      "display_size": [
+        32.94409937888199,
+        68.5913043478261
+      ],
+      "anchor": [
+        16,
+        68
+      ],
+      "source_sha256": "ec5a362ac2a56ab1f8a35329f72d50a5b7c786cc7eed6e95bf475140beb02575",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        230,
+        844
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_left_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "region": [
+        521,
+        34,
+        320,
+        808
+      ],
+      "display_size": [
+        27.03105590062112,
+        68.25341614906833
+      ],
+      "anchor": [
+        12,
+        68
+      ],
+      "source_sha256": "ec5a362ac2a56ab1f8a35329f72d50a5b7c786cc7eed6e95bf475140beb02575",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        663,
+        840
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "walk_left_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_left_contact2_20261012_v2.png",
+      "region": [
+        132,
+        91,
+        728,
+        1378
+      ],
+      "display_size": [
+        36.02911208151383,
+        68.19796215429403
+      ],
+      "anchor": [
+        18,
+        68
+      ],
+      "source_sha256": "cdbc17a2f773732672e10284f245d50bf088300efddaff65646dfffd20835f39",
+      "source_reference": "docs/art_reference/hero_walk_left_contact2_20261012_v2.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        500,
+        1467
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_left_3",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "region": [
+        1402,
+        34,
+        297,
+        819
+      ],
+      "display_size": [
+        25.088198757763976,
+        69.18260869565218
+      ],
+      "anchor": [
+        11,
+        69
+      ],
+      "source_sha256": "ec5a362ac2a56ab1f8a35329f72d50a5b7c786cc7eed6e95bf475140beb02575",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1537,
+        851
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "strike_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        147,
+        21,
+        281,
+        367
+      ],
+      "display_size": [
+        53.077777777777776,
+        69.32222222222222
+      ],
+      "anchor": [
+        26,
+        69
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        286.5,
+        386
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "strike_left_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        567,
+        21,
+        343,
+        366
+      ],
+      "display_size": [
+        64.78888888888889,
+        69.13333333333333
+      ],
+      "anchor": [
+        39,
+        69
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        774,
+        385
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "thrust_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_left_thrust_windup_20261012.png",
+      "region": [
+        161,
+        194,
+        707,
+        657
+      ],
+      "display_size": [
+        73.96307692307693,
+        68.73230769230769
+      ],
+      "anchor": [
+        44,
+        68.73230769230769
+      ],
+      "source_sha256": "3d56c94e91ebd081bf953d3f8bc529db4f701fb428e9f4d573a0f577e4565773",
+      "source_reference": "docs/art_reference/hero_left_thrust_windup_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        581,
+        849
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "thrust_left_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        495,
+        396,
+        471,
+        365
+      ],
+      "display_size": [
+        88.96666666666667,
+        68.94444444444444
+      ],
+      "anchor": [
+        61,
+        68.94444444444444
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        817.5,
+        759
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "thrust_left_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "region": [
+        41,
+        34,
+        390,
+        812
+      ],
+      "display_size": [
+        32.94409937888199,
+        68.5913043478261
+      ],
+      "anchor": [
+        16,
+        68
+      ],
+      "source_sha256": "ec5a362ac2a56ab1f8a35329f72d50a5b7c786cc7eed6e95bf475140beb02575",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        230,
+        844
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_left_0"
+    },
+    {
+      "id": "slash_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_left_thrust_windup_20261012.png",
+      "region": [
+        1147,
+        52,
+        579,
+        800
+      ],
+      "display_size": [
+        60.57230769230769,
+        83.6923076923077
+      ],
+      "anchor": [
+        30,
+        83
+      ],
+      "source_sha256": "3d56c94e91ebd081bf953d3f8bc529db4f701fb428e9f4d573a0f577e4565773",
+      "source_reference": "docs/art_reference/hero_left_thrust_windup_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1434,
+        850
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "slash_left_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        541,
+        791,
+        410,
+        354
+      ],
+      "display_size": [
+        77.44444444444444,
+        66.86666666666666
+      ],
+      "anchor": [
+        48,
+        66
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        795.5,
+        1143
+      ],
+      "source_pose_index": 5
+    },
+    {
+      "id": "slash_left_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "region": [
+        41,
+        34,
+        390,
+        812
+      ],
+      "display_size": [
+        32.94409937888199,
+        68.5913043478261
+      ],
+      "anchor": [
+        16,
+        68
+      ],
+      "source_sha256": "ec5a362ac2a56ab1f8a35329f72d50a5b7c786cc7eed6e95bf475140beb02575",
+      "source_reference": "docs/art_reference/protagonist_imagegen_walk_left_sheet_20261011_v2.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        230,
+        844
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_left_0"
+    },
+    {
+      "id": "guard_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        135,
+        1143,
+        321,
+        369
+      ],
+      "display_size": [
+        60.63333333333333,
+        69.7
+      ],
+      "anchor": [
+        33,
+        69
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        308,
+        1510
+      ],
+      "source_pose_index": 6
+    },
+    {
+      "id": "hit_left_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "region": [
+        597,
+        1176,
+        347,
+        336
+      ],
+      "display_size": [
+        65.54444444444444,
+        63.46666666666667
+      ],
+      "anchor": [
+        31,
+        63
+      ],
+      "source_sha256": "61908b4f2353ea1e3dd0f5b244daef0dda26075b68605069986b102b647e7147",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_left_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        759,
+        1510
+      ],
+      "source_pose_index": 7
+    },
+    {
+      "id": "walk_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_20261012.png",
+      "region": [
+        39,
+        59,
+        444,
+        798
+      ],
+      "display_size": [
+        37.5055900621118,
+        67.40869565217392
+      ],
+      "anchor": [
+        17,
+        67
+      ],
+      "source_sha256": "1e68448c90d2cd7bb7dfb26260998902aa16362c3b133ff2f43bcf193faf5156",
+      "source_reference": "docs/art_reference/hero_walk_right_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        245,
+        855
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_right_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_20261012.png",
+      "region": [
+        515,
+        59,
+        357,
+        802
+      ],
+      "display_size": [
+        30.156521739130437,
+        67.74658385093169
+      ],
+      "anchor": [
+        13,
+        67.74658385093169
+      ],
+      "source_sha256": "1e68448c90d2cd7bb7dfb26260998902aa16362c3b133ff2f43bcf193faf5156",
+      "source_reference": "docs/art_reference/hero_walk_right_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        673,
+        859
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "walk_right_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_contact2_20261012.png",
+      "region": [
+        172,
+        89,
+        719,
+        1377
+      ],
+      "display_size": [
+        35.60961398397669,
+        68.19810633648943
+      ],
+      "anchor": [
+        18,
+        68
+      ],
+      "source_sha256": "64e6c083ab605328fd6223ec873356be16d3131b6b6f71a7b294beabfb17d17a",
+      "source_reference": "docs/art_reference/hero_walk_right_contact2_20261012.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        530,
+        1464
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_right_3",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_20261012.png",
+      "region": [
+        1382,
+        62,
+        374,
+        799
+      ],
+      "display_size": [
+        31.592546583850933,
+        67.49316770186336
+      ],
+      "anchor": [
+        14,
+        67
+      ],
+      "source_sha256": "1e68448c90d2cd7bb7dfb26260998902aa16362c3b133ff2f43bcf193faf5156",
+      "source_reference": "docs/art_reference/hero_walk_right_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1544,
+        859
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "strike_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        124,
+        25,
+        274,
+        378
+      ],
+      "display_size": [
+        50.086021505376344,
+        69.09677419354838
+      ],
+      "anchor": [
+        25,
+        69
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        258.5,
+        401
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "strike_right_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        568,
+        25,
+        342,
+        378
+      ],
+      "display_size": [
+        62.516129032258064,
+        69.09677419354838
+      ],
+      "anchor": [
+        25,
+        69
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        702.5,
+        401
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "thrust_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        112,
+        407,
+        337,
+        372
+      ],
+      "display_size": [
+        61.60215053763441,
+        68
+      ],
+      "anchor": [
+        25,
+        68
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        250,
+        777
+      ],
+      "source_pose_index": 2
+    },
+    {
+      "id": "thrust_right_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        544,
+        408,
+        448,
+        371
+      ],
+      "display_size": [
+        81.89247311827957,
+        67.81720430107526
+      ],
+      "anchor": [
+        26,
+        67
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        684,
+        777
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "thrust_right_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_20261012.png",
+      "region": [
+        39,
+        59,
+        444,
+        798
+      ],
+      "display_size": [
+        37.5055900621118,
+        67.40869565217392
+      ],
+      "anchor": [
+        17,
+        67
+      ],
+      "source_sha256": "1e68448c90d2cd7bb7dfb26260998902aa16362c3b133ff2f43bcf193faf5156",
+      "source_reference": "docs/art_reference/hero_walk_right_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        245,
+        855
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_right_0"
+    },
+    {
+      "id": "slash_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        108,
+        784,
+        336,
+        374
+      ],
+      "display_size": [
+        61.41935483870968,
+        68.36559139784947
+      ],
+      "anchor": [
+        26,
+        68
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        250.5,
+        1156
+      ],
+      "source_pose_index": 4
+    },
+    {
+      "id": "slash_right_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        529,
+        802,
+        449,
+        356
+      ],
+      "display_size": [
+        82.0752688172043,
+        65.0752688172043
+      ],
+      "anchor": [
+        27,
+        65
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        676.5,
+        1156
+      ],
+      "source_pose_index": 5
+    },
+    {
+      "id": "slash_right_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_right_20261012.png",
+      "region": [
+        39,
+        59,
+        444,
+        798
+      ],
+      "display_size": [
+        37.5055900621118,
+        67.40869565217392
+      ],
+      "anchor": [
+        17,
+        67
+      ],
+      "source_sha256": "1e68448c90d2cd7bb7dfb26260998902aa16362c3b133ff2f43bcf193faf5156",
+      "source_reference": "docs/art_reference/hero_walk_right_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        245,
+        855
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_right_0"
+    },
+    {
+      "id": "guard_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        122,
+        1158,
+        304,
+        351
+      ],
+      "display_size": [
+        55.56989247311828,
+        64.16129032258064
+      ],
+      "anchor": [
+        26,
+        64
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        265.5,
+        1507
+      ],
+      "source_pose_index": 6
+    },
+    {
+      "id": "hit_right_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "region": [
+        613,
+        1177,
+        317,
+        334
+      ],
+      "display_size": [
+        57.946236559139784,
+        61.053763440860216
+      ],
+      "anchor": [
+        32,
+        61
+      ],
+      "source_sha256": "3dd041ecadc7bbf0f58d2ae74168d9d317e57d7145fede212ade92a17b5f2a60",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_right_sheet_20261011_v3.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        789,
+        1509
+      ],
+      "source_pose_index": 7
+    },
+    {
+      "id": "walk_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        71,
+        44,
+        308,
+        819
+      ],
+      "display_size": [
+        25.698159509202455,
+        68.33374233128835
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        227,
+        861
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "walk_up_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        522,
+        44,
+        321,
+        818
+      ],
+      "display_size": [
+        26.78282208588957,
+        68.25030674846626
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        678,
+        860
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "walk_up_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        954,
+        44,
+        316,
+        818
+      ],
+      "display_size": [
+        26.36564417177914,
+        68.25030674846626
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1110,
+        860
+      ],
+      "source_pose_index": 2
+    },
+    {
+      "id": "walk_up_3",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        1386,
+        44,
+        315,
+        818
+      ],
+      "display_size": [
+        26.282208588957058,
+        68.25030674846626
+      ],
+      "anchor": [
+        14,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        1548,
+        860
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "strike_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        164,
+        28,
+        252,
+        358
+      ],
+      "display_size": [
+        48.82051282051282,
+        69.35612535612535
+      ],
+      "anchor": [
+        25,
+        69
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        293.5,
+        384
+      ],
+      "source_pose_index": 0
+    },
+    {
+      "id": "strike_up_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        608,
+        28,
+        255,
+        359
+      ],
+      "display_size": [
+        49.4017094017094,
+        69.54985754985755
+      ],
+      "anchor": [
+        26,
+        69
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        741,
+        385
+      ],
+      "source_pose_index": 1
+    },
+    {
+      "id": "thrust_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        157,
+        405,
+        270,
+        367
+      ],
+      "display_size": [
+        52.30769230769231,
+        71.0997150997151
+      ],
+      "anchor": [
+        27,
+        71
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        298,
+        770
+      ],
+      "source_pose_index": 2
+    },
+    {
+      "id": "thrust_up_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        605,
+        405,
+        264,
+        367
+      ],
+      "display_size": [
+        51.14529914529914,
+        71.0997150997151
+      ],
+      "anchor": [
+        27,
+        71
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        744,
+        770
+      ],
+      "source_pose_index": 3
+    },
+    {
+      "id": "thrust_up_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        71,
+        44,
+        308,
+        819
+      ],
+      "display_size": [
+        25.698159509202455,
+        68.33374233128835
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        227,
+        861
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_up_0"
+    },
+    {
+      "id": "slash_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        161,
+        790,
+        264,
+        356
+      ],
+      "display_size": [
+        51.14529914529914,
+        68.96866096866097
+      ],
+      "anchor": [
+        26,
+        68.96866096866097
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        294.5,
+        1144
+      ],
+      "source_pose_index": 4
+    },
+    {
+      "id": "slash_up_1",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        587,
+        796,
+        385,
+        351
+      ],
+      "display_size": [
+        74.58689458689459,
+        68
+      ],
+      "anchor": [
+        26,
+        68
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        722.5,
+        1145
+      ],
+      "source_pose_index": 5
+    },
+    {
+      "id": "slash_up_2",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/hero_walk_up_20261012.png",
+      "region": [
+        71,
+        44,
+        308,
+        819
+      ],
+      "display_size": [
+        25.698159509202455,
+        68.33374233128835
+      ],
+      "anchor": [
+        13,
+        68
+      ],
+      "source_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "source_reference": "docs/art_reference/hero_walk_up_20261012.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        227,
+        861
+      ],
+      "source_pose_index": 0,
+      "recovery_reuses": "walk_up_0"
+    },
+    {
+      "id": "guard_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        162,
+        1162,
+        264,
+        344
+      ],
+      "display_size": [
+        51.14529914529914,
+        66.64387464387464
+      ],
+      "anchor": [
+        26,
+        66
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        295.5,
+        1504
+      ],
+      "source_pose_index": 6
+    },
+    {
+      "id": "hit_up_0",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "region": [
+        602,
+        1176,
+        338,
+        331
+      ],
+      "display_size": [
+        65.48148148148148,
+        64.12535612535612
+      ],
+      "anchor": [
+        24,
+        64
+      ],
+      "source_sha256": "9963a25ea8b7ff494d20372be7b5eb11955af25f099cf391c91e7a3a3cc397ff",
+      "source_reference": "docs/art_reference/protagonist_imagegen_combat_up_sheet_20261011.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "anchor_source": [
+        724,
+        1505
+      ],
+      "source_pose_index": 7
+    },
+    {
+      "id": "down",
+      "texture": "res://assets/runtime/characters/imagegen_20261012/protagonist_imagegen_defeat_20261011.png",
+      "region": [
+        138,
+        239,
+        1502,
+        451
+      ],
+      "display_size": [
+        121.5904761904762,
+        36.50952380952381
+      ],
+      "anchor": [
+        61,
+        36
+      ],
+      "source_sha256": "6281752a24ef231a412699bf428d14b35cbcd304b9c0a168a6b4f15133911127",
+      "source_reference": "docs/art_reference/protagonist_imagegen_defeat_20261011.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "anchor_source": [
+        889,
+        688
+      ],
+      "source_pose_index": 0
+    }
+  ],
+  "clips": {
+    "walk_down": {
+      "cells": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 8,
+      "loop": true
+    },
+    "idle_down": {
+      "cells": [
+        0
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "strike_down": {
+      "cells": [
+        4,
+        5
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "thrust_down": {
+      "cells": [
+        6,
+        7,
+        8
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "slash_down": {
+      "cells": [
+        9,
+        10,
+        11
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "guard_down": {
+      "cells": [
+        12
+      ],
+      "fps": 3,
+      "loop": false
+    },
+    "hit_down": {
+      "cells": [
+        13
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "walk_left": {
+      "cells": [
+        14,
+        15,
+        16,
+        17
+      ],
+      "fps": 8,
+      "loop": true
+    },
+    "idle_left": {
+      "cells": [
+        14
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "strike_left": {
+      "cells": [
+        18,
+        19
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "thrust_left": {
+      "cells": [
+        20,
+        21,
+        22
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "slash_left": {
+      "cells": [
+        23,
+        24,
+        25
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "guard_left": {
+      "cells": [
+        26
+      ],
+      "fps": 3,
+      "loop": false
+    },
+    "hit_left": {
+      "cells": [
+        27
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "walk_right": {
+      "cells": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "fps": 8,
+      "loop": true
+    },
+    "idle_right": {
+      "cells": [
+        28
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "strike_right": {
+      "cells": [
+        32,
+        33
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "thrust_right": {
+      "cells": [
+        34,
+        35,
+        36
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "slash_right": {
+      "cells": [
+        37,
+        38,
+        39
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "guard_right": {
+      "cells": [
+        40
+      ],
+      "fps": 3,
+      "loop": false
+    },
+    "hit_right": {
+      "cells": [
+        41
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "walk_up": {
+      "cells": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "fps": 8,
+      "loop": true
+    },
+    "idle_up": {
+      "cells": [
+        42
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "strike_up": {
+      "cells": [
+        46,
+        47
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "thrust_up": {
+      "cells": [
+        48,
+        49,
+        50
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "slash_up": {
+      "cells": [
+        51,
+        52,
+        53
+      ],
+      "fps": 10,
+      "loop": false
+    },
+    "guard_up": {
+      "cells": [
+        54
+      ],
+      "fps": 3,
+      "loop": false
+    },
+    "hit_up": {
+      "cells": [
+        55
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "down": {
+      "cells": [
+        56
+      ],
+      "fps": 1,
+      "loop": false
+    }
+  }
+}
+

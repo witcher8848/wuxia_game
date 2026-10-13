@@ -1,0 +1,489 @@
+{
+  "schema": 1,
+  "read_only": true,
+  "connectivity": 8,
+  "alpha_threshold_comparison": ">",
+  "threshold": 127,
+  "images": [
+    {
+      "key": "walk_up_production",
+      "path": "/Users/witcher/Documents/ChatGPT/wuxia_game/docs/art_reference/hero_walk_up_20261012.png",
+      "sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "expected_layout": [
+        4,
+        1
+      ],
+      "alpha_gt_threshold": 127,
+      "alpha_histogram_summary": {
+        "zero": 915679,
+        "partial": 656553,
+        "opaque": 1306,
+        "foreground_gt_threshold": 605720
+      },
+      "min_subject_component_pixels": 1000,
+      "component_count": 4,
+      "large_component_count": 4,
+      "components": [
+        {
+          "pixels": 152861,
+          "bounds": [
+            73,
+            46,
+            377,
+            861
+          ],
+          "id": 0,
+          "bbox_xywh": [
+            73,
+            46,
+            304,
+            815
+          ]
+        },
+        {
+          "pixels": 152244,
+          "bounds": [
+            956,
+            46,
+            1268,
+            860
+          ],
+          "id": 1,
+          "bbox_xywh": [
+            956,
+            46,
+            312,
+            814
+          ]
+        },
+        {
+          "pixels": 151797,
+          "bounds": [
+            1388,
+            46,
+            1699,
+            860
+          ],
+          "id": 2,
+          "bbox_xywh": [
+            1388,
+            46,
+            311,
+            814
+          ]
+        },
+        {
+          "pixels": 148818,
+          "bounds": [
+            524,
+            46,
+            841,
+            860
+          ],
+          "id": 3,
+          "bbox_xywh": [
+            524,
+            46,
+            317,
+            814
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "expected_grid_bounds_exclusive": [
+            0,
+            0,
+            443,
+            887
+          ],
+          "candidate_component_ids": [
+            0
+          ],
+          "subject_component_id": 0,
+          "subject_pixels": 152861,
+          "region_xywh": [
+            73,
+            46,
+            304,
+            815
+          ],
+          "bounds_exclusive": [
+            73,
+            46,
+            377,
+            861
+          ],
+          "foreign_alpha_gt_threshold_pixels": 0,
+          "foreign_components": [],
+          "foreign_subject_pixels": 0,
+          "rectangular_subject_isolation": true,
+          "recommended_gpu_region_xywh": [
+            71,
+            44,
+            308,
+            819
+          ],
+          "recommended_padding": 2,
+          "padding_checks": [
+            {
+              "padding": 0,
+              "region_xywh": [
+                73,
+                46,
+                304,
+                815
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 1,
+              "region_xywh": [
+                72,
+                45,
+                306,
+                817
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 2,
+              "region_xywh": [
+                71,
+                44,
+                308,
+                819
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 4,
+              "region_xywh": [
+                69,
+                42,
+                312,
+                823
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 8,
+              "region_xywh": [
+                65,
+                38,
+                320,
+                831
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            }
+          ],
+          "clips_own_subject_pixels": 0,
+          "touches_canvas_edge": false,
+          "review_note": "Check detached small components, pose semantics and soft-alpha edges visually; not a visual PASS."
+        },
+        {
+          "index": 1,
+          "expected_grid_bounds_exclusive": [
+            443,
+            0,
+            887,
+            887
+          ],
+          "candidate_component_ids": [
+            3
+          ],
+          "subject_component_id": 3,
+          "subject_pixels": 148818,
+          "region_xywh": [
+            524,
+            46,
+            317,
+            814
+          ],
+          "bounds_exclusive": [
+            524,
+            46,
+            841,
+            860
+          ],
+          "foreign_alpha_gt_threshold_pixels": 0,
+          "foreign_components": [],
+          "foreign_subject_pixels": 0,
+          "rectangular_subject_isolation": true,
+          "recommended_gpu_region_xywh": [
+            522,
+            44,
+            321,
+            818
+          ],
+          "recommended_padding": 2,
+          "padding_checks": [
+            {
+              "padding": 0,
+              "region_xywh": [
+                524,
+                46,
+                317,
+                814
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 1,
+              "region_xywh": [
+                523,
+                45,
+                319,
+                816
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 2,
+              "region_xywh": [
+                522,
+                44,
+                321,
+                818
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 4,
+              "region_xywh": [
+                520,
+                42,
+                325,
+                822
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 8,
+              "region_xywh": [
+                516,
+                38,
+                333,
+                830
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            }
+          ],
+          "clips_own_subject_pixels": 0,
+          "touches_canvas_edge": false,
+          "review_note": "Check detached small components, pose semantics and soft-alpha edges visually; not a visual PASS."
+        },
+        {
+          "index": 2,
+          "expected_grid_bounds_exclusive": [
+            887,
+            0,
+            1330,
+            887
+          ],
+          "candidate_component_ids": [
+            1
+          ],
+          "subject_component_id": 1,
+          "subject_pixels": 152244,
+          "region_xywh": [
+            956,
+            46,
+            312,
+            814
+          ],
+          "bounds_exclusive": [
+            956,
+            46,
+            1268,
+            860
+          ],
+          "foreign_alpha_gt_threshold_pixels": 0,
+          "foreign_components": [],
+          "foreign_subject_pixels": 0,
+          "rectangular_subject_isolation": true,
+          "recommended_gpu_region_xywh": [
+            954,
+            44,
+            316,
+            818
+          ],
+          "recommended_padding": 2,
+          "padding_checks": [
+            {
+              "padding": 0,
+              "region_xywh": [
+                956,
+                46,
+                312,
+                814
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 1,
+              "region_xywh": [
+                955,
+                45,
+                314,
+                816
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 2,
+              "region_xywh": [
+                954,
+                44,
+                316,
+                818
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 4,
+              "region_xywh": [
+                952,
+                42,
+                320,
+                822
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 8,
+              "region_xywh": [
+                948,
+                38,
+                328,
+                830
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            }
+          ],
+          "clips_own_subject_pixels": 0,
+          "touches_canvas_edge": false,
+          "review_note": "Check detached small components, pose semantics and soft-alpha edges visually; not a visual PASS."
+        },
+        {
+          "index": 3,
+          "expected_grid_bounds_exclusive": [
+            1330,
+            0,
+            1774,
+            887
+          ],
+          "candidate_component_ids": [
+            2
+          ],
+          "subject_component_id": 2,
+          "subject_pixels": 151797,
+          "region_xywh": [
+            1388,
+            46,
+            311,
+            814
+          ],
+          "bounds_exclusive": [
+            1388,
+            46,
+            1699,
+            860
+          ],
+          "foreign_alpha_gt_threshold_pixels": 0,
+          "foreign_components": [],
+          "foreign_subject_pixels": 0,
+          "rectangular_subject_isolation": true,
+          "recommended_gpu_region_xywh": [
+            1386,
+            44,
+            315,
+            818
+          ],
+          "recommended_padding": 2,
+          "padding_checks": [
+            {
+              "padding": 0,
+              "region_xywh": [
+                1388,
+                46,
+                311,
+                814
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 1,
+              "region_xywh": [
+                1387,
+                45,
+                313,
+                816
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 2,
+              "region_xywh": [
+                1386,
+                44,
+                315,
+                818
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 4,
+              "region_xywh": [
+                1384,
+                42,
+                319,
+                822
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            },
+            {
+              "padding": 8,
+              "region_xywh": [
+                1380,
+                38,
+                327,
+                830
+              ],
+              "foreign_alpha_gt_threshold_pixels": 0
+            }
+          ],
+          "clips_own_subject_pixels": 0,
+          "touches_canvas_edge": false,
+          "review_note": "Check detached small components, pose semantics and soft-alpha edges visually; not a visual PASS."
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "method": "built-in image_gen.imagegen",
+    "calls": 1,
+    "transparent_background": true,
+    "edit_target": "docs/art_reference/protagonist_imagegen_walk_up_sheet_20261011.png",
+    "edit_target_sha256": "342a699e4db7f9d9c93678ff1094627a1323d18cd50df2bc0d81b3117d34df0c",
+    "identity_reference": "docs/art_reference/protagonist_imagegen_turnaround_20261011_v3.png",
+    "identity_reference_sha256": "fdb71157e5dae68a1badfa3103a8ded1805742a6ed45e2db76e8d30bb0b5c67f",
+    "original_tool_output": "/Users/witcher/.codex/generated_images/01a12b2d-2d11-7c03-8a02-18550eb8f924/exec-3f0c0c73-30a0-4c91-b59f-e71e85068eb7.png",
+    "original_output_sha256": "5b5d3b46fa6358d05388c0efef090544d49bde2a62dc80080a14484761aaf611",
+    "png_processing": "none; non-overwriting original byte copy only",
+    "old_snapshot_modified": false
+  },
+  "notes": [
+    "Alpha > 127 and 8-connected components are used for source-region measurement only; original PNG alpha is retained.",
+    "Invisible RGB in alpha=0 is not interpreted as visible halo.",
+    "All four source figures are rectangularly isolated; this is not an automatic runtime-adoption or full-animation PASS.",
+    "Actual fourth pose has screen-right support and screen-left lift; first three are visually retained but not byte-identical."
+  ]
+}
+

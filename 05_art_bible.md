@@ -558,3 +558,33 @@ Day 5 若需要进一步减量，优先减少头像表情、氛围装饰、证�
 - [x] 未来增加区域时只需组合或扩充 32×32 模块，不改变基础分辨率和角色规格。
 
 美术规范已经足够开始制作主角测试素材和三套灰盒占位瓦片。Day 5 只决定哪些资产属于 Must／Should／Could，不再改变底层像素规格。
+
+## 12. 2026-10-12主角imagegen生产显示合同
+
+用户认可已展示标准并授权我们自主完善、完成第五周，暂不再询问。沿用已认可的脸、服装、比例；本节是当前生产主角相对前文原生像素基线的明确例外，不删除旧规范、2026-10-07代码源记录或用户意见，也不自动改变其他人物／地图的规格。
+
+### 12.1 当前生产资源与真实显示尺寸
+
+默认探索、战斗与角色实验室已经共用`HeroVisual.ACTIVE_DATA_PATH`指定的`res://assets/runtime/characters/chr_protagonist_imagegen_20261012.json`：schema2、57逻辑槽／29 clips、15张原PNG的runtime字节副本，不是仅opt-in预览。旧`hero_pixel_source.gd`、`chr_protagonist_atlas.png/json`、11色／二值透明与色板测试保留为历史可重现fixture；`DATA_PATH`／`ATLAS`／静态`data`继续供旧测试使用，不再是默认生产人物。
+
+`48×72`是站立主体的**最大名义框**，不是所有帧的精确画布或固定拉伸宽度。束髻顶到鞋底约68显示像素，当前walk实际矩形约25～37像素宽、高约67～69；具体以每帧`display_size`为准。武器、高举动作和倒地可以需要更宽或不同高度的矩形，完整剑尖／头脚不得被名义框截掉；倒地保持横向全身比例，不把它拉伸到68像素高。
+
+### 12.2 原图、alpha与GPU区域
+
+imagegen原PNG与runtime副本逐字节复制、SHA一致，保留原alpha及透明像素里的原RGB。显示只选择完整、独立、不混入邻人的原图矩形`region`，按区域宽高同比例最近邻绘制；metadata区域选择不是位图裁切，不生成裁片PNG，不写缩小版人物PNG。
+
+导入为lossless、最近邻，关闭mipmap、alpha-border修正、预乘及size-limit，不做阈值清边、量化、换色或程序补人物像素；不能冒充原生32×48／11色／二值透明精灵。生成或补充人物／基础动作只能使用内置imagegen，保持已认可脸与服装，不允许用代码／mask／shader重画人体或把一个站姿伪装成完整四向动作。Godot包内纹理可remap到导入资源，原PNG逐字节一致性由构建前preflight保证，实际导入RGBA与运行时显示另做验证。
+
+### 12.3 脚底锚点与不变的物理基线
+
+`anchor_source`记录原图坐标，`anchor`是相对所选区域、以逻辑显示像素表示的脚点。X以已审查的**身体中轴**为基准，不能取带长剑矩形的中心，也不能跟随左右交替的单只支撑鞋来回移动整副躯干；Y跟随鞋底落地平面，不取下垂剑尖或半透明噪点。需要时只人工覆盖metadata坐标，不改原PNG。倒地使用已审查的整体落地点与原比例。探索绘制、战斗插值和遮挡排序都沿共享脚点；固定16×6像素阴影在表现层另画，不烘入人物PNG。
+
+地面／战斗格32×32、逻辑视口640×360、脚部碰撞20×12、步速180／冲刺300不变。显示尺寸扩大不改变移动距离、伤害、范围、事件、结算或存档规则；HUD避让按实际renderer显示边界检查，不能继续假设角色32×48。
+
+### 12.4 动画复用、再现与验收边界
+
+每方向walk4、strike2、thrust3、slash3、guard1、hit1，加一个持续down，共57逻辑槽；idle复用本方向walk0，thrust／slash恢复槽也复用本方向walk0，不声称57幅独立绘画。walk8FPS，strike／thrust／slash10FPS、guard3FPS、hit5FPS；冲刺复用步态、步频乘300/180，down保持末帧，重试才清除。左右不得镜像改变文袋侧别：解剖左髋固定，front画面右／back画面左，朝左近侧可见、朝右远侧主要遮挡。
+
+原图及实际提示词／输入／输出哈希保留；`tools/build_hero_imagegen_manifest.py --emit`只读测量并重现帧表，`--verify`验证原图／runtime字节及导入，`tools/build_week5_candidate.py --preflight-only`只读核查。旧代码源／导出器只用于旧fixture再现，不生成当前生产主角；imagegen重跑本身不保证同一输出字节。
+
+当前新默认已通过源码headless、实际渲染14张捕获与全量工程回归；测试证明默认接线、帧时序、独立区域、原图保护和不变规则，不替代动作自然性、用户审美、Windows硬件试玩或发布审核。实际生产取材与验收边界见[生产记录](./docs/art_reference/hero_imagegen_production_20261012.md)，当前入口与旧fixture再现见[角色资源说明](./assets/source/characters/README.md)。

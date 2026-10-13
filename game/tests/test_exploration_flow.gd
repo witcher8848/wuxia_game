@@ -436,11 +436,16 @@ func _test_boundary_save_hud() -> void:
 
 
 func _check_bottom_hud(label: String) -> void:
-	var screen_foot: Vector2 = _region().player.get_global_transform_with_canvas().origin
-	var avatar := Rect2(screen_foot - Vector2(16, 44), Vector2(32, 48))
+	var visual: Node2D = _region().player._visual
+	var local_bounds: Rect2 = visual.presentation_bounds()
+	check(local_bounds.has_area(), label + " actual shared renderer exposes its full active clip bounds")
+	if not local_bounds.has_area(): return
+	var canvas_transform: Transform2D = visual.get_global_transform_with_canvas()
+	var screen_foot: Vector2 = canvas_transform.origin
+	var avatar: Rect2 = canvas_transform * local_bounds
 	check(screen_foot.y > 278, label + " exercises the lower camera edge")
 	check(main.controls_backdrop.position.y == 48 and main.status.position.y == 53, label + " relocates controls backdrop and status above the player")
-	check(not main.controls_backdrop.get_global_rect().intersects(avatar) and not main.status.get_global_rect().intersects(avatar), label + " controls never cover the full 32x48 avatar canvas")
+	check(not main.controls_backdrop.get_global_rect().intersects(avatar) and not main.status.get_global_rect().intersects(avatar), label + " controls never cover the full actual renderer canvas bounds")
 
 
 func _check_snapshot(expected: Dictionary, label: String) -> void:

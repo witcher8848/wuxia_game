@@ -1,7 +1,7 @@
 class_name ExplorationPlayer
 extends CharacterBody2D
 ## Scene-local movement only. The region owns persistence and interaction state.
-## Origin is the feet anchor (16, 44) of the shared 32 × 48 character atlas.
+## Origin is the shared renderer's feet anchor; default atlas remains (16, 44).
 
 const WALK_SPEED := 180.0
 const SPRINT_SPEED := 300.0

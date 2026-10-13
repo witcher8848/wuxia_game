@@ -45,7 +45,9 @@ func sync_visuals() -> void:
 	if unit.is_empty(): return
 	if _motion.is_empty(): hero_position = _feet(Grid.cell_of(unit))
 	var hp: int = unit["hp"]
-	if hp == 0: hero_visual.play_action("down",hero_visual.facing)
+	if hp == 0:
+		# Repeated synchronization must not restart a multi-frame falling clip.
+		if hero_visual._action != "down": hero_visual.play_action("down",hero_visual.facing)
 	elif _last_hp >= 0 and hp < _last_hp: hero_visual.play_action("hit",hero_visual.facing)
 	elif _last_hp >= 0 and hp > _last_hp: reset_presentation(); return
 	_last_hp = hp
