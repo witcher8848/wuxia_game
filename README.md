@@ -8,7 +8,9 @@
 
 ## 第六周当前进度
 
-第六周战斗V1正在收尾：新[每日排期](./武侠RPG_第六周每日任务.md)、[工程评审](./12_week6_review.md)与[试玩表](./docs/week6_playtest.md)。正常探索按M整备三外功／一身法／一内功；标题末项或[CombatV1.command](./CombatV1.command)进入2对3清场／3整轮保护同伴试炼。六武学、三敌AI及新预览正在全量／包内验证；不把进行中源树计作已验候选。
+第六周战斗V1工程已完成：见[每日排期](./武侠RPG_第六周每日任务.md)、[最终评审](./12_week6_review.md)与[试玩表](./docs/week6_playtest.md)。正常探索按M整备三外功／一身法／一内功；标题末项或[CombatV1.command](./CombatV1.command)进入2对3清场／3整轮保护同伴试炼。六武学、三敌数据AI、状态／预览、存读与可配置关卡完整回归通过；配置按角色ID注入，不依赖数组顺序。
+
+本地实现`cbfb5fe`／修复`0a04033`，未推送。推荐冻结候选：`builds/week6/0.6.0-week6-prototype_0a04033_20261014T013331Z/`，先读包内`HANDOFF.md`；用`Play-on-Mac.command`玩普通剧情、`CombatV1-on-Mac.command`玩演武。十项同PCK门禁、34张Mac实绘、两类跨进程存读和78项SHA均通过。Mac脚本依赖安装的Godot；Windows／实体手柄、最终手感与审美仍未验，不冒称Steam发行版，也不自动启动第七周。
 
 ## 第五周已完成交付
 
