@@ -78,6 +78,98 @@ func capture(label: String) -> void:
 	captured.append(label)
 
 
+func _definition_validation() -> void:
+	# Inject detached data, never rewrite res:// JSON. The same test runs from a
+	# source checkout or the frozen PCK's production resources and controller.
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(trial.DATA_PATH))
+	var archetypes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/enemy_archetypes.json"))
+	var profiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_ai_profiles.json"))
+	var martial: Dictionary = session.martial_configuration()["state"]
+	martial["loadout"] = {"external":["SK_TRIP_WRIST","SK_YUE_CROSSCUT"],"movement":"","internal":""}
+	var before: Dictionary = session.state.to_dict()
+	var inputs := JSON.stringify([raw, archetypes, profiles, martial])
+	for kind: String in ["eliminate", "survive"]:
+		var original: Dictionary = trial.definition_from_data(kind,martial,raw,archetypes,profiles)
+		var swapped := raw.duplicate(true)
+		swapped["allies"].reverse()
+		var reordered: Dictionary = trial.definition_from_data(kind,martial,swapped,archetypes,profiles)
+		check(original["error"].is_empty() and reordered["error"].is_empty(), "both legal allied-array orders accepted " + kind)
+		var original_battle := CombatEncounter.new()
+		var swapped_battle := CombatEncounter.new()
+		check(original_battle.configure(original["definition"]).is_empty() and swapped_battle.configure(reordered["definition"]).is_empty(), "both ordered definitions pass actual domain " + kind)
+		check(swapped_battle.unit("CHAR_PROTAGONIST")["loadout"] == martial["loadout"] and swapped_battle.unit("CHAR_PROTAGONIST")["mastery"] == martial["mastery"], "主角 ID receives selected configuration after reorder " + kind)
+		check(swapped_battle.unit("CHAR_PROTAGONIST")["max_qi"] == 3 and swapped_battle.action_restore_qi("CHAR_PROTAGONIST","SK_FIST_BASIC") == 0, "reordered protagonist really runs unequipped passive rules " + kind)
+		check(not swapped_battle.unit("CHAR_COMPANION").has("loadout") and swapped_battle.unit("CHAR_COMPANION")["skills"] == raw["allies"][1]["skills"], "reordered companion retains only its own fixed kit " + kind)
+		check(original_battle.snapshot() == swapped_battle.snapshot(), "legal array reorder changes no actual encounter state " + kind)
+	check(JSON.stringify([raw, archetypes, profiles, martial]) == inputs and session.state.to_dict() == before, "building both configurations mutates no inputs or persistent state")
+	var detached: Dictionary = trial.definition_from_data("eliminate",martial,raw,archetypes,profiles)
+	detached["definition"]["size"][0] = 1
+	detached["definition"]["units"][0]["mastery"].clear()
+	detached["definition"]["ai_profiles"].clear()
+	check(JSON.stringify([raw, archetypes, profiles, martial]) == inputs, "returned board, martial and AI data own deep copies")
+	var cases: Array = []
+	for value: Variant in [null, [], "raw"]: cases.append([value, archetypes, profiles])
+	for field: String in ["id","size","blocked","allies","enemies","scenarios"]:
+		var bad := raw.duplicate(true)
+		bad.erase(field)
+		cases.append([bad, archetypes, profiles])
+	for change: Dictionary in [{"id":null},{"id":""},{"size":"10,8"},{"size":[10]},{"size":[1.5,8]},{"blocked":null},{"blocked":[null]},{"blocked":[[1,"2"]]},{"allies":null},{"enemies":null},{"scenarios":null}]:
+		var bad := raw.duplicate(true)
+		bad.merge(change,true)
+		cases.append([bad, archetypes, profiles])
+	for scenarios: Array in [[null],["scenario"],[{}],[{"id":"eliminate"}],[{"objective":{"kind":"eliminate"}}],[{"id":1,"objective":{"kind":"eliminate"}}],[{"id":"eliminate","objective":[]}],[{"id":"eliminate","objective":{}}],[{"id":"eliminate","objective":{"kind":null}}]]:
+		var bad := raw.duplicate(true)
+		bad["scenarios"] = scenarios.duplicate(true)
+		cases.append([bad, archetypes, profiles])
+	var duplicate_scenario := raw.duplicate(true)
+	duplicate_scenario["scenarios"].append(duplicate_scenario["scenarios"][0].duplicate(true))
+	cases.append([duplicate_scenario, archetypes, profiles])
+	for ally: Variant in [null, "ally", {}, {"id":"CHAR_PROTAGONIST","team":"ally"}]:
+		var bad := raw.duplicate(true)
+		bad["allies"][0] = ally
+		cases.append([bad, archetypes, profiles])
+	for change: Dictionary in [{"id":"OTHER_ALLY"},{"id":"CHAR_COMPANION"},{"id":null},{"team":"enemy"},{"team":null},{"archetype":null}]:
+		var bad := raw.duplicate(true)
+		bad["allies"][0].merge(change,true)
+		cases.append([bad, archetypes, profiles])
+	var duplicate_hero := raw.duplicate(true)
+	duplicate_hero["allies"][1] = duplicate_hero["allies"][0].duplicate(true)
+	cases.append([duplicate_hero, archetypes, profiles])
+	for placement: Variant in [null,"enemy",{}, {"id":"ENEMY_BLADE"},{"archetype":"EN_YAMEN_BLADE"}]:
+		var bad := raw.duplicate(true)
+		bad["enemies"][0] = placement
+		cases.append([bad, archetypes, profiles])
+	for change: Dictionary in [{"id":null},{"archetype":null},{"archetype":"MISSING"},{"cell":null},{"cell":[6,"3"]}]:
+		var bad := raw.duplicate(true)
+		bad["enemies"][0].merge(change,true)
+		cases.append([bad, archetypes, profiles])
+	for value: Variant in [null, [], "archetypes"]: cases.append([raw,value,profiles])
+	for value: Variant in [null, [], "profile"]: cases.append([raw,archetypes,value])
+	var missing_archetype := archetypes.duplicate(true)
+	missing_archetype.erase("EN_YAMEN_BLADE")
+	cases.append([raw,missing_archetype,profiles])
+	var malformed_archetype := archetypes.duplicate(true)
+	malformed_archetype["EN_YAMEN_BLADE"] = "not a unit"
+	cases.append([raw,malformed_archetype,profiles])
+	for index: int in range(cases.size()):
+		var item: Array = cases[index]
+		var input_before := JSON.stringify(item)
+		var result: Dictionary = trial.definition_from_data("eliminate",martial,item[0],item[1],item[2])
+		check(not result["error"].is_empty() and result["definition"].is_empty(), "malformed adapter configuration returns explicit empty failure " + str(index))
+		check(JSON.stringify(item) == input_before and session.state.to_dict() == before and trial.phase == "selection" and trial.battle == null and not session.combat_active(), "rejected adapter configuration is atomic and never starts/locks battle " + str(index))
+	var unknown: Dictionary = trial.definition_from_data("unknown",martial,raw,archetypes,profiles)
+	check(not unknown["error"].is_empty() and unknown["definition"].is_empty(), "unknown configured scenario returns explicit failure")
+	# The adapter protects accesses without replacing the authoritative domain's
+	# stronger semantic checks (out-of-board coordinates, resource limits, AI).
+	var bad_semantic := raw.duplicate(true)
+	bad_semantic["size"] = [0,8]
+	var prepared: Dictionary = trial.definition_from_data("eliminate",martial,bad_semantic,archetypes,profiles)
+	var guarded := CombatEncounter.new()
+	check(prepared["error"].is_empty() and not guarded.configure(prepared["definition"]).is_empty(), "domain remains authoritative for semantic board validation")
+	check(session.state.to_dict() == before and not session.combat_active(), "all pure configuration validation leaves session and ownership unchanged")
+	print("WEEK6_TRIAL_CONFIGURATION_CASES bad=%d orders=2 scenarios=2 source_writes=0" % cases.size())
+
+
 func _selection_and_preparation() -> void:
 	var before: Dictionary = session.state.to_dict()
 	await capture("selection")
@@ -260,6 +352,7 @@ func _run() -> void:
 	var app: Node = root.get_node("App")
 	var original_contexts: Array = app.contexts.duplicate()
 	if not await install(): quit(1); return
+	_definition_validation()
 	await _selection_and_preparation()
 	await _entry_lock_and_retry()
 	await play_to_end()

@@ -4,13 +4,13 @@
 
 ## 试玩入口
 
-源码标题选择“战斗V1演武（测试）”，或双击项目`CombatV1.command`。正常探索按M打开整备，E应用；F5才是写存档。Mac启动需要本机Godot。独立包入口与确切版本会在通过完整验收后补充；当前不把进行中源码当冻结包。
+源码标题选择“战斗V1演武（测试）”，或双击源码项目的`CombatV1.command`。正常探索按M打开整备，E应用；F5才是写存档。独立候选请先读包内`HANDOFF.md`与`build_info.json`：用`Play-on-Mac.command`玩普通剧情，用`CombatV1-on-Mac.command`进入演武；确切推荐目录见仓库第六周评审。Mac脚本需要本机Godot，源码和冻结包不要混用。
 
 武学：绊腕（破势）、承岳直势（中距剑招）、回山护剑（守势／援护）、承岳横截（牵制）、掠水步（移步）、无名吐纳（被动内功）。普攻、守势、辅助吐纳不占槽。外功3／身法1／内功1，仅识招不能装备；本轮为熟练测试种子，不是正式成长剧情。
 
 三敌：刀役近压，弓役远射，捕手优先携带者。试炼选择清场，或保护同伴并坚持完整3轮；保护者倒地即失败。战斗中不能换招或写探索存档；R重试恢复战前配置与临时资源，F2返回战前须确认放弃本局。
 
-已验证源码实绘：[默认整备](./week6_evidence/prep_default.png)、[修改外功](./week6_evidence/prep_changed.png)、[卸内功](./week6_evidence/prep_no_internal.png)、[目标选择](./week6_evidence/week6_trial_selection.png)、[清场战斗](./week6_evidence/week6_trial_eliminate.png)、[保护目标](./week6_evidence/week6_trial_protection.png)、[战果](./week6_evidence/week6_trial_result.png)、[伤害与资源预览](./week6_evidence/week6_preview_attack_confirm.png)、[状态期限](./week6_evidence/week6_preview_status_expiry.png)。这些是Mac工程证据，不是人工试玩认可；独立包会另跑同包截图。
+已验证源码实绘：[默认整备](./week6_evidence/prep_default.png)、[修改外功](./week6_evidence/prep_changed.png)、[卸内功](./week6_evidence/prep_no_internal.png)、[目标选择](./week6_evidence/week6_trial_selection.png)、[清场战斗](./week6_evidence/week6_trial_eliminate.png)、[保护目标](./week6_evidence/week6_trial_protection.png)、[战果](./week6_evidence/week6_trial_result.png)、[伤害与资源预览](./week6_evidence/week6_preview_attack_confirm.png)、[状态期限](./week6_evidence/week6_preview_status_expiry.png)。这些是Mac工程证据，不是人工试玩认可。独立包的同包实绘另在`evidence/`，与其`validation/`日志和metadata对应；不要用源码图替代包内证据。
 
 ## 请直接把意见写在最后一列
 

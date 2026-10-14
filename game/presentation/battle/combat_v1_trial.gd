@@ -192,24 +192,55 @@ func definition_for(kind: String, martial_state: Dictionary) -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
 	var archetypes: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/enemy_archetypes.json"))
 	var profiles: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_ai_profiles.json"))
-	if not raw is Dictionary or not archetypes is Dictionary or not profiles is Dictionary or not raw.get("allies") is Array or not raw.get("enemies") is Array or not raw.get("scenarios") is Array:
-		return {"error":"演武配置缺失或结构错误。", "definition":{}}
+	return definition_from_data(kind, martial_state, raw, archetypes, profiles)
+
+
+func definition_from_data(kind: String, martial_state: Dictionary, raw: Variant, archetypes: Variant, profiles: Variant) -> Dictionary:
+	# Guard the adapter's casts/accesses before reading editable JSON. The combat
+	# domain still owns semantic board, unit, skill, objective and AI validation.
+	if not raw is Dictionary or not archetypes is Dictionary or not profiles is Dictionary or not GameState.is_json_value(raw) or not GameState.is_json_value(archetypes) or not GameState.is_json_value(profiles):
+		return _definition_failure("演武配置缺失或结构错误。")
+	if not raw.get("id") is String or not raw["id"].is_valid_identifier() or not BattleState._pair(raw.get("size")) or not raw.get("blocked") is Array or not raw.get("allies") is Array or not raw.get("enemies") is Array or not raw.get("scenarios") is Array:
+		return _definition_failure("演武配置必需字段缺失或类型错误。")
+	for cell: Variant in raw["blocked"]:
+		if not BattleState._pair(cell): return _definition_failure("演武障碍格格式错误。")
 	var normalized := Loadout.normalize_state(martial_state, _definitions)
-	if not normalized["error"].is_empty(): return {"error":normalized["error"], "definition":{}}
+	if not normalized["error"].is_empty(): return _definition_failure(normalized["error"])
 	var objective: Dictionary = {}
-	for scenario: Dictionary in raw["scenarios"]:
+	var scenario_ids: Dictionary = {}
+	for scenario: Variant in raw["scenarios"]:
+		if not scenario is Dictionary or not scenario.get("id") is String or not scenario["id"].is_valid_identifier() or scenario_ids.has(scenario["id"]) or not scenario.get("objective") is Dictionary or not scenario["objective"].get("kind") is String:
+			return _definition_failure("演武目标记录缺失、重复或格式错误。")
+		scenario_ids[scenario["id"]] = true
 		if scenario["id"] == kind: objective = scenario["objective"].duplicate(true)
-	if objective.is_empty(): return {"error":"未注册的演武目标。", "definition":{}}
+	if objective.is_empty(): return _definition_failure("未注册的演武目标。")
 	var units: Array = raw["allies"].duplicate(true)
-	if units.size() != 2: return {"error":"演武需要两名我方。", "definition":{}}
-	units[0]["loadout"] = normalized["state"]["loadout"].duplicate(true)
-	units[0]["mastery"] = normalized["state"]["mastery"].duplicate(true)
-	for placement: Dictionary in raw["enemies"]:
-		if not archetypes.has(placement.get("archetype", "")): return {"error":"未知敌人原型。", "definition":{}}
+	if units.size() != 2: return _definition_failure("演武需要两名我方。")
+	var protagonist_index := -1
+	var ally_ids: Dictionary = {}
+	for index: int in range(units.size()):
+		var ally: Variant = units[index]
+		if not ally is Dictionary or not ally.get("id") is String or not ally["id"].is_valid_identifier() or ally_ids.has(ally["id"]) or ally.get("team") != "ally" or not ally.get("archetype") is String or not ally["archetype"].is_valid_identifier():
+			return _definition_failure("演武我方身份、队伍或原型格式错误。")
+		ally_ids[ally["id"]] = true
+		if ally["id"] == "CHAR_PROTAGONIST": protagonist_index = index
+	if protagonist_index < 0: return _definition_failure("演武需要唯一的我方主角。")
+	# Array order is presentation/configuration data, never character identity.
+	units[protagonist_index]["loadout"] = normalized["state"]["loadout"].duplicate(true)
+	units[protagonist_index]["mastery"] = normalized["state"]["mastery"].duplicate(true)
+	for placement: Variant in raw["enemies"]:
+		if not placement is Dictionary or not placement.get("id") is String or not placement["id"].is_valid_identifier() or not placement.get("archetype") is String or not placement["archetype"].is_valid_identifier() or not BattleState._pair(placement.get("cell")):
+			return _definition_failure("演武敌方位置或身份格式错误。")
+		if not archetypes.has(placement["archetype"]) or not archetypes[placement["archetype"]] is Dictionary:
+			return _definition_failure("未知或无效的敌人原型。")
 		var enemy: Dictionary = archetypes[placement["archetype"]].duplicate(true)
 		enemy.merge(placement, true)
 		units.append(enemy)
-	return {"error":"", "definition":{"size":raw["size"], "blocked":raw["blocked"].duplicate(true), "objective":objective, "units":units, "skill_definitions":_definitions.duplicate(true), "ai_profiles":profiles.duplicate(true)}}
+	return {"error":"", "definition":{"size":raw["size"].duplicate(), "blocked":raw["blocked"].duplicate(true), "objective":objective, "units":units, "skill_definitions":_definitions.duplicate(true), "ai_profiles":profiles.duplicate(true)}}
+
+
+static func _definition_failure(reason: String) -> Dictionary:
+	return {"error": reason, "definition": {}}
 
 
 func start_trial() -> void:
