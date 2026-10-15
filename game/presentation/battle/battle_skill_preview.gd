@@ -22,8 +22,15 @@ static func build(battle: CombatEncounter, actor: String, identifier: String, cu
 			if battle.contains(cell) and not battle.is_obstacle(cell): ranges.append(cell)
 	var affected: Array[Vector2i] = []
 	var action := battle.preview_action(actor, identifier, cursor)
+	if skill["area_pattern"] == "front_arc":
+		for cell: Vector2i in Actions.affected_cells(battle,actor,identifier,cursor):
+			if not cell in ranges: ranges.append(cell)
 	if action["ok"]:
 		if skill["range_pattern"] == "step": affected.append(cursor)
+		elif skill["area_pattern"] == "front_arc":
+			for hit: Dictionary in action["hits"]:
+				var receiver_cell := Grid.cell_of(battle.unit(hit["receiver"]))
+				if not receiver_cell in affected: affected.append(receiver_cell)
 		elif not action["hits"].is_empty():
 			for hit: Dictionary in action["hits"]: affected.append(Grid.cell_of(battle.unit(hit["receiver"])))
 		else:

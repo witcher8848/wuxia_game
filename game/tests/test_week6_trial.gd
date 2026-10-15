@@ -82,8 +82,8 @@ func _definition_validation() -> void:
 	# Inject detached data, never rewrite res:// JSON. The same test runs from a
 	# source checkout or the frozen PCK's production resources and controller.
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(trial.DATA_PATH))
-	var archetypes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/enemy_archetypes.json"))
-	var profiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_ai_profiles.json"))
+	var archetypes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(trial.ARCHETYPES_PATH))
+	var profiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(trial.PROFILES_PATH))
 	var martial: Dictionary = session.martial_configuration()["state"]
 	martial["loadout"] = {"external":["SK_TRIP_WRIST","SK_YUE_CROSSCUT"],"movement":"","internal":""}
 	var before: Dictionary = session.state.to_dict()
@@ -168,6 +168,33 @@ func _definition_validation() -> void:
 	check(prepared["error"].is_empty() and not guarded.configure(prepared["definition"]).is_empty(), "domain remains authoritative for semantic board validation")
 	check(session.state.to_dict() == before and not session.combat_active(), "all pure configuration validation leaves session and ownership unchanged")
 	print("WEEK6_TRIAL_CONFIGURATION_CASES bad=%d orders=2 scenarios=2 source_writes=0" % cases.size())
+
+
+func _legacy_data_contract() -> void:
+	# Current production uses the tactical tables. The original flat table and
+	# fixture remain deliberately supported, not silently edited to pass V2.
+	var old_skills: Array = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
+	var old_archetypes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/enemy_archetypes.json"))
+	var old_profiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_ai_profiles.json"))
+	var fixture: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/week6_ai_test_encounter.json"))
+	var old_hero: Dictionary = fixture["units"][0].duplicate(true)
+	var old_enemy: Dictionary = fixture["units"][2].duplicate(true)
+	old_hero["cell"] = [1,1]
+	old_enemy["cell"] = [1,3]
+	old_enemy.erase("ai_profile")
+	var before: Dictionary = session.state.to_dict()
+	var old_battle := CombatEncounter.new()
+	check(old_battle.configure({"size":[5,5],"blocked":[],"objective":{"kind":"eliminate"},"units":[old_hero,old_enemy],"skill_definitions":old_skills}).is_empty(), "original flat resources still validate independently")
+	check(old_battle.skill("SK_YUE_THRUST")["qi_cost"] == 1 and old_battle.skill("SK_YUE_THRUST")["power"] == 3 and old_battle.skill("SK_YUE_CROSSCUT")["area_pattern"] == "single", "original damage/cost/single-target contract preserved")
+	check(old_battle.skill("ACT_BREATH")["effects"] == ["guard"] and not old_battle.skill("SK_TRIP_WRIST").has("broken_mode"), "original recovery/expiry semantics remain explicit old metadata")
+	check(old_archetypes["EN_YAMEN_CATCHER"]["move"] == 3 and old_profiles["AI_PRESSURE"]["effect_priority"] == ["pin"] and old_profiles["AI_CAPTURE"]["low_hp_guard_threshold"] == 2, "original enemy/profile data remain distinct from tactical replacements")
+	var preview := old_battle.preview_action("CHAR_PROTAGONIST","SK_YUE_THRUST",Vector2i(1,3))
+	check(preview["ok"] and preview["qi_cost"] == 1 and preview["qi_after"] == 4, "old flat straight attack still has actual one-qi preview")
+	check(old_battle.perform_action("CHAR_PROTAGONIST","SK_YUE_THRUST",Vector2i(1,3),old_battle.revision)["ok"] and old_battle.unit("CHAR_PROTAGONIST")["qi"] == 4, "legacy preview matches actual old execution")
+	var planned: Dictionary = AI.plan(old_battle,old_battle.current_actor_id())
+	check(not planned.is_empty() and AI.take_turn(old_battle)["ok"], "legacy unprofiled AI still executes its original flat path")
+	check(old_battle.perform_action("CHAR_PROTAGONIST","ACT_BREATH",Grid.cell_of(old_battle.unit("CHAR_PROTAGONIST")),old_battle.revision)["ok"] and old_battle.unit("CHAR_PROTAGONIST")["statuses"].has("guard"), "legacy auxiliary breathing still legally grants old guard")
+	check(session.state.to_dict() == before, "legacy compatibility checks mutate no active route")
 
 
 func _selection_and_preparation() -> void:
@@ -352,6 +379,7 @@ func _run() -> void:
 	var app: Node = root.get_node("App")
 	var original_contexts: Array = app.contexts.duplicate()
 	if not await install(): quit(1); return
+	_legacy_data_contract()
 	_definition_validation()
 	await _selection_and_preparation()
 	await _entry_lock_and_retry()

@@ -17,7 +17,7 @@ static func validate(data: Variant) -> String:
 				return "Missing skill text: " + field
 		if not skill["category"] in CATEGORIES or not skill["mastery_stage"] in ["识招", "熟练", "化用"]:
 			return "Unknown skill category or mastery stage."
-		if not skill.get("range_pattern") in ["adjacent", "line", "self", "step"] or not skill.get("area_pattern") in ["single", "adjacent_allies"] or not skill.get("target") in ["enemy", "self", "empty"]:
+		if not skill.get("range_pattern") in ["adjacent", "line", "self", "step"] or not skill.get("area_pattern") in ["single", "adjacent_allies", "front_arc"] or not skill.get("target") in ["enemy", "self", "empty"]:
 			return "Invalid skill range/target."
 		for field: String in ["range", "power", "qi_cost", "cooldown_rounds", "restore_qi", "distance_bonus"]:
 			if not BattleState._whole(skill.get(field)) or skill[field] < 0 or skill[field] > 32:
@@ -27,6 +27,8 @@ static func validate(data: Variant) -> String:
 		for status: Variant in skill["effects"]:
 			if not status in STATUSES:
 				return "Unknown status."
+		if skill.has("broken_mode") and (not skill["broken_mode"] is String or skill["broken_mode"] != "next_hit" or not "broken" in skill["effects"]):
+			return "Next-hit broken mode requires the broken effect."
 		if skill["category"] == "内功":
 			if skill["ultimate"] or skill["range_pattern"] != "self" or skill["area_pattern"] != "single" or skill["target"] != "self" or skill["range"] != 0 or not skill["effects"].is_empty():
 				return "Internal arts must be passive self definitions."
@@ -50,6 +52,8 @@ static func validate(data: Variant) -> String:
 			return "Adjacent attacks have range one."
 		if skill["area_pattern"] == "adjacent_allies" and pattern != "self":
 			return "Area support must originate at self."
+		if skill["area_pattern"] == "front_arc" and (pattern != "adjacent" or skill["target"] != "enemy"):
+			return "Front arc requires an adjacent enemy attack."
 		ids[skill["id"]] = true
 	for identifier: String in BASE:
 		if not ids.has(identifier):

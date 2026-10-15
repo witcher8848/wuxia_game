@@ -8,6 +8,8 @@
 
 ## 第六周当前进度
 
+2026-10-15反馈版已交付：主角战斗显示约27px、不挡上一格；吐纳／守势分开，直势耗气控距、横截前排群控、绊腕接击、护剑援护，并拉开近压／追携卷者差异。详见[反馈落实说明](./docs/week6_feedback_followup.md)与[短试玩表](./docs/week6_feedback_playtest.md)。当前推荐`builds/week6_feedback/0.6.1-week6-feedback_8f38fb9_20261015T014126Z/`，用包内`CombatFeedback-on-Mac.command`玩演武；15门、49张Mac实绘、三类冷重启与105项SHA已通过。原图／探索大小／原反馈不改，本轮改动未提交或推送；以下0.6.0为基础交付历史。
+
 第六周战斗V1工程已完成：见[每日排期](./武侠RPG_第六周每日任务.md)、[最终评审](./12_week6_review.md)与[试玩表](./docs/week6_playtest.md)。正常探索按M整备三外功／一身法／一内功；标题末项或[CombatV1.command](./CombatV1.command)进入2对3清场／3整轮保护同伴试炼。六武学、三敌数据AI、状态／预览、存读与可配置关卡完整回归通过；配置按角色ID注入，不依赖数组顺序。
 
 本地实现`cbfb5fe`／修复`0a04033`，未推送。推荐冻结候选：`builds/week6/0.6.0-week6-prototype_0a04033_20261014T013331Z/`，先读包内`HANDOFF.md`；用`Play-on-Mac.command`玩普通剧情、`CombatV1-on-Mac.command`玩演武。十项同PCK门禁、34张Mac实绘、两类跨进程存读和78项SHA均通过。Mac脚本依赖安装的Godot；Windows／实体手柄、最终手感与审美仍未验，不冒称Steam发行版，也不自动启动第七周。
@@ -20,7 +22,7 @@
 
 第五周推荐冻结候选：`builds/week5/0.5.0-week5-prototype_imagegen_645127f_20261012T154536Z/`。用包内`Character-on-Mac.command`看角色、`Play-on-Mac.command`玩流程，先读`HANDOFF.md`，意见写在`PLAYTEST.md`；Mac脚本依赖本机Godot，不是独立Mac App。源码完整回归、同包Mac实际渲染和跨进程存读通过，167文件校验通过。包保留构建时HEAD／dirty元数据，后续本地提交不改写它；当前工作树的第六周实验代码不属于这个第五周包。最终外观、旧体验门、Windows／实体手柄真机仍待验。
 
-其他角色／地图仍灰盒。imagegen只用于内部方向参考；实机图集独立整数像素制作。角色风格、第四周引导体验和首月人工门仍待确认，不自动开始正式美术量产。
+其他角色／地图仍灰盒。当前主角实机使用原imagegen PNG与帧清单，旧独立整数像素图集保留为历史fixture。角色风格、第四周引导体验和首月人工门仍待确认，不自动开始正式美术量产。
 
 ## 第四周当前进度
 

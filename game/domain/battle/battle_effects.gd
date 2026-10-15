@@ -36,15 +36,18 @@ static func execute(battle: RefCounted, plan: Dictionary) -> void:
 		if hit["redirected"]:
 			battle._units[hit["target"]]["statuses"].erase("support")
 		battle._units[hit["receiver"]]["statuses"].erase("guard")
+		var old_broken: Dictionary = battle._units[hit["receiver"]]["statuses"].get("broken", {})
+		if old_broken.get("mode", "") == "next_hit":
+			battle._units[hit["receiver"]]["statuses"].erase("broken")
 		hurt(battle, actor, hit["receiver"], hit["damage"], skill["name"])
 		# Debuffs follow the actual recipient of an intercepted strike.
-		apply_statuses(battle, actor, hit["receiver"], skill["effects"])
+		apply_statuses(battle, actor, hit["receiver"], skill["effects"], str(skill.get("broken_mode", "")))
 	if plan["hits"].is_empty():
 		for recipient: String in plan["affected"]:
-			apply_statuses(battle, actor, recipient, skill["effects"])
+			apply_statuses(battle, actor, recipient, skill["effects"], str(skill.get("broken_mode", "")))
 
 
-static func apply_statuses(battle: RefCounted, source: String, recipient: String, effects: Array) -> void:
+static func apply_statuses(battle: RefCounted, source: String, recipient: String, effects: Array, broken_mode := "") -> void:
 	var unit: Dictionary = battle._units[recipient]
 	if unit["hp"] <= 0:
 		return
@@ -54,6 +57,9 @@ static func apply_statuses(battle: RefCounted, source: String, recipient: String
 		if status == "guard" and source != recipient:
 			continue
 		unit["statuses"][status] = {"source": source, "remaining": 2 if status == "bleed" else 1, "expires_round": battle.round_number + 1}
+		if status == "broken" and broken_mode == "next_hit":
+			unit["statuses"][status]["mode"] = "next_hit"
+			unit["statuses"][status]["expires_round"] = battle.round_number + 2
 
 
 static func start_turn(battle: RefCounted) -> void:
@@ -76,7 +82,7 @@ static func end_turn(battle: RefCounted, actor: String) -> void:
 		bleed["remaining"] -= 1
 		if bleed["remaining"] == 0:
 			statuses.erase("bleed")
-	statuses.erase("broken")
+	if statuses.get("broken", {}).get("mode", "") != "next_hit": statuses.erase("broken")
 	statuses.erase("pin")
 
 
@@ -85,3 +91,5 @@ static func begin_round(battle: RefCounted) -> void:
 		var statuses: Dictionary = unit["statuses"]
 		if statuses.has("support") and statuses["support"]["expires_round"] <= battle.round_number:
 			statuses.erase("support")
+		if statuses.get("broken", {}).get("mode", "") == "next_hit" and statuses["broken"]["expires_round"] <= battle.round_number:
+			statuses.erase("broken")

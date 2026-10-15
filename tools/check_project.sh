@@ -6,6 +6,7 @@ python3 tools/validate_repo.py
 python3 -B -m unittest discover -s tools/tests -p 'test_hero_manifest.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_review_bundle.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_week6_candidate.py'
+python3 -B -m unittest discover -s tools/tests -p 'test_week6_feedback_candidate.py'
 python3 tools/run_checked.py import ./tools/godot.sh --headless --path "$task_root" --editor --import
 python3 tools/run_checked.py character_source ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_source.gd
 python3 tools/run_checked.py character_pipeline ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_pipeline.gd
@@ -32,6 +33,11 @@ python3 tools/run_checked.py week6_preview ./tools/godot.sh --headless --path "$
 python3 tools/run_checked.py week6_preparation ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_preparation.gd
 python3 tools/run_checked.py week6_martial_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_martial_session.gd
 python3 tools/run_checked.py week6_trial ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_trial.gd
+python3 tools/run_checked.py battle_tactics ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_battle_tactics.gd
+python3 tools/run_checked.py board_visibility ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_board_visibility.gd
+python3 tools/run_checked.py tactics_encounter ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_tactics_encounter.gd
+python3 tools/run_checked.py week6_feedback_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_feedback_ui.gd
+python3 tools/run_checked.py week6_feedback_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_feedback_session.gd
 python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_investigation_rules.gd
 python3 tools/run_checked.py dialogue ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_dialogue.gd
 python3 tools/run_checked.py inquiry ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_inquiry.gd

@@ -3,8 +3,12 @@ extends RefCounted
 const Combat = preload("res://game/domain/battle/combat_encounter.gd")
 var _data: Dictionary = {}
 var _rules: InvestigationRules
+var _prepared_skills: Array = []
 
-func configure(data: Dictionary, skills: Array, rules: InvestigationRules) -> String:
+func configure(data: Dictionary, skills: Array, rules: InvestigationRules, prepared_skills: Array = []) -> String:
+	if not prepared_skills.is_empty():
+		var prepared_error: String = preload("res://game/domain/battle/battle_skills.gd").validate(prepared_skills)
+		if not prepared_error.is_empty(): return prepared_error
 	if not GameState.is_json_value(data) or data.size() != 10 or data.get("id") != "BATTLE_GRAVES_01":
 		return "Invalid story encounter definition."
 	if data.get("prepare_step") != "STEP_PREPARE_RESCUE" or data.get("victory_step") != "STEP_GRAVES_VICTORY" or data.get("formation_fact") != "FACT_YAMEN_FORMATION" or data.get("ferry_fact") != "FACT_FERRY_ROUTE":
@@ -35,6 +39,7 @@ func configure(data: Dictionary, skills: Array, rules: InvestigationRules) -> St
 	if not error.is_empty(): return error
 	_data = candidate
 	_rules = rules
+	_prepared_skills = prepared_skills.duplicate(true)
 	return ""
 
 func prepare(state: GameState) -> Dictionary:
@@ -47,6 +52,7 @@ func prepare(state: GameState) -> Dictionary:
 	# Empty schema-1 records preserve the original story seed. An explicitly
 	# confirmed preparation is applied to the protagonist, not the companion.
 	if not state.martial_states.get("loadout",{}).is_empty():
+		if not _prepared_skills.is_empty(): definition["skill_definitions"] = _prepared_skills.duplicate(true)
 		var prepared: Dictionary = preload("res://game/domain/battle/martial_loadout.gd").normalize_state(state.martial_states,definition["skill_definitions"])
 		if not prepared["error"].is_empty(): return _failure(ERR_INVALID_DATA)
 		for unit: Dictionary in definition["units"]:

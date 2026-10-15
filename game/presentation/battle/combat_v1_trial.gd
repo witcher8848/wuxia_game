@@ -8,6 +8,9 @@ const Preparation = preload("res://game/presentation/battle/martial_preparation_
 const Loadout = preload("res://game/domain/battle/martial_loadout.gd")
 const Skills = preload("res://game/domain/battle/battle_skills.gd")
 const DATA_PATH := "res://game/content/data/combat_v1_trial.json"
+const SKILLS_PATH := "res://game/content/data/battle_skills_tactics.json"
+const ARCHETYPES_PATH := "res://game/content/data/enemy_archetypes_tactics.json"
+const PROFILES_PATH := "res://game/content/data/battle_ai_profiles_tactics.json"
 const FONT = preload("res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf")
 var phase := "selection"
 var selected_scenario := 0
@@ -68,6 +71,11 @@ class TrialBattleScreen extends BaseScreen:
 			menu.text = "退出演武？\n本局临时进度不会保存。\nE退出；Esc继续。"
 		elif mode == "result":
 			detail.text = "演武结果不结算探索气血、奖励或时间。\nR恢复本局战前配置；F2返回战前。"
+		elif mode == "command" and not battle.current_actor_id().is_empty() and battle.unit(battle.current_actor_id())["team"] == "enemy":
+			var identifier: String = battle.current_actor_id()
+			var intent: Dictionary = AI.intent(battle, identifier, false, true)
+			var priority: String = intent.get("priority_target", "")
+			if not priority.is_empty(): menu.text += "\n策略优先：%s（站位改变后重算）" % battle.unit(priority).get("name", priority)
 
 
 func _ready() -> void:
@@ -81,7 +89,8 @@ func _ready() -> void:
 	cards.append(_label(Vector2(336,62), Vector2(272,110), 14))
 	detail = _label(Vector2(28,190), Vector2(584,106), 13)
 	footer = _label(Vector2(28,306), Vector2(584,44), 12)
-	_definitions = get_node("/root/ContentDB").martial_definitions()
+	var definitions: Variant = JSON.parse_string(FileAccess.get_file_as_string(SKILLS_PATH))
+	_definitions = definitions.duplicate(true) if definitions is Array else []
 	_app.push_context(&"battle")
 	_context_pushed = true
 	_refresh_selection()
@@ -117,23 +126,58 @@ func _draw() -> void:
 
 func _refresh_selection() -> void:
 	if not is_instance_valid(selection_root): return
-	heading.text = "战斗V1演武 · 2对3 · 试验目标，不结算剧情"
-	cards[0].text = "› 清场演武" if selected_scenario == 0 else "清场演武"
-	cards[0].text += "\n击倒刀役、弓役与捕手。\n任一我方存活即可继续。"
-	cards[1].text = "› 保护同伴" if selected_scenario == 1 else "保护同伴"
-	cards[1].text += "\n坚持完整3轮；同伴必须存活。\n清敌不会提前结束计时。"
+	heading.text = "战斗V1演武 · 2对3 · 站位与内力取舍"
+	var views := scenario_views()
+	if not views["error"].is_empty():
+		for card: Label in cards: card.text = "配置无效，不能开战。"
+		detail.text = "不回退到其他场景或旧配置。"
+		footer.text = views["error"] + "\nEsc返回"
+		queue_redraw()
+		return
+	var scenarios: Array = views["scenarios"]
+	selected_scenario = clampi(selected_scenario, 0, scenarios.size()-1)
+	for index: int in range(cards.size()):
+		cards[index].text = ("› " if selected_scenario == index else "") + scenarios[index]["title"] + "\n" + scenarios[index]["description"]
 	var configuration: Dictionary = _session.martial_configuration()
+	if not configuration.get("error", "").is_empty():
+		detail.text = "持久武学数据无效，不能回退默认整备。"
+		footer.text = configuration["error"] + "\nEsc返回"
+		queue_redraw()
+		return
 	var names: Array[String] = []
 	if configuration.get("error", "").is_empty():
 		var equipped: Dictionary = configuration["state"]["loadout"]
 		var indexed := Skills.index(_definitions)
 		for identifier: String in equipped["external"] + [equipped["movement"],equipped["internal"]]:
 			if not identifier.is_empty(): names.append(indexed[identifier]["name"])
-	detail.text = "敌人：刀役近压 · 弓役远射 · 捕手锁拿主角\n主角整备：%s\n演武不消耗永久气血、调查证据或时间；无调查加成。" % " / ".join(names)
+	var scenario: Dictionary = scenarios[selected_scenario]
+	var prepared := definition_for(scenario["id"], configuration.get("state", {}))
+	if not prepared["error"].is_empty():
+		detail.text = "配置无效，不回退旧场景：" + prepared["error"]
+		footer.text = "Esc返回；修复配置后重新进入演武。"
+		queue_redraw()
+		return
+	var carrier := ""
+	for unit: Dictionary in prepared["definition"]["units"]:
+		var profile: Variant = prepared["definition"]["ai_profiles"].get(str(unit.get("ai_profile", "")), {})
+		if not profile is Dictionary or profile.get("style") != "capture": continue
+		var targets: Variant = unit.get("ai_target_ids", [])
+		if targets is Array and not targets.is_empty() and targets[0] is String: carrier = targets[0]
+	var carrier_name := _unit_name(prepared["definition"], carrier)
+	var goal: Dictionary = scenario["objective"]
+	var objective := "击倒全部三敌；任一我方存活可继续。"
+	if goal["kind"] == "survive": objective = "保护%s，坚持完整%d轮。" % [_unit_name(prepared["definition"], goal["protected_unit_id"]), int(goal["rounds"])]
+	detail.text = "主角整备：%s\n刀役近压破势 · 弓役远射 · 捕手优先%s\n目标：%s\n随目标更换武学；演武不结算剧情、永久气血或时辰。" % [" / ".join(names), carrier_name, objective]
 	footer.text = "←→ / A D 选择目标 · M 战前整备 · E / Enter 开战\nEsc 返回探索；战内 R 原配置重试 · F2 返回整备（确认）"
 	if phase == "quit": footer.text = "退出演武并返回？E确认 · Esc取消；本局不结算任何奖励。"
 	elif not message.is_empty(): footer.text = message + "\n←→选择 · M整备 · E开战 · Esc返回"
 	queue_redraw()
+
+
+static func _unit_name(definition: Dictionary, identifier: String) -> String:
+	for unit: Dictionary in definition.get("units", []):
+		if unit["id"] == identifier: return str(unit.get("name", identifier))
+	return identifier if not identifier.is_empty() else "未配置携带者"
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -190,9 +234,39 @@ func _close_preparation() -> void:
 
 func definition_for(kind: String, martial_state: Dictionary) -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
-	var archetypes: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/enemy_archetypes.json"))
-	var profiles: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_ai_profiles.json"))
+	var archetypes: Variant = JSON.parse_string(FileAccess.get_file_as_string(ARCHETYPES_PATH))
+	var profiles: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROFILES_PATH))
 	return definition_from_data(kind, martial_state, raw, archetypes, profiles)
+
+
+func scenario_views() -> Dictionary:
+	return _scenario_table(JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH)))
+
+
+static func _scenario_table(raw: Variant) -> Dictionary:
+	var failure := {"error":"演武需要两个有效目标记录。", "scenarios":[]}
+	if not raw is Dictionary or not raw.get("scenarios") is Array or raw["scenarios"].size() != 2 or not GameState.is_json_value(raw): return failure
+	var ids: Dictionary = {}
+	var kinds: Dictionary = {}
+	for scenario: Variant in raw["scenarios"]:
+		if not scenario is Dictionary or not scenario.get("id") is String or not scenario["id"].is_valid_identifier() or ids.has(scenario["id"]) or not scenario.get("title") is String or scenario["title"].is_empty() or not scenario.get("description") is String or scenario["description"].is_empty() or not scenario.get("objective") is Dictionary: return failure
+		var goal: Dictionary = scenario["objective"]
+		if not goal.get("kind") in ["eliminate", "survive"] or kinds.has(goal["kind"]): return failure
+		if goal["kind"] == "survive" and (not BattleState._whole(goal.get("rounds")) or goal["rounds"] < 1 or goal["rounds"] > 99 or not goal.get("protected_unit_id") is String or not goal["protected_unit_id"].is_valid_identifier()): return failure
+		for field: String in ["deployment", "ai_targets"]:
+			if scenario.has(field) and not scenario[field] is Dictionary: return failure
+		for identifier: Variant in scenario.get("deployment", {}):
+			if not identifier is String or not identifier.is_valid_identifier() or not BattleState._pair(scenario["deployment"][identifier]): return failure
+		for identifier: Variant in scenario.get("ai_targets", {}):
+			var targets: Variant = scenario["ai_targets"][identifier]
+			if not identifier is String or not identifier.is_valid_identifier() or not targets is Array or targets.is_empty(): return failure
+			var seen: Dictionary = {}
+			for target: Variant in targets:
+				if not target is String or not target.is_valid_identifier() or seen.has(target): return failure
+				seen[target] = true
+		ids[scenario["id"]] = true
+		kinds[goal["kind"]] = true
+	return {"error":"", "scenarios":raw["scenarios"].duplicate(true)}
 
 
 func definition_from_data(kind: String, martial_state: Dictionary, raw: Variant, archetypes: Variant, profiles: Variant) -> Dictionary:
@@ -204,15 +278,16 @@ func definition_from_data(kind: String, martial_state: Dictionary, raw: Variant,
 		return _definition_failure("演武配置必需字段缺失或类型错误。")
 	for cell: Variant in raw["blocked"]:
 		if not BattleState._pair(cell): return _definition_failure("演武障碍格格式错误。")
+	var table := _scenario_table(raw)
+	if not table["error"].is_empty(): return _definition_failure(table["error"])
 	var normalized := Loadout.normalize_state(martial_state, _definitions)
 	if not normalized["error"].is_empty(): return _definition_failure(normalized["error"])
 	var objective: Dictionary = {}
-	var scenario_ids: Dictionary = {}
-	for scenario: Variant in raw["scenarios"]:
-		if not scenario is Dictionary or not scenario.get("id") is String or not scenario["id"].is_valid_identifier() or scenario_ids.has(scenario["id"]) or not scenario.get("objective") is Dictionary or not scenario["objective"].get("kind") is String:
-			return _definition_failure("演武目标记录缺失、重复或格式错误。")
-		scenario_ids[scenario["id"]] = true
-		if scenario["id"] == kind: objective = scenario["objective"].duplicate(true)
+	var selected: Dictionary = {}
+	for scenario: Dictionary in table["scenarios"]:
+		if scenario["id"] == kind:
+			selected = scenario
+			objective = scenario["objective"].duplicate(true)
 	if objective.is_empty(): return _definition_failure("未注册的演武目标。")
 	var units: Array = raw["allies"].duplicate(true)
 	if units.size() != 2: return _definition_failure("演武需要两名我方。")
@@ -228,14 +303,27 @@ func definition_from_data(kind: String, martial_state: Dictionary, raw: Variant,
 	# Array order is presentation/configuration data, never character identity.
 	units[protagonist_index]["loadout"] = normalized["state"]["loadout"].duplicate(true)
 	units[protagonist_index]["mastery"] = normalized["state"]["mastery"].duplicate(true)
+	if raw["enemies"].size() != 3: return _definition_failure("演武需要三名敌人。")
+	var unit_ids: Dictionary = ally_ids.duplicate()
 	for placement: Variant in raw["enemies"]:
-		if not placement is Dictionary or not placement.get("id") is String or not placement["id"].is_valid_identifier() or not placement.get("archetype") is String or not placement["archetype"].is_valid_identifier() or not BattleState._pair(placement.get("cell")):
+		if not placement is Dictionary or not placement.get("id") is String or not placement["id"].is_valid_identifier() or unit_ids.has(placement["id"]) or not placement.get("archetype") is String or not placement["archetype"].is_valid_identifier() or not BattleState._pair(placement.get("cell")):
 			return _definition_failure("演武敌方位置或身份格式错误。")
 		if not archetypes.has(placement["archetype"]) or not archetypes[placement["archetype"]] is Dictionary:
 			return _definition_failure("未知或无效的敌人原型。")
 		var enemy: Dictionary = archetypes[placement["archetype"]].duplicate(true)
 		enemy.merge(placement, true)
+		if enemy.get("team") != "enemy": return _definition_failure("敌方原型队伍错误。")
+		unit_ids[placement["id"]] = true
 		units.append(enemy)
+	for identifier: String in selected.get("deployment", {}):
+		if not unit_ids.has(identifier): return _definition_failure("部署引用了未知人物。")
+	for identifier: String in selected.get("ai_targets", {}):
+		if not unit_ids.has(identifier) or ally_ids.has(identifier): return _definition_failure("追缉策略必须引用敌人。")
+		for target: String in selected["ai_targets"][identifier]:
+			if not ally_ids.has(target): return _definition_failure("追缉目标必须引用我方人物。")
+	for unit: Dictionary in units:
+		if selected.get("deployment", {}).has(unit["id"]): unit["cell"] = selected["deployment"][unit["id"]].duplicate()
+		if selected.get("ai_targets", {}).has(unit["id"]): unit["ai_target_ids"] = selected["ai_targets"][unit["id"]].duplicate()
 	return {"error":"", "definition":{"size":raw["size"].duplicate(), "blocked":raw["blocked"].duplicate(true), "objective":objective, "units":units, "skill_definitions":_definitions.duplicate(true), "ai_profiles":profiles.duplicate(true)}}
 
 
@@ -247,7 +335,10 @@ func start_trial() -> void:
 	if phase != "selection": return
 	var configuration: Dictionary = _session.martial_configuration()
 	if not configuration.get("error", "").is_empty(): message = configuration["error"]; _refresh_selection(); return
-	var prepared := definition_for("eliminate" if selected_scenario == 0 else "survive", configuration["state"])
+	var table := scenario_views()
+	if not table["error"].is_empty(): message = table["error"]; _refresh_selection(); return
+	if selected_scenario < 0 or selected_scenario >= table["scenarios"].size(): message = "未选择有效目标。"; _refresh_selection(); return
+	var prepared := definition_for(table["scenarios"][selected_scenario]["id"], configuration["state"])
 	var candidate := Combat.new()
 	startup_error = prepared["error"] if not prepared["error"].is_empty() else candidate.configure(prepared["definition"])
 	if not startup_error.is_empty(): message = startup_error; _refresh_selection(); return

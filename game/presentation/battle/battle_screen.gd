@@ -9,6 +9,7 @@ const Board = preload("res://game/presentation/battle/battle_board.gd")
 const SkillPreview = preload("res://game/presentation/battle/battle_skill_preview.gd")
 const Commands = preload("res://game/presentation/battle/battle_command_options.gd")
 const MovementPreview = preload("res://game/presentation/battle/battle_movement_preview.gd")
+const Actions = preload("res://game/domain/battle/battle_actions.gd")
 var battle: CombatEncounter
 var board: Node2D
 var heading: Label
@@ -27,6 +28,7 @@ var ai_delay := 0.0
 var auto_ai := true
 var startup_error := ""
 var inspect_status := false
+var show_enemy_attack := false
 var _navigation: Array[Dictionary] = []
 var _target_cursors: Dictionary = {}
 
@@ -108,7 +110,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or battle == null: return
 	# Scene switching may detach this node during a confirmation callback.
 	get_viewport().set_input_as_handled()
-	if event.keycode == KEY_V and mode == "inspect":
+	if event.is_action_pressed("toggle_threat"):
+		show_enemy_attack = not show_enemy_attack
+	elif event.keycode == KEY_V and mode == "inspect":
 		inspect_status = not inspect_status
 	elif event.keycode == KEY_F1:
 		if mode == "help": cancel()
@@ -237,6 +241,7 @@ func refresh() -> void:
 	board.valid_targets = []
 	board.range_disabled = false
 	board.enemy_reach = []
+	board.enemy_attack_cells = _current_enemy_attacks() if show_enemy_attack else []
 	board.inspect_enemy = false
 	disabled_menu.text = ""
 	detail.text = ""
@@ -286,19 +291,38 @@ func refresh() -> void:
 			var inspected := battle.unit(battle.unit_at(cursor))
 			menu.text = "空地／障碍" if inspected.is_empty() else "%s 气血%d/%d\n内力%d/%d 身法%d\n状态：%s" % [inspected["name"], inspected["hp"], inspected["max_hp"], inspected["qi"], inspected["max_qi"], inspected["agility"], Text.statuses(inspected)]
 			if not inspected.is_empty() and inspected["team"] == "enemy":
-				var intent := AI.intent(battle, inspected["id"])
+				var intent := AI.intent(battle, inspected["id"], false, true)
 				menu.text += "\n" + intent["kind"]
+				var priority: String = str(intent.get("priority_target",""))
+				if not priority.is_empty(): menu.text += "\n策略目标：" + battle.unit(priority).get("name",priority)
 				board.highlights = intent["reachable"]
 				board.inspect_enemy = true
 			detail.text = Text.status_detail(battle,inspected) if inspect_status and not inspected.is_empty() else "紫色为移动范围；没有额外情报时\n不显示具体攻击目标。V查看状态到期；Esc返回。"
 			footer.text = "方向键查看单位 · V状态/意图切换 · Esc返回 · R重试（确认）"
-		"help": menu.text = Text.STATUS_HELP; detail.text = goal + "\n" + Text.resource_help(battle,actor if not unit.is_empty() else "CHAR_PROTAGONIST")
+		"help": menu.text = Text.status_help(battle); detail.text = goal + "\n" + Text.resource_help(battle,actor if not unit.is_empty() else "CHAR_PROTAGONIST") + "\nT红纹：现站位射程，不判断内力/冷却；移动后重算，非锁定计划。"
 		"retry": menu.text = "重试当前配置？\n全部临时战斗进度将恢复。\nE确认，Esc保留当前战斗。"
 		"quit": menu.text = "退出战斗实验场？\n不会影响探索进度。\nE退出，Esc继续。"
 	# Reset requested extent after replacing text; Label may grow to its minimum.
 	menu.size = Vector2(282,120)
 	disabled_menu.size = menu.size
+	var footer_lines: PackedStringArray = footer.text.split("\n")
+	if not footer_lines.is_empty() and not footer_lines[0].contains("红纹"):
+		footer_lines[0] += " · T红纹(现站位)"
+	footer.text = "\n".join(footer_lines)
 	board.queue_redraw()
+
+
+func _current_enemy_attacks() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for identifier: String in battle.unit_ids():
+		var unit := battle.unit(identifier)
+		if unit["team"] != "enemy" or unit["hp"] <= 0: continue
+		for skill_id: String in battle.abilities(identifier):
+			var skill := battle.skill(skill_id)
+			if skill["target"] != "enemy": continue
+			for cell: Vector2i in Actions.target_cells(battle,identifier,skill_id):
+				if not cell in cells: cells.append(cell)
+	return cells
 
 
 func _show_skill_range(actor: String, identifier: String, at: Vector2i, command_index := -1) -> void:
@@ -311,6 +335,7 @@ func _show_skill_range(actor: String, identifier: String, at: Vector2i, command_
 	footer.text = "淡色格：范围 · 亮框：可选目标 · 橙框：实际受影响\n方向键/WASD选择 · E确认 · Esc逐级返回 · F1规则 · R重试"
 	if not message.is_empty(): footer.text += "\n" + message
 	elif board.range_disabled: footer.text += "\n灰色仅展示范围；当前不可用：" + model["reason"]
+	elif battle.skill(identifier)["area_pattern"] == "front_arc": footer.text += "\n横截选相邻方向格（可空）；前排至少一敌，不伤友军。"
 	else: footer.text += "\n预览不消耗行动；攻击须选敌人，自身招式须选自己。"
 	if command_index >= 0:
 		board.range_disabled = not Commands.entries(battle)[command_index]["enabled"]

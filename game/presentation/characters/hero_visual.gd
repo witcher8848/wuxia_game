@@ -235,15 +235,25 @@ func frame_number() -> int:
 func _draw() -> void:
 	draw_at(self,Vector2.ZERO)
 
-func draw_at(canvas: CanvasItem, at: Vector2) -> void:
+## Optional presentation-only scale. The default keeps exploration/lab geometry
+## byte-for-byte equivalent; battle can fit the original texture into its grid.
+func frame_draw_rectangle(frame: int, at: Vector2, render_scale := 1.0) -> Rect2:
+	if not is_finite(render_scale) or render_scale <= 0.0: return Rect2()
+	var geometry := frame_geometry(frame)
+	if geometry.is_empty(): return Rect2()
+	return Rect2(at-geometry["anchor"]*render_scale,geometry["display_size"]*render_scale)
+
+func draw_at(canvas: CanvasItem, at: Vector2, render_scale := 1.0) -> void:
 	if clip_data().is_empty(): return
 	var geometry := frame_geometry(frame_number())
 	if geometry.is_empty(): return
+	var rectangle := frame_draw_rectangle(frame_number(),at,render_scale)
+	if not rectangle.has_area(): return
 	# Separate fixed pixel shadow; anchor always follows physics feet exactly.
 	for row: Rect2 in SHADOW_ROWS:
-		canvas.draw_rect(Rect2(at+row.position,row.size),Color("#333b46"))
-	canvas.draw_texture_rect_region(geometry["texture"],Rect2(at-geometry["anchor"],geometry["display_size"]),geometry["region"])
+		canvas.draw_rect(Rect2(at+row.position*render_scale,row.size*render_scale),Color("#333b46"))
+	canvas.draw_texture_rect_region(geometry["texture"],rectangle,geometry["region"])
 	if sprinting and walking:
 		var behind := Vector2.UP if facing == "down" else Vector2.DOWN if facing == "up" else Vector2.LEFT if facing == "right" else Vector2.RIGHT
-		canvas.draw_rect(Rect2(at+(behind*14).round(),Vector2(3,2)),Color("#d19a5c"))
-		canvas.draw_rect(Rect2(at+(behind*19+Vector2(3,1)).round(),Vector2(2,1)),Color("#a9ada4"))
+		canvas.draw_rect(Rect2(at+(behind*14*render_scale).round(),Vector2(3,2)*render_scale),Color("#d19a5c"))
+		canvas.draw_rect(Rect2(at+((behind*19+Vector2(3,1))*render_scale).round(),Vector2(2,1)*render_scale),Color("#a9ada4"))

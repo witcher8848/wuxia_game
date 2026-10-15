@@ -32,7 +32,7 @@ func _ready() -> void:
 	surface.custom_minimum_size = Vector2(584, 320)
 	add_child(surface)
 	_label(surface, Vector2(16, 10), Vector2(552, 26), 20).text = "武学整备 · 外功3／身法1／内功1"
-	_label(surface, Vector2(16, 41), Vector2(552, 32), 12).text = "V1熟练测试种子；正式传授剧情待后续制作。\n普攻／守势／吐纳辅助始终可用；内功为被动，不占行动栏。"
+	_label(surface, Vector2(16, 41), Vector2(552, 32), 12).text = "四外功择三：破势续攻／控距爆发／群控／援护各有用途。\n熟练测试种子；普攻、守势、恢复不占槽，内功为被动。"
 	for index in range(6):
 		rows.append(_label(surface, Vector2(16, 79 + 27 * index), Vector2(552, 24), 14))
 	detail = _label(surface, Vector2(16, 244), Vector2(552, 34), 12)
@@ -167,6 +167,12 @@ func refresh() -> void:
 			var effects: Dictionary = {"guard":"守势","broken":"破势","pin":"牵制","bleed":"流血","support":"援护"}
 			var names: Array[String] = []
 			for effect: String in skill["effects"]: names.append(effects[effect])
-			detail.text = "%s · 范围%d · 耗内力%d · 冷却%d轮 · 基础威力%d\n%s" % [skill["category"],skill["range"],skill["qi_cost"],skill["cooldown_rounds"],skill["power"], "识招仅能查看，熟练后可配置。" if mastery.get(identifier,"识招") == "识招" else ("效果：" + "／".join(names) if not names.is_empty() else "实际伤害受双方属性与状态影响；战斗中可预览。")]
+			var role: String = "效果：" + "／".join(names)
+			if skill.get("broken_mode","") == "next_hit": role = "破势续攻：给下一击开护体-2窗口。"
+			elif skill["area_pattern"] == "front_arc": role = "群控：定向前排3格，伤敌并牵制追击。"
+			elif "support" in skill["effects"]: role = "护持：自身守势，替邻友承受首击。"
+			elif skill["range_pattern"] == "step": role = "机动：穿人不穿墙，移步并获守势。"
+			elif skill["distance_bonus"] > 0: role = "控距：2格加伤；注意贴身伤害与内力消耗。"
+			detail.text = "%s · 范围%d · 耗内力%d · 冷却%d轮 · 基础威力%d\n%s" % [skill["category"],skill["range"],skill["qi_cost"],skill["cooldown_rounds"],skill["power"], "识招仅能查看，熟练后可配置。" if mastery.get(identifier,"识招") == "识招" else role]
 	var error := _draft_error()
 	notice.text = _message if not _message.is_empty() else (error if not error.is_empty() else "草稿已准备好；按E应用，Esc取消不会改配置。")

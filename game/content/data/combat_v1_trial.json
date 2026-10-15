@@ -1,12 +1,16 @@
 {
   "id": "TRIAL_COMBAT_V1", "size": [10,8], "blocked": [[4,2],[4,3],[4,4],[7,5]],
   "scenarios": [
-    {"id":"eliminate","title":"清场演武","description":"击倒全部敌人。主角倒地后，只要同伴仍存活就可继续。","objective":{"kind":"eliminate"}},
-    {"id":"survive","title":"保护同伴","description":"坚持完整3轮并保护同伴；同伴倒地立即失败。提前击倒敌人仍须完成3轮。","objective":{"kind":"survive","rounds":3,"protected_unit_id":"CHAR_COMPANION"}}
+    {"id":"eliminate","title":"破阵清场","description":"击倒三敌；刀役护体较高，捕手追主角。任一我方存活可继续。","objective":{"kind":"eliminate"},
+      "deployment":{"CHAR_PROTAGONIST":[2,3],"CHAR_COMPANION":[1,5],"ENEMY_BLADE":[3,6],"ENEMY_BOW":[8,1],"ENEMY_CATCHER":[7,6]},
+      "ai_targets":{"ENEMY_CATCHER":["CHAR_PROTAGONIST"]}},
+    {"id":"survive","title":"护证守线","description":"保护携卷同伴，坚持完整3轮；同伴倒地即失败。清敌不提前结束。","objective":{"kind":"survive","rounds":3,"protected_unit_id":"CHAR_COMPANION"},
+      "deployment":{"CHAR_PROTAGONIST":[3,3],"CHAR_COMPANION":[1,5],"ENEMY_BLADE":[3,1],"ENEMY_BOW":[8,1],"ENEMY_CATCHER":[6,6]},
+      "ai_targets":{"ENEMY_CATCHER":["CHAR_COMPANION"]}}
   ],
   "allies": [
     {"id":"CHAR_PROTAGONIST","name":"主角","archetype":"ALLY_SWORD","team":"ally","cell":[1,3],"hp":16,"max_hp":16,"qi":5,"max_qi":5,"agility":4,"move":3,"power":3,"guard":1,"skills":["SK_YUE_THRUST","SK_YUE_GUARD","SK_WATER_STEP"],"ultimate":{"skill_id":"ULT_SWORD","kind":"damage_received","threshold":6}},
-    {"id":"CHAR_COMPANION","name":"同伴","archetype":"ALLY_FIST","team":"ally","cell":[2,5],"hp":14,"max_hp":14,"qi":5,"max_qi":5,"agility":5,"move":3,"power":2,"guard":1,"skills":["SK_TRIP_WRIST","SK_WATER_STEP"],"ultimate":{"skill_id":"ULT_FIST","kind":"takedowns","threshold":1}}
+    {"id":"CHAR_COMPANION","name":"同伴","archetype":"ALLY_FIST","team":"ally","cell":[2,5],"hp":14,"max_hp":14,"qi":5,"max_qi":5,"agility":5,"move":3,"power":2,"guard":1,"skills":["SK_WATER_STEP"],"ultimate":{"skill_id":"ULT_FIST","kind":"takedowns","threshold":1}}
   ],
   "enemies": [
     {"id":"ENEMY_BLADE","archetype":"EN_YAMEN_BLADE","cell":[6,3]},

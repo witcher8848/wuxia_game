@@ -1,0 +1,17 @@
+{
+  "AI_PRESSURE": {
+    "style": "pressure", "intent_label": "刀役近压破势，优先最近者",
+    "target_priority": "nearest", "preferred_range": [1, 1],
+    "skill_priority": ["EN_BLADE_PIN", "SK_FIST_BASIC"], "effect_priority": ["broken"], "low_hp_guard_threshold": 2
+  },
+  "AI_RANGED": {
+    "style": "ranged", "intent_label": "弓役拉开射距，优先低血者",
+    "target_priority": "lowest_hp", "preferred_range": [3, 5],
+    "skill_priority": ["EN_BOW_BLEED", "EN_BOW_SHOT"], "effect_priority": ["bleed"], "low_hp_guard_threshold": 0
+  },
+  "AI_CAPTURE": {
+    "style": "capture", "intent_label": "捕手绕行锁拿，优先携带者",
+    "target_priority": "configured", "preferred_range": [1, 1],
+    "skill_priority": ["EN_CATCHER_LOCK", "SK_FIST_BASIC"], "effect_priority": ["pin"], "low_hp_guard_threshold": 0
+  }
+}

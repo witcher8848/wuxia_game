@@ -158,7 +158,7 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 		if not encounter_data is Dictionary: return _invalid("Story encounter must be an object.")
 		var skills: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
 		if not skills is Array: return _invalid("Invalid battle skills.")
-		var encounter_error: String = encounter.configure(encounter_data, skills, investigation)
+		var encounter_error: String = encounter.configure(encounter_data, skills, investigation, martial_definitions())
 		if not encounter_error.is_empty(): return _invalid(encounter_error)
 	_investigation = investigation
 	_dialogue = dialogue
@@ -244,7 +244,7 @@ func validate_persistent_state(state: GameState) -> String:
 
 
 func martial_definitions() -> Array:
-	var definitions: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
+	var definitions: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills_tactics.json"))
 	return definitions.duplicate(true) if definitions is Array else []
 
 

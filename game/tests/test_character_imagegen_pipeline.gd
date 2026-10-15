@@ -244,6 +244,18 @@ func _controller(original_state: Dictionary) -> void:
 	world.add_child(player)
 	player.position = Vector2(100.25,100.25)
 	await _advance(2)
+	if captures:
+		# A newly opened native window may deliver its initial focus-IN after
+		# the controller was created. That correctly resets held intent. Settle
+		# native focus before injecting the first press; never bypass the real
+		# controller's release gate or retry a failed movement assertion.
+		var stable_focus := 0
+		for _tick: int in range(120):
+			_release()
+			await _advance()
+			stable_focus = stable_focus+1 if DisplayServer.window_is_focused() and player._window_focused else 0
+			if stable_focus >= 6: break
+		check(stable_focus >= 6,"native window focus settled before physical keyboard checks")
 	_active(player._visual,"real CharacterBody controller")
 	check(player.get_node("FeetCollision").shape.size == Vector2(20,12),"unchanged 20x12 physical feet")
 	check(Player.WALK_SPEED == 180 and Player.SPRINT_SPEED == 300,"unchanged walk/sprint speeds")
@@ -254,7 +266,9 @@ func _controller(original_state: Dictionary) -> void:
 		_key(binding[0],true)
 		for _tick: int in 10:
 			await _advance()
-			walk_advanced = walk_advanced or player._visual.frame_number() != int(manifest.clips["walk_"+binding[2]].cells[previous_phase])
+			walk_advanced = walk_advanced or (player._visual.walking and player.facing == binding[2] and player._visual.frame_number() != int(manifest.clips["walk_"+binding[2]].cells[previous_phase]))
+		if player.velocity != binding[1]*180 or player.facing != binding[2] or not player._visual.walking:
+			print("IMAGEGEN_CONTROLLER_DIAGNOSTIC direction=%s velocity=%s facing=%s walking=%s focused=%s release_gate=%s" % [binding[2],player.velocity,player.facing,player._visual.walking,player._window_focused,player._requires_release])
 		check(player.velocity == binding[1]*180 and player.facing == binding[2] and player._visual.walking,"physical walk drives active facing/animation "+binding[2])
 		check(walk_advanced,"physical movement advances actual mapped walk frame "+binding[2])
 		check(player._visual.global_position == player.global_position.round() and player.position != player.position.round(),"integer drawing/fractional physics "+binding[2])

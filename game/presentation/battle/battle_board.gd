@@ -4,6 +4,10 @@ const FONT = preload("res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf")
 const ORIGIN := Vector2(12, 44)
 const Hero = preload("res://game/presentation/characters/hero_visual.gd")
 const CELL := 32
+# Battle-only GPU scale: the ~68px body becomes ~27px inside a 32px cell.
+# Shared source textures, exploration/lab sizes and physical feet stay intact.
+const HERO_DRAW_SCALE := 0.4
+var hero_draw_scale := HERO_DRAW_SCALE
 var battle: CombatEncounter
 var cursor := Vector2i.ZERO
 var highlights: Array = []
@@ -15,12 +19,14 @@ var valid_targets: Array = []
 var range_disabled := false
 var range_offensive := false
 var enemy_reach: Array = []
+var enemy_attack_cells: Array = []
 var hero_visual: Node2D
 var hero_position := Vector2.ZERO
 var _motion: Array = []
 var _motion_time := 0.0
 var _last_hp := -1
 var _bound_battle: CombatEncounter
+var _restore_flash := 0.0
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -30,6 +36,7 @@ func _ready() -> void:
 
 func reset_presentation() -> void:
 	_motion.clear()
+	_restore_flash = 0.0
 	_last_hp = -1
 	if is_instance_valid(hero_visual): hero_visual.reset_pose()
 	sync_visuals()
@@ -86,6 +93,13 @@ func animate_action(plan: Dictionary) -> void:
 	hero_position = _feet(origin)
 	var skill: Dictionary = battle.skill(plan["skill_id"])
 	var direction := _direction(Vector2(plan["target"])-Vector2(origin))
+	_restore_flash = 0.0
+	# Pure recovery is visually quiet, not the guard/sword defensive pose.
+	# The in-cell pulse is presentation only; it grants no guard or resource.
+	if skill["target"] == "self" and int(skill["restore_qi"]) > 0 and skill["effects"].is_empty():
+		hero_visual.reset_pose()
+		_restore_flash = 0.55
+		return
 	var clip := "guard"
 	if skill["target"] == "enemy":
 		clip = ("slash" if skill["ultimate"] else "thrust") if skill["weapon_tag"] == "剑" else "strike"
@@ -93,6 +107,7 @@ func animate_action(plan: Dictionary) -> void:
 	hero_visual.play_action(clip,direction)
 
 func _process(delta: float) -> void:
+	_restore_flash = maxf(0.0,_restore_flash-delta)
 	if _motion.size() > 1:
 		_motion_time += delta
 		var segment := mini(int(_motion_time/0.08),_motion.size()-2)
@@ -124,10 +139,12 @@ func _draw() -> void:
 				color = Color("#634b48") if range_offensive else Color("#315a65")
 				if range_disabled: color = Color("#51545c")
 			draw_rect(rectangle, color)
-			if cell in enemy_reach: draw_rect(rectangle.grow(-2), Color("#b78bc9"), false, 1)
-			if cell in valid_targets: draw_rect(rectangle.grow(-4), Color("#a5dfeb"), false, 2)
-			if battle.objective.get("kind") == "escape" and cell == Vector2i(battle.objective["cell"][0], battle.objective["cell"][1]):
-				draw_rect(rectangle.grow(-2), Color("#7ccc83"), false, 2)
+			if cell in enemy_attack_cells:
+				# Separate current-attack danger texture, never another movement
+				# fill. Keep cyan/purple base meanings and draw before faces.
+				var at := rectangle.position
+				for segment: Array in [[Vector2(7,16),Vector2(16,7)],[Vector2(7,24),Vector2(24,7)],[Vector2(15,24),Vector2(24,15)]]:
+					draw_line(at+segment[0],at+segment[1],Color("#a65b5b"),1)
 	for index: int in range(1, path.size()):
 		draw_line(ORIGIN + Vector2(path[index-1]) * CELL + Vector2(16,16), ORIGIN + Vector2(path[index]) * CELL + Vector2(16,16), Color("#b0dcce"), 3)
 	var sorted := _sorted_actor_ids()
@@ -135,12 +152,34 @@ func _draw() -> void:
 		var unit := battle.unit(identifier)
 		var at := ORIGIN + Vector2(Grid.cell_of(unit)) * CELL
 		if unit["hp"] == 0:
-			if identifier == "CHAR_PROTAGONIST": hero_visual.draw_at(self,hero_position)
+			if identifier == "CHAR_PROTAGONIST": hero_visual.draw_at(self,hero_position,hero_draw_scale)
 			else: draw_line(at + Vector2(10,10), at + Vector2(22,22), Color("#7b7777"), 2)
 			continue
-		if identifier == "CHAR_PROTAGONIST": hero_visual.draw_at(self,hero_position)
+		if identifier == "CHAR_PROTAGONIST": hero_visual.draw_at(self,hero_position,hero_draw_scale)
 		else:
 			draw_rect(Rect2(at + Vector2(7,4), Vector2(18,22)), Color("#69bfd5") if unit["team"] == "ally" else Color("#dd876e"))
+	if _restore_flash > 0:
+		var pulse := 6.0+2.0*(1.0-_restore_flash/0.55)
+		draw_arc(hero_position-Vector2(0,12),pulse,0.0,TAU,20,Color("#a5dfeb"),1)
+	# Information is a separate final pass. Temporary weapons/hit silhouettes may
+	# cross a cell, but cannot paint over range borders, unit marks or health.
+	for y: int in range(battle.board_size.y):
+		for x: int in range(battle.board_size.x):
+			var cell := Vector2i(x,y)
+			var rectangle := Rect2(ORIGIN+Vector2(cell)*CELL,Vector2(31,31))
+			# Keep danger visible even in an occupied ally cell. Body/weapon
+			# paint can hide hatching, but unit text and health are drawn later.
+			if cell in enemy_attack_cells: draw_rect(rectangle.grow(-7),Color("#cd6864"),false,1)
+			# Its distinct inset survives the two-pixel outer affected outline.
+			if cell in enemy_reach: draw_rect(rectangle.grow(-3),Color("#b78bc9"),false,1)
+			if cell in valid_targets: draw_rect(rectangle.grow(-4),Color("#a5dfeb"),false,2)
+			if battle.objective.get("kind") == "escape" and cell == Vector2i(battle.objective["cell"][0],battle.objective["cell"][1]):
+				draw_rect(rectangle.grow(-2),Color("#7ccc83"),false,2)
+	for identifier: String in battle.unit_ids():
+		var unit := battle.unit(identifier)
+		if unit["hp"] == 0: continue
+		var at := ORIGIN+Vector2(Grid.cell_of(unit))*CELL
+		if identifier != "CHAR_PROTAGONIST":
 			draw_string(FONT, at + Vector2(8,21), unit["name"].substr(0,1), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#121a22"))
 		draw_rect(Rect2(at + Vector2(4,28), Vector2(24,2)), Color("#17232b"))
 		draw_rect(Rect2(at + Vector2(4,28), Vector2(24.0 * float(unit["hp"]) / float(unit["max_hp"]),2)), Color("#95c979"))

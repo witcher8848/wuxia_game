@@ -61,7 +61,8 @@ static func hint(battle: CombatEncounter, index: int) -> String:
 	var skill := battle.skill(battle.abilities(actor)[index-1])
 	if skill["ultimate"] and unit["ultimate_used"]: return "本战绝技已用（每战仅1次）；下一场战斗恢复使用次数。"
 	if reason.begins_with("内力不足"):
-		return "内力不足：当前%d，需要%d；可用普攻或吐纳恢复。" % [unit["qi"],skill["qi_cost"]]
+		var recovery := "普攻或吐纳" if battle.action_restore_qi(actor,"SK_FIST_BASIC") > 0 else "吐纳"
+		return "内力不足：当前%d，需要%d；可用%s恢复。" % [unit["qi"],skill["qi_cost"],recovery]
 	if reason.begins_with("冷却中"):
 		return "冷却中：当前第%d轮，第%d轮恢复；可先使用其他招式。" % [battle.round_number,unit["cooldowns"][skill["id"]]]
 	if skill["ultimate"]:
@@ -74,5 +75,7 @@ static func hint(battle: CombatEncounter, index: int) -> String:
 		if reason == "无合法目标": return "触发条件已满足，但范围内无合法目标；先移动接近敌人。"
 		if row["enabled"]: return "触发条件已满足；按E选择敌人施放，每战仅1次。"
 	if reason == "无合法目标":
+		if skill["area_pattern"] == "front_arc": return "定向前排3格没有敌人；先改变站位／方向，友军不受伤。"
 		return "范围内没有可落脚空格；需改变站位，不能落在单位或障碍上。" if skill["range_pattern"] == "step" else "当前无合法目标；先移动至攻击范围内，并避开射线遮挡。"
+	if row["enabled"] and skill["area_pattern"] == "front_arc": return "按E选相邻方向格（可为空）；前排3格至少一敌，不伤友军。"
 	return "按E选择目标；预览不消耗行动，确认后才施放。" if row["enabled"] else reason

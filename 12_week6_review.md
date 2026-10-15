@@ -1,5 +1,20 @@
 # 第六周评审：战斗V1
 
+## 2026-10-15反馈修订交付（0.6.1）
+
+针对主角遮挡与已填写试玩意见，已完成战斗约27px显示、信息顶层绘制、恢复／防御分离、耗气控距、横截群控、破势续攻、刀役近压／捕手追携卷者和两种真实部署。规则依据、四场配装取舍、原生截图及兼容边界见[反馈落实说明](./docs/week6_feedback_followup.md)，新意见填写[短试玩表](./docs/week6_feedback_playtest.md)；用户原反馈未改，SHA仍为`581f4e4b5cc0ff3ef41f91f67b5da9751ffad4e6d57240a3861b75ba3bd409ee`。
+
+当前推荐反馈候选：`builds/week6_feedback/0.6.1-week6-feedback_8f38fb9_20261015T014126Z/`。先读包内`HANDOFF.md`，双击`CombatFeedback-on-Mac.command`试演武，或`Play-on-Mac.command`玩正常剧情；Mac脚本依赖本机Godot。版本0.6.1、独立存档`ProjectWumingCombatFeedbackPrototype`，构建HEAD `8f38fb9`、dirty=true如实保留，未为制造clean而提交／推送。
+
+- 同PCK15项门禁通过，包含新战术373／0、生产战术360／0／4种配置、遮挡216／0、反馈UI247／0、真实M→剧情接线109／0；原baseline回归仍单独保留。三类冷重启各为独立writer退出后启动reader；新反馈配置writer65／0、reader50／0。
+- 同包Mac实绘49张：角色1165／14、旧预览342／12、整备143／3、演武378／5、遮挡305／9、反馈UI269／6，全零失败，逐张查看。不是用旧图片／旧规则覆盖新战术验收。
+- PCK SHA256 `fe4ec6e89817bed4323b624da171f6f4a8d9db203e5dd6786d97f127f77be440`，stage前后源SHA `6a3172c9d29a8ca19f31f691495ca19c00ffe9fe6561ef6890f3651247073eaa`；根代理逐项复核105项SHA、精确文件集合、152个当前runtime输入、15个验证器身份和三份新战术表，全部一致。原PNG／manifest／用户反馈保持原字节。
+- 普通主入口及演武场景实际包内启动30帧均退出0、无脚本错误。Windows仅导出／PE检查，手柄、最终平衡／手感／审美仍未代签。`20261015T013852Z`为原生启动焦点检查失败的中间包，保留失败日志，不用于交付；没有修改任何旧冻结包。
+
+交付前再次完整运行`./tools/check_project.sh`，退出0／`PROJECT_CHECK_PASS`，日志`builds/qa/feedback_delivery_project_check.log`；包括加强后的原生角色验证器所对应源码检查、33项新builder单测及全部旧回归。包内105项SHA复核全部通过；源码和新包就绪，不代替人工体验认可。
+
+以下0.6.0段落保留10月14日基础交付历史，其数值、计数和旧推荐路径不代表0.6.1反馈版。
+
 2026-10-14收口。第五周实现已本地提交`8d72416`；第六周主体`cbfb5fe`、配置身份修复`0a04033`均已本地提交，分支`codex/week6-combat-v1`。Day36～42工程交付与独立候选验收完成，尚未推送GitHub或上传Steam；人工体验与硬件边界仍单列保留。
 
 ## 交付目标

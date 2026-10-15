@@ -47,7 +47,8 @@ func _open_briefing() -> void:
 		tr("BATTLE_INTEL_HOME" if reveal_intent else "BATTLE_NO_HOME"),
 		tr("BATTLE_INTEL_DOCK" if ferry_deployment else "BATTLE_NO_DOCK"),
 		tr("BATTLE_STORY_LIMITS"),
-		"战斗规则（PgDn）\n" + Text.STATUS_HELP + "\n" + Text.resource_help(battle, "CHAR_PROTAGONIST")])
+		"战斗规则（PgDn）\n" + Text.status_help(battle) + "\n" + Text.resource_help(battle, "CHAR_PROTAGONIST")])
+	briefing_body.text += "\nT红纹：现站位招式射程（不判断内力/冷却），非锁定计划；移动后重算。"
 	briefing_body.scroll_to_line(0)
 	briefing.show()
 
@@ -131,6 +132,7 @@ func refresh() -> void:
 		if get("inspect_status") == true and not inspected.is_empty():
 			detail.text = Text.status_detail(battle, inspected)
 		footer.text += "\nV 状态期限／推演说明"
+	if not footer.text.contains("T红纹"): footer.text += " · T红纹"
 	board.queue_redraw()
 
 func _show_forecast() -> void:

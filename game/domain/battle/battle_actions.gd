@@ -24,15 +24,35 @@ static func preview(battle: RefCounted, actor: String, skill_id: String, target:
 	var target_id: String = battle.unit_at(target)
 	var distance: int = Grid.distance(origin, target)
 	var valid := range_matches(battle, actor, skill, origin, target)
-	if skill["target"] == "enemy":
+	if skill["target"] == "enemy" and skill["area_pattern"] != "front_arc":
 		valid = valid and not target_id.is_empty() and battle.unit(target_id)["team"] != unit["team"]
 	if not valid:
 		denied["reason"] = "目标／距离／射线不合法"
 		return denied
 	var hits: Array[Dictionary] = []
-	if skill["target"] == "enemy":
+	var area: Array[Vector2i] = []
+	if skill["area_pattern"] == "front_arc":
+		area = affected_cells(battle, actor, skill_id, target, origin)
+		var receivers: Dictionary = {}
+		# Resolve once against pre-cast support relationships, center/left/right.
+		# An actual recipient can be struck only once by this single sweep. A
+		# skipped duplicate does not consume a second ward or multiply damage.
+		for cell: Vector2i in area:
+			var identifier: String = battle.unit_at(cell)
+			if identifier.is_empty() or battle.unit(identifier)["team"] == unit["team"]: continue
+			var hit := damage_preview(battle, actor, identifier, skill, Grid.distance(origin, cell))
+			if receivers.has(hit["receiver"]): continue
+			receivers[hit["receiver"]] = true
+			hits.append(hit)
+		if hits.is_empty():
+			denied["reason"] = "横截范围内没有敌人"
+			return denied
+	elif skill["target"] == "enemy":
 		hits.append(damage_preview(battle, actor, target_id, skill, distance))
 	var affected: Array = [actor] if skill["target"] != "enemy" else [target_id]
+	if skill["area_pattern"] == "front_arc":
+		affected = []
+		for hit: Dictionary in hits: affected.append(hit["receiver"])
 	if skill["area_pattern"] == "adjacent_allies":
 		for identifier: String in battle.unit_ids():
 			var other: Dictionary = battle.unit(identifier)
@@ -43,7 +63,27 @@ static func preview(battle: RefCounted, actor: String, skill_id: String, target:
 	var nominal_restore: int = battle.action_restore_qi(actor, skill_id)
 	var qi_after: int = mini(int(unit["max_qi"]), qi_before - qi_cost + nominal_restore)
 	var actual_restore: int = qi_after - (qi_before - qi_cost)
-	return {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": qi_cost, "restore_qi": actual_restore, "qi_before": qi_before, "qi_after": qi_after, "cooldown_ready_round": battle.round_number + int(skill["cooldown_rounds"]) + 1 if skill["cooldown_rounds"] > 0 else 0, "destination": target if skill["range_pattern"] == "step" else origin, "effects": skill["effects"].duplicate()}
+	var result := {"ok": true, "reason": "", "revision": battle.revision, "actor": actor, "skill_id": skill_id, "target": target, "hits": hits, "affected": affected, "qi_cost": qi_cost, "restore_qi": actual_restore, "qi_before": qi_before, "qi_after": qi_after, "cooldown_ready_round": battle.round_number + int(skill["cooldown_rounds"]) + 1 if skill["cooldown_rounds"] > 0 else 0, "destination": target if skill["range_pattern"] == "step" else origin, "effects": skill["effects"].duplicate()}
+	if skill["area_pattern"] == "front_arc": result["area_cells"] = area
+	return result
+
+
+static func affected_cells(battle: RefCounted, actor: String, skill_id: String, target: Vector2i, origin := Vector2i(-1, -1)) -> Array[Vector2i]:
+	# Pure geometry: the adjacent center names a direction, not a mandatory
+	# victim. Side cells are diagonal-front; units do not block the sweep, walls
+	# and board edges do. A wall at the center blocks the whole forward sweep.
+	var result: Array[Vector2i] = []
+	var unit: Dictionary = battle.unit(actor)
+	var skill: Dictionary = battle.skill(skill_id)
+	if unit.is_empty() or skill.is_empty(): return result
+	if origin == Vector2i(-1, -1): origin = Grid.cell_of(unit)
+	if not range_matches(battle, actor, skill, origin, target): return result
+	if skill["area_pattern"] != "front_arc": return [target]
+	var forward := target-origin
+	var left := Vector2i(forward.y, -forward.x)
+	for cell: Vector2i in [target, target+left, target-left]:
+		if battle.contains(cell) and not battle.is_obstacle(cell): result.append(cell)
+	return result
 
 
 static func range_matches(battle: RefCounted, actor: String, skill: Dictionary, origin: Vector2i, target: Vector2i) -> bool:
