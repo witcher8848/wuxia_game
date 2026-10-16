@@ -9,6 +9,8 @@ var _handover_sequence := 0
 var _story: Dictionary = {}
 var _story_sequence := 0
 var _trial_token := ""
+var _world_preview: Dictionary = {}
+var _world_sequence := 0
 
 
 func start_new_game() -> GameState:
@@ -16,6 +18,7 @@ func start_new_game() -> GameState:
 	_trial_token = ""
 	_handover.clear()
 	_story.clear()
+	_world_preview.clear()
 	var next_state: GameState = GameState.new()
 	next_state.route_id = "ROUTE_%d_%d" % [int(Time.get_unix_time_from_system()), Time.get_ticks_usec()]
 	var content: Node = _content_db()
@@ -39,11 +42,14 @@ func replace_state(next_state: GameState) -> Error:
 		return ERR_INVALID_DATA
 	if content != null and not content.martial_configuration(next_state).get("error","").is_empty():
 		return ERR_INVALID_DATA
+	if content != null and not content.validate_world_state(next_state).is_empty():
+		return ERR_INVALID_DATA
 	# Own a copy: a UI preview or loaded snapshot cannot mutate the live route later.
 	state = GameState.from_dict(next_state.to_dict())
 	_handover.clear()
 	_story.clear()
 	_trial_token = ""
+	_world_preview.clear()
 	state_replaced.emit()
 	return OK
 
@@ -62,7 +68,7 @@ func enter_region(scene_id: String, spawn_id: String) -> Error:
 	if content == null or not content.has_spawn(scene_id, spawn_id):
 		return ERR_INVALID_PARAMETER
 	var position: Vector2 = content.get_spawn_position(scene_id, spawn_id)
-	if not content.is_safe_player_position(scene_id, position):
+	if not content.is_safe_world_position(scene_id, position, state):
 		return ERR_INVALID_PARAMETER
 	# Commit all three fields together after validation. Walking and scene changes
 	# are free exploration, not confirmed quest actions: time_state is untouched.
@@ -83,6 +89,40 @@ func mark_inspected(interaction_id: String) -> Error:
 
 func is_inspected(interaction_id: String) -> bool:
 	return state.world_flags.get("INSPECTED_" + interaction_id, false) == true
+
+
+func preview_world_action(kind: String, npc_id: String = "") -> Dictionary:
+	_world_preview.clear()
+	if combat_active(): return {"error":ERR_BUSY}
+	var content := _content_db()
+	if content == null: return {"error":ERR_UNAVAILABLE}
+	if content.get_exploration_region(state.scene_id).is_empty(): return {"error":ERR_UNAVAILABLE}
+	if kind == "help" and not content.can_reach_world_npc(state, npc_id): return {"error":ERR_UNAVAILABLE}
+	var proposal: Dictionary = content.prepare_world_action(state, kind, npc_id)
+	if proposal.get("error", ERR_INVALID_DATA) != OK: return {"error":proposal.get("error", ERR_INVALID_DATA)}
+	_world_sequence += 1
+	var token := "WORLD_%d_%d" % [_world_sequence, Time.get_ticks_usec()]
+	_world_preview = {"token":token,"kind":kind,"npc_id":npc_id,"before":state.to_dict(),"after":proposal["state"].to_dict(),"summary":proposal["summary"].duplicate(true)}
+	return {"error":OK,"token":token,"summary":proposal["summary"].duplicate(true)}
+
+
+func confirm_world_action(token: String) -> Dictionary:
+	if token.is_empty() or token != _world_preview.get("token", ""): return {"error":ERR_INVALID_PARAMETER}
+	var pending := _world_preview.duplicate(true)
+	_world_preview.clear()
+	if combat_active() or state.to_dict() != pending["before"]: return {"error":ERR_BUSY}
+	var content := _content_db()
+	if content == null: return {"error":ERR_UNAVAILABLE}
+	if pending["kind"] == "help" and not content.can_reach_world_npc(state, pending["npc_id"]): return {"error":ERR_UNAVAILABLE}
+	var proposal: Dictionary = content.prepare_world_action(state, pending["kind"], pending["npc_id"])
+	if proposal.get("error", ERR_INVALID_DATA) != OK: return {"error":proposal.get("error", ERR_INVALID_DATA)}
+	if proposal["state"].to_dict() != pending["after"] or proposal["summary"] != pending["summary"]: return {"error":ERR_BUSY}
+	var error := replace_state(proposal["state"])
+	return {"error":error,"summary":pending["summary"].duplicate(true) if error == OK else {}}
+
+
+func cancel_world_action(token: String) -> void:
+	if not token.is_empty() and token == _world_preview.get("token", ""): _world_preview.clear()
 
 
 func apply_investigation_step(step_id: String) -> Dictionary:
@@ -219,6 +259,7 @@ func set_martial_loadout(loadout: Dictionary) -> Error:
 
 func lock_martial_trial() -> String:
 	if not _story.is_empty() or not _trial_token.is_empty(): return ""
+	_world_preview.clear()
 	_trial_token = "TRIAL_%d" % Time.get_ticks_usec()
 	return _trial_token
 

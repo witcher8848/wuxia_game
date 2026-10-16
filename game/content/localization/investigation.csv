@@ -105,7 +105,7 @@ INV_RETURN_DIALOGUE,回到对话,Return to dialogue
 INV_CODEX_TITLE,命卷：任务与证据,Journal: goals & evidence
 INV_TAB_CASE,当前案,Current case
 INV_TAB_EVIDENCE,证据,Evidence
-INV_TAB_PEOPLE,人物（未开放）,People (unavailable)
+INV_TAB_PEOPLE,人物,People
 INV_TAB_ROUTES,路线（未开放）,Routes (unavailable)
 INV_CODEX_KEYS,Q/R 切页 · ↑↓ 选择 · E 校勘 · Esc 返回 · PgUp/Dn 翻文,Q/R: tabs · Arrows: choose · E: compare · Esc: back · PgUp/Dn: text
 INV_JOURNAL_NAV_KEYS,Q/R 切页 · ↑↓ 选择 · Esc 返回 · PgUp/Dn 翻文,Q/R: tabs · Arrows: choose · Esc: back · PgUp/Dn: text
@@ -149,3 +149,75 @@ D_JOURNEY_TEXT,女囚：我认得河西旧坟道，没问出近路也能绕过�
 D_DEPART,确认出发；遇追兵则掩护老妇,Depart and cover the gravekeeper if pursued
 D_AFTER_GRAVES_TEXT,老妇脱险后只留下一句：迁坟旧账里，埋下的未必都是死人。女囚收好她留下的记号，与你返回码头。下一目标是追查旧账与改籍往事；本周样本到此，不开放后续地区。可查看命卷并存档。,After escaping she leaves a warning: not everyone buried in the old ledger was dead. The prisoner keeps her mark and returns to the docks with you. Trace the ledger next; this week's sample ends here with no new region. Review the journal and save.
 INV_OBJECTIVE_LEDGER,下一目标：追查迁坟旧账与改籍往事。本周样本已结束；可回码头听战后对话、查看命卷并存档。后续剧情尚未开放。,Next: trace the burial ledger and altered identities. This sample ends here. Return to the boatman for the aftermath; review the journal and save. Further story is unavailable.
+INV_EMPTY_PEOPLE,还未结识人物。靠近摊主或船夫交谈后会记入命卷。,No acquaintances yet. Speak to the vendor or boatman to record them.
+WORLD_TITLE,时辰与人情,Time and ties
+WORLD_CLOCK,第%d日 · %s,Day %d · %s
+WORLD_TIME_0,黎明,Dawn
+WORLD_TIME_1,清晨,Early morning
+WORLD_TIME_2,上午,Morning
+WORLD_TIME_3,正午,Noon
+WORLD_TIME_4,下午,Afternoon
+WORLD_TIME_5,傍晚,Dusk
+WORLD_TIME_6,入夜,Evening
+WORLD_TIME_7,深夜,Late night
+WORLD_KEYS,↑↓选择 · E确认 · Esc/H返回 · PgUp/PgDn翻阅,Up/Down select · E confirm · Esc/H back · PgUp/PgDn scroll
+WORLD_DIALOGUE_KEYS,↑↓选择 · E确认 · H人情 · Esc离开 · PgUp/PgDn翻阅,Up/Down select · E confirm · H ties · Esc leave · PgUp/PgDn scroll
+WORLD_SOCIAL_DIALOGUE_KEYS,H人情／帮忙 · E/Esc离开 · PgUp/PgDn翻阅,H ties / help · E/Esc leave · PgUp/PgDn scroll
+WORLD_STORY_RETURN,时段已推进，船夫去忙别处了。仍可在码头找到他，继续战后对话。F5存档。,Time advanced. The boatman is working elsewhere on this dock; approach him for the aftermath. F5 saves.
+WORLD_NPC_MOVED,时段已推进，对方去忙别处了。人情变化已记入命卷；请退出面板，在原区域找到对方再交谈。,Time advanced and they have moved on. The journal records your ties; close this panel and find them in the same area to talk again.
+WORLD_TIME_RULE,走路、阅读和普通交谈不耗时。确认等候才推进一个时段；熟人会更换位置。主线不会因等候被关闭。,Walking and reading are free. Confirm waiting to advance one slot. Acquaintances relocate; the main quest stays available.
+WORLD_PROTOTYPE,本周为日程原型：每循环8槽跨日。正式三日八剧情时段尚未接入；当前不触发封城或截止失败。,Schedule prototype: eight clock slots per day. The final three-day / eight-story-phase chapter is not connected. No deadline failure here.
+WORLD_NO_AUTOSAVE,不会自动保存。退出面板后按F5，或在暂停菜单另存。,No automatic save. Close this panel and use F5 or a manual save slot.
+WORLD_CONFIRM_TITLE,确认推进时段,Confirm time advance
+WORLD_CONFIRM_TIME,%s → %s,%s → %s
+WORLD_CONFIRM_WAIT,等候消耗1时段，不增加关系或声望。已结识人物仍在原区域，只改变站位与话题。,Waiting costs one slot and grants no social rewards. Known people stay in their original area but change position and topic.
+WORLD_CONFIRM_HELP,搭手帮忙消耗1时段，对方信任+1、乡里声望+1（各自封顶100）。每位熟人每天一次；不奖励武功或主线证据。,Helping costs one slot. Trust +1 and town reputation +1 (each capped at 100). Once per person per day; no martial or quest rewards.
+WORLD_ACTION_WAIT,等候一时段（先查看确认）,Wait one slot (review first)
+WORLD_ACTION_HELP,搭手帮忙（1时段，每日一次）,Lend a hand (1 slot; once daily)
+WORLD_ACTION_LEAVE,离开，继续当前目标,Leave and continue your objective
+WORLD_ACTION_CANCEL,取消，不推进时段,Cancel without spending time
+WORLD_ACTION_CONFIRM,确认执行，推进1时段,Confirm and spend one slot
+WORLD_CANCELLED,已取消。时段、关系与声望不变。,Cancelled. Time and social state are unchanged.
+WORLD_APPLIED,时段已推进；人物位置与话题已更新。尚未保存。,Time advanced; positions and topics updated. Not yet saved.
+WORLD_STALE,预览已失效，未执行；请重新查看。,Preview expired. Nothing was applied; review again.
+WORLD_UNAVAILABLE,当前不能推进时段，未改变状态。,Time cannot advance here. State unchanged.
+WORLD_HELP_UNAVAILABLE,今天已帮过忙，或对方已走远。请到面前交谈；不可隔墙或远程帮忙。,Already helped today or out of reach. Speak nearby; no remote help or helping through walls.
+WORLD_RELATION,与你的关系：%s,Relationship: %s
+WORLD_PERSON_DETAIL,关系：%s。已知活动区域：%s。乡里评价：%s。只记已知信息，不显示完整日程。,Relationship: %s. Known area: %s. Town standing: %s. Only known information is recorded; full schedules stay hidden.
+WORLD_UNKNOWN_LOCATION,尚不清楚,Unknown
+WORLD_VENDOR_ANCHOR_0,街边汤摊,Soup stall
+WORLD_VENDOR_ANCHOR_1,街口理货处,Street sorting spot
+WORLD_VENDOR_ANCHOR_2,茶棚附近,Near the tea stall
+WORLD_DOCK_ANCHOR_0,码头装卸处,Dock loading spot
+WORLD_DOCK_ANCHOR_1,河岸候船处,Riverside waiting spot
+WORLD_DOCK_ANCHOR_2,仓房外,Outside the storehouse
+WORLD_REL_GUARDED,戒备,Guarded
+WORLD_REL_NEW,初识,Acquainted
+WORLD_REL_FRIENDLY,相熟,Friendly
+WORLD_REL_TRUSTED,信赖,Trusted
+WORLD_REP_SUSPECT,有人存疑,Distrusted
+WORLD_REP_UNKNOWN,尚无名声,Unknown
+WORLD_REP_KNOWN,有人称道,Well regarded
+WORLD_CHAT_GUARDED,对方收住话头，仍对你有些戒备。,They hold back and remain wary of you.
+WORLD_CHAT_NEW,彼此还不熟，只肯谈些眼前的事。,You are still strangers; the talk stays close to everyday matters.
+WORLD_CHAT_FRIENDLY,你上回搭过手，这份人情我记着。以后有空再来坐坐。,I remember you lending a hand. Stop by again when you have time.
+WORLD_CHAT_TRUSTED,这些日子多亏你照应。有事尽管开口，别同我见外。,You have helped us often. If you need something just ask.
+WORLD_CHAT_REP_NEGATIVE,街坊对你的议论还没散，话也不敢说得太满。,People still have doubts about you; I cannot promise too much.
+WORLD_CHAT_REP_NEUTRAL,街坊还不大认得你。行路之外，也可顺手帮人解个难。,You are not well known here yet. A small kindness along the way can matter.
+WORLD_CHAT_REP_POSITIVE,街坊说你肯搭把手。这样的后生，大家愿意多照应些。,The neighbours say you help people. They are more willing to look out for you.
+WORLD_VENDOR_CHAT_0,天刚亮，汤还得再熬一会儿。你若赶路，先暖暖手。,The sun is barely up and the soup needs time. Warm your hands before you travel.
+WORLD_VENDOR_CHAT_1,早市人多，我得先理好这几筐菜。吃汤的事，待会儿再说。,The morning market is busy. I must sort these vegetables before serving soup.
+WORLD_VENDOR_CHAT_2,赶集的人渐渐散了，总算能喘口气。你也歇歇脚。,The market crowd is thinning. I can catch my breath; rest your feet too.
+WORLD_VENDOR_CHAT_3,正午这会儿最忙，几桌客人还等着添汤呢。,Noon is our busiest time. Several tables are waiting for another bowl.
+WORLD_VENDOR_CHAT_4,午市过了，要把碗盏洗净，免得晚来的人没得用。,Lunch is over. These bowls need washing before the evening crowd arrives.
+WORLD_VENDOR_CHAT_5,天将黑，汤还温着。过路的人吃饱了，才有力气回家。,Dusk is near but the soup is warm. Travellers need a full stomach for the road home.
+WORLD_VENDOR_CHAT_6,夜市散得慢，灯还不能收。你有事便说，我听着。,The night market is slow to close. The lamp stays lit; tell me what you need.
+WORLD_VENDOR_CHAT_7,今晚剩下些收摊的杂活。街上清静了，说话倒方便。,Just a little closing work remains. The quiet street makes conversation easier.
+WORLD_DOCK_CHAT_0,河面雾重，先理缆绳，等看得清了再忙船上的活。,Mist lies on the river. I will sort the ropes before tending to the boat.
+WORLD_DOCK_CHAT_1,晨船刚歇，我在核对货数。不是催你，手边的活得先做完。,The morning boat has docked. I am counting cargo; this work needs finishing first.
+WORLD_DOCK_CHAT_2,日头起来了，这些湿绳得摊开晾。不然下回吃力会断。,The sun is up. These ropes need drying or they may snap under strain.
+WORLD_DOCK_CHAT_3,正午歇一阵。撑船靠的是气力，不是逞强。,I rest at noon. Working a boat takes strength; stubbornness is no substitute.
+WORLD_DOCK_CHAT_4,下午要修补这张旧篷，河上起风，总得有处挡雨。,This old awning needs mending. Out on the river we need shelter from rain.
+WORLD_DOCK_CHAT_5,天色收了，得逐条检查系船的绳结。夜里松开可不是小事。,Light is fading. Every mooring knot needs checking before night.
+WORLD_DOCK_CHAT_6,灯挂好了，岸边还有些零碎货没归拢。我暂不走远。,The lamp is hung but some cargo still needs sorting. I will stay nearby.
+WORLD_DOCK_CHAT_7,夜深船静，正好补补桨柄。有话慢慢说，别惊了歇息的人。,The river is quiet. I can mend this oar handle; speak softly for those resting nearby.

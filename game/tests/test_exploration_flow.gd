@@ -190,7 +190,10 @@ func _run() -> void:
 		await _finish()
 		return
 	_observe_region()
-	session.state.time_state = {"day": 3, "slot": 2}
+	var timed: GameState = GameState.from_dict(session.state.to_dict())
+	timed.time_state = {"day": 3, "slot": 2}
+	check(session.replace_state(timed) == OK, "fixture time change projects NPCs through authoritative replacement")
+	await _step(2)
 	var free_exploration_time: Dictionary = session.state.time_state.duplicate(true)
 	var original_route: String = session.state.route_id
 	await _test_interactions()

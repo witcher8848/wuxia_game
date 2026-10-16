@@ -83,6 +83,14 @@ func refresh() -> void:
 	if node_id == "D_TOKEN" and GameSession.state.evidence_states.has("CL_BOATMAN_01"):
 		body.text += "\n" + tr("INV_TRACE_HINT")
 	hint.text = tr("INV_DIALOGUE_KEYS")
+	var greeting := ContentDB.world_greeting(GameSession.state, target_id)
+	if not greeting.is_empty():
+		var npc: Dictionary = ContentDB.world_npc(GameSession.state, target_id)["npc"]
+		heading.text = tr(npc["name_key"])
+		# Some quest nodes are the protagonist's inner monologue. Keep their
+		# original speaker explicit instead of attributing NPC chatter to him.
+		body.text = greeting + "\n\n" + tr(view["speaker_key"]) + ": " + body.text
+		hint.text = tr("WORLD_DIALOGUE_KEYS")
 	for index: int in choices.size():
 		choices[index].visible = index < view["choices"].size()
 		if not choices[index].visible:

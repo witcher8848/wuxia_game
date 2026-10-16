@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "time_labels": ["WORLD_TIME_0", "WORLD_TIME_1", "WORLD_TIME_2", "WORLD_TIME_3", "WORLD_TIME_4", "WORLD_TIME_5", "WORLD_TIME_6", "WORLD_TIME_7"],
+  "reputation_flag": "REP_TOWN",
+  "npcs": [
+    {
+      "id": "NPC_STREET_VENDOR", "scene_id": "SCENE_TOWN_STREET",
+      "anchors": [
+        {"position": [608, 352], "label": "WORLD_VENDOR_ANCHOR_0"},
+        {"position": [736, 416], "label": "WORLD_VENDOR_ANCHOR_1"},
+        {"position": [832, 320], "label": "WORLD_VENDOR_ANCHOR_2"}
+      ],
+      "schedule": [0, 1, 2, 0, 1, 2, 1, 0],
+      "time_dialogue": ["WORLD_VENDOR_CHAT_0", "WORLD_VENDOR_CHAT_1", "WORLD_VENDOR_CHAT_2", "WORLD_VENDOR_CHAT_3", "WORLD_VENDOR_CHAT_4", "WORLD_VENDOR_CHAT_5", "WORLD_VENDOR_CHAT_6", "WORLD_VENDOR_CHAT_7"]
+    },
+    {
+      "id": "NPC_DOCK_WORKER", "scene_id": "SCENE_RIVER_DOCK",
+      "anchors": [
+        {"position": [704, 352], "label": "WORLD_DOCK_ANCHOR_0"},
+        {"position": [640, 384], "label": "WORLD_DOCK_ANCHOR_1"},
+        {"position": [896, 352], "label": "WORLD_DOCK_ANCHOR_2"}
+      ],
+      "schedule": [0, 2, 1, 2, 0, 1, 2, 1],
+      "time_dialogue": ["WORLD_DOCK_CHAT_0", "WORLD_DOCK_CHAT_1", "WORLD_DOCK_CHAT_2", "WORLD_DOCK_CHAT_3", "WORLD_DOCK_CHAT_4", "WORLD_DOCK_CHAT_5", "WORLD_DOCK_CHAT_6", "WORLD_DOCK_CHAT_7"]
+    }
+  ]
+}

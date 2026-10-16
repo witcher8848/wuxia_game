@@ -235,8 +235,15 @@ func _ui() -> void:
 		await _capture("story_victory")
 		check(session.state.time_state["slot"] == 0, "UI victory not auto-settled")
 		await _tap(KEY_E)
-		check(not session.story_encounter_active() and main.reading_panel.node_id == "D_AFTER_GRAVES", "keyboard settlement returns aftermath")
+		check(not session.story_encounter_active() and not main.reading_panel.visible and root.get_node("App").current_context() == &"exploration", "settlement cannot resume a remote relocated boatman's dialogue")
 		check(session.state.time_state["slot"] == 1 and main.get_node("UIRoot").visible, "one settlement and exploration UI restored")
+		var relocated: Dictionary = content.world_npc(session.state, "NPC_DOCK_WORKER")["npc"]
+		var current_region: Node = main.get_node("SceneHost").get_child(0)
+		current_region.player_position = Vector2(relocated["position"][0],relocated["position"][1])+Vector2(0,40)
+		current_region.player.facing = "up"
+		await _frames()
+		await _tap(KEY_E)
+		check(main.reading_panel.visible and main.reading_panel.node_id == "D_AFTER_GRAVES", "approaching relocated boatman reopens the actual aftermath")
 		await _capture("story_aftermath")
 		await _tap(KEY_ESCAPE)
 	root.remove_child(main)

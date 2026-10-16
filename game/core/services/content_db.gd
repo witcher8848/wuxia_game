@@ -8,10 +8,12 @@ const Investigation = preload("res://game/domain/investigation/investigation_rul
 const Dialogue = preload("res://game/domain/investigation/dialogue_catalog.gd")
 const Inquiry = preload("res://game/domain/investigation/inquiry_rules.gd")
 const StoryEncounter = preload("res://game/domain/investigation/story_encounter_rules.gd")
+const World = preload("res://game/domain/world/world_rules.gd")
 var _investigation: RefCounted = Investigation.new()
 var _dialogue: RefCounted = Dialogue.new()
 var _inquiry: RefCounted = Inquiry.new()
 var _story_encounter: RefCounted = StoryEncounter.new()
+var _world: RefCounted = World.new()
 
 var content_version: String = ""
 var start_scene_id: String = ""
@@ -40,7 +42,7 @@ func reload_content(path: String = BOOTSTRAP_PATH) -> Error:
 	return load_definitions(parser.data)
 
 
-func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null, dialogue_data: Variant = null, encounter_data: Variant = null) -> Error:
+func load_definitions(data: Dictionary, exploration_data: Variant = null, investigation_data: Variant = null, dialogue_data: Variant = null, encounter_data: Variant = null, world_data: Variant = null) -> Error:
 	# Only publish the new registry once every definition and reference passes.
 	if not GameState.is_json_value(data):
 		return _invalid("Bootstrap must contain only finite JSON values.")
@@ -160,6 +162,18 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 		if not skills is Array: return _invalid("Invalid battle skills.")
 		var encounter_error: String = encounter.configure(encounter_data, skills, investigation, martial_definitions())
 		if not encounter_error.is_empty(): return _invalid(encounter_error)
+	var world: RefCounted = World.new()
+	if world_data == null and data.has("world_path"):
+		var path: Variant = data["world_path"]
+		if not path is String or not path.begins_with("res://game/content/data/") or ".." in path or not path.ends_with(".json") or not FileAccess.file_exists(path):
+			return _invalid("Invalid world content path.")
+		world_data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not world_data is Dictionary: return _invalid("World content must be an object.")
+	if world_data != null:
+		var world_error: String = world.configure(world_data, regions)
+		if not world_error.is_empty(): return _invalid(world_error)
+		if not _world_text_valid(world_data): return _invalid("World content references missing bilingual text.")
+	_world = world
 	_investigation = investigation
 	_dialogue = dialogue
 	_inquiry = inquiry
@@ -240,7 +254,104 @@ func validate_persistent_state(state: GameState) -> String:
 	if not error.is_empty(): return error
 	var martial: Dictionary = martial_configuration(state)
 	if not martial.get("error","").is_empty(): return martial["error"]
+	error = validate_world_state(state)
+	if not error.is_empty(): return error
 	return _story_encounter.validate_persistent_state(state)
+
+
+func world_definitions() -> Dictionary:
+	return _world.definitions()
+
+
+func validate_world_state(state: GameState) -> String:
+	return _world.validate_state(state)
+
+
+func world_time(state: GameState) -> Dictionary:
+	return _world.time_view(state)
+
+
+func world_npc(state: GameState, npc_id: String) -> Dictionary:
+	return _world.npc_view(state, npc_id)
+
+
+func exploration_view(scene_id: String, state: GameState) -> Dictionary:
+	if not _regions.has(scene_id): return {"error":"Unknown exploration region.","region":{}}
+	var view: Dictionary = _world.project_region(state, _regions[scene_id])
+	return {"error":"" if view.get("error", ERR_INVALID_DATA) == OK else "Invalid world state.", "region":view.get("region", {})}
+
+
+func is_safe_world_position(scene_id: String, position: Vector2, state: GameState) -> bool:
+	var view := exploration_view(scene_id, state)
+	return view["error"].is_empty() and _safe_player_position(view["region"], position)
+
+
+func world_greeting(state: GameState, npc_id: String) -> String:
+	var view := world_npc(state, npc_id)
+	if view.get("error", ERR_INVALID_DATA) != OK: return ""
+	var lines: PackedStringArray = []
+	for key: String in view["npc"].get("dialogue_keys", []): lines.append(tr(key))
+	return "\n".join(lines)
+
+
+func people_entries(state: GameState) -> Array:
+	var view: Dictionary = _world.people_view(state)
+	var entries: Array = []
+	if view.get("error", ERR_INVALID_DATA) != OK: return entries
+	for npc: Dictionary in view.get("people", []):
+		if not npc.get("known", false): continue
+		var scene: String = npc.get("last_known_scene", "")
+		var location_key: String = _scenes.get(scene, {}).get("name_key", "WORLD_UNKNOWN_LOCATION")
+		entries.append({"id":npc["id"], "title":tr(npc["name_key"]), "detail":tr("WORLD_PERSON_DETAIL") % [tr(npc["relationship_label"]), tr(location_key), tr(view["reputation_label"])]})
+	return entries
+
+
+func prepare_world_action(state: GameState, kind: String, npc_id: String = "") -> Dictionary:
+	if kind == "wait" and npc_id.is_empty(): return _world.prepare_wait(state)
+	if kind == "help" and not npc_id.is_empty(): return _world.prepare_help(state, npc_id)
+	return {"error":ERR_INVALID_PARAMETER,"message":"Unknown world action."}
+
+
+func can_reach_world_npc(state: GameState, npc_id: String) -> bool:
+	var result := world_npc(state, npc_id)
+	if result.get("error", ERR_INVALID_DATA) != OK or result["npc"]["scene_id"] != state.scene_id: return false
+	var start := Vector2(state.player_state["position"]["x"], state.player_state["position"]["y"])
+	var finish := _point(result["npc"]["position"])
+	if start.distance_to(finish) > 58.0: return false
+	var view := exploration_view(state.scene_id, state)
+	if not view["error"].is_empty(): return false
+	if not _safe_player_position(view["region"], start): return false
+	# Domain-side geometry check: a UI target ID cannot help through a wall.
+	for obstacle: Dictionary in view["region"]["obstacles"]:
+		var rect: Array = obstacle["rect"]
+		if _segment_hits_rect(start, finish, Rect2(rect[0],rect[1],rect[2],rect[3])): return false
+	for target: Dictionary in view["region"]["interactions"]:
+		if target["kind"] == "exit" or target["id"] == npc_id: continue
+		if _segment_hits_rect(start, finish, Rect2(_point(target["position"])-PLAYER_FEET/2, PLAYER_FEET)): return false
+	return true
+
+
+func _world_text_valid(value: Variant) -> bool:
+	# World prose is authored as keys, never translated text in a save file.
+	if value is String and value.begins_with("WORLD_"):
+		var chinese := load("res://game/content/localization/investigation.zh_CN.translation") as Translation
+		var english := load("res://game/content/localization/investigation.en.translation") as Translation
+		return chinese != null and english != null and not chinese.get_message(value).is_empty() and not english.get_message(value).is_empty()
+	if value is Dictionary:
+		for nested: Variant in value.values():
+			if not _world_text_valid(nested): return false
+	if value is Array:
+		for nested: Variant in value:
+			if not _world_text_valid(nested): return false
+	return true
+
+
+func _segment_hits_rect(start: Vector2, finish: Vector2, rect: Rect2) -> bool:
+	if rect.has_point(start) or rect.has_point(finish): return true
+	var corners := [rect.position, Vector2(rect.end.x,rect.position.y), rect.end, Vector2(rect.position.x,rect.end.y)]
+	for index: int in 4:
+		if Geometry2D.segment_intersects_segment(start, finish, corners[index], corners[(index+1)%4]) != null: return true
+	return false
 
 
 func martial_definitions() -> Array:

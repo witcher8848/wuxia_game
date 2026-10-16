@@ -79,6 +79,10 @@ open_martial={
 "deadzone":0.25,
 "events":[Object(InputEventKey,"physical_keycode":77),Object(InputEventJoypadButton,"button_index":8)]
 }
+open_world={
+"deadzone":0.25,
+"events":[Object(InputEventKey,"physical_keycode":72)]
+}
 tab_previous={
 "deadzone":0.25,
 "events":[Object(InputEventKey,"physical_keycode":81),Object(InputEventJoypadButton,"button_index":9)]

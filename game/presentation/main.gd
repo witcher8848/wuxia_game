@@ -29,6 +29,11 @@ var _activity_from_dialogue := false
 var _activity_initial_state: Dictionary = {}
 const StoryBattleScreen = preload("res://game/presentation/battle/story_battle_screen.gd")
 const MartialPanel = preload("res://game/presentation/battle/martial_preparation_panel.gd")
+const WorldPanel = preload("res://game/presentation/world/world_panel.gd")
+const SocialDialoguePanel = preload("res://game/presentation/world/social_dialogue_panel.gd")
+const ExplorationRegion = preload("res://game/presentation/exploration/exploration_region.gd")
+var world_panel: PanelContainer
+var _world_from_dialogue := false
 var martial_panel: PanelContainer
 var story_battle_screen: Node2D
 var _story_layer: CanvasLayer
@@ -79,6 +84,9 @@ func _build_ui() -> void:
 	region_label = Label.new()
 	region_label.theme = ui_theme
 	region_label.position = Vector2(12, 8)
+	region_label.size = Vector2(616, 24)
+	region_label.add_theme_font_size_override("font_size", 15)
+	region_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	region_label.add_theme_color_override("font_color", Color("#f1e6cf"))
 	region_label.add_theme_color_override("font_shadow_color", Color("#171820"))
 	region_label.add_theme_constant_override("shadow_outline_size", 4)
@@ -261,9 +269,14 @@ func _enter_yard(prepared: Node = null) -> Error:
 	var definition: Dictionary = ContentDB.get_exploration_region(next_state.scene_id)
 	if not definition.is_empty():
 		var saved: Dictionary = next_state.player_state["position"]
-		if not ContentDB.is_safe_player_position(next_state.scene_id, Vector2(saved["x"], saved["y"])):
+		if not ContentDB.is_safe_world_position(next_state.scene_id, Vector2(saved["x"], saved["y"]), next_state):
 			var spawn: Vector2 = ContentDB.get_spawn_position(next_state.scene_id, next_state.spawn_id)
-			if not ContentDB.is_safe_player_position(next_state.scene_id, spawn):
+			# An NPC's new scheduled anchor may overlap an older save. Move only
+			# the minimum safe distance, not all the way back to the entrance.
+			if ContentDB.is_walkable_position(next_state.scene_id, Vector2(saved["x"], saved["y"])):
+				var projection: Dictionary = ContentDB.exploration_view(next_state.scene_id, next_state)
+				if projection["error"].is_empty(): spawn = ExplorationRegion.nearest_safe_position(projection["region"], Vector2(saved["x"], saved["y"]))
+			if not ContentDB.is_safe_world_position(next_state.scene_id, spawn, next_state):
 				status.text = tr("UI_INVALID_SCENE")
 				if prepared != null:
 					prepared.free()
@@ -325,6 +338,15 @@ func _on_interaction(target: Dictionary) -> void:
 	App.push_context(&"dialogue")
 	if is_instance_valid(reading_panel):
 		reading_panel.queue_free()
+	if target["kind"] == "npc" and ContentDB.dialogue_entry(target["id"], GameSession.state).is_empty() and ContentDB.world_npc(GameSession.state, target["id"]).get("error", ERR_INVALID_DATA) == OK:
+		reading_panel = SocialDialoguePanel.new()
+		reading_panel.name = "ReadingPanel"
+		reading_panel.theme = ui_theme
+		reading_panel.target_id = target["id"]
+		reading_panel.close_requested.connect(_close_reading)
+		$UIRoot.add_child(reading_panel)
+		interaction_hint.text = ""
+		return
 	if not ContentDB.dialogue_entry(target["id"], GameSession.state).is_empty():
 		reading_panel = DialoguePanel.new()
 		reading_panel.name = "ReadingPanel"
@@ -431,6 +453,37 @@ func _close_martial() -> void:
 	if App.current_context() == &"codex": App.pop_context()
 	_reset_movement()
 
+func _open_world(npc_id: String = "") -> void:
+	if transitioning or GameSession.combat_active() or App.current_context() not in [&"exploration", &"dialogue"]: return
+	if App.current_context() == &"dialogue" and (not reading_panel is DialoguePanel or npc_id.is_empty()): return
+	if not npc_id.is_empty() and not ContentDB.can_reach_world_npc(GameSession.state, npc_id): return
+	if $SceneHost.get_child_count() != 1: return
+	_reset_movement()
+	var region: Node = $SceneHost.get_child(0)
+	GameSession.update_player_position(region.player_position)
+	GameSession.state.player_state["facing"] = region.player.facing
+	_world_from_dialogue = App.current_context() == &"dialogue"
+	if _world_from_dialogue: reading_panel.hide()
+	App.push_context(&"codex")
+	if is_instance_valid(world_panel): world_panel.queue_free()
+	world_panel = WorldPanel.new()
+	world_panel.theme = ui_theme
+	world_panel.npc_id = npc_id
+	world_panel.closed.connect(_close_world)
+	$UIRoot.add_child(world_panel)
+
+func _close_world() -> void:
+	if not is_instance_valid(world_panel) or not world_panel.visible: return
+	GameSession.cancel_world_action(world_panel.preview.get("token", ""))
+	world_panel.hide()
+	if App.current_context() == &"codex": App.pop_context()
+	if _world_from_dialogue and is_instance_valid(reading_panel):
+		reading_panel.show()
+		if not ContentDB.can_reach_world_npc(GameSession.state, world_panel.npc_id): _close_reading()
+		else: reading_panel.refresh()
+	_world_from_dialogue = false
+	_reset_movement()
+
 func _start_story_battle() -> void:
 	if App.current_context() != &"dialogue" or $SceneHost.get_child_count() != 1: return
 	var region: Node = $SceneHost.get_child(0)
@@ -484,16 +537,19 @@ func _close_story_battle() -> void:
 	$UIRoot.show()
 	App.reset_contexts()
 	_reset_movement()
-	if is_instance_valid(reading_panel):
+	if is_instance_valid(reading_panel) and reading_panel is DialoguePanel and ContentDB.can_reach_world_npc(GameSession.state, reading_panel.target_id):
+		_reading_target = {"id":reading_panel.target_id}
 		App.push_context(&"dialogue")
 		reading_panel.show()
 		reading_panel.go_to("@entry")
+	else:
+		status.text = tr("WORLD_STORY_RETURN")
 
 func _transition_to(scene_id: String, spawn_id: String) -> void:
 	if transitioning:
 		return
 	var spawn: Vector2 = ContentDB.get_spawn_position(scene_id, spawn_id)
-	if not ContentDB.has_spawn(scene_id, spawn_id) or not ContentDB.is_safe_player_position(scene_id, spawn):
+	if not ContentDB.has_spawn(scene_id, spawn_id) or not ContentDB.is_safe_world_position(scene_id, spawn, GameSession.state):
 		status.text = tr("UI_EXIT_INVALID")
 		_reset_movement()
 		return
@@ -787,6 +843,13 @@ func _input(event: InputEvent) -> void:
 	if transitioning:
 		get_viewport().set_input_as_handled()
 		return
+	if App.current_context() == &"codex" and is_instance_valid(world_panel) and world_panel.visible:
+		world_panel.handle_input(event)
+		return
+	if event.is_action_pressed("open_world") and not event.is_echo() and App.current_context() == &"dialogue" and reading_panel is DialoguePanel:
+		get_viewport().set_input_as_handled()
+		_open_world(reading_panel.target_id)
+		return
 	if App.current_context() == &"codex" and is_instance_valid(martial_panel) and martial_panel.visible:
 		get_viewport().set_input_as_handled()
 		martial_panel.handle_input(event)
@@ -815,6 +878,10 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo() or transitioning or App.current_context() == &"battle":
 		return
+	if event.is_action_pressed("open_world") and App.current_context() == &"exploration":
+		get_viewport().set_input_as_handled()
+		_open_world()
+		return
 	if event.is_action_pressed("open_martial") and App.current_context() == &"exploration":
 		get_viewport().set_input_as_handled()
 		_open_martial()
@@ -839,8 +906,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	var controls_at_top := false
 	objective_label.visible = App.current_context() == &"exploration"
+	region_label.visible = App.current_context() == &"exploration"
 	if App.current_context() == &"exploration" and $SceneHost.get_child_count() == 1:
 		var region: Node = $SceneHost.get_child(0)
+		var clock: Dictionary = ContentDB.world_time(GameSession.state)
+		region_label.text = tr(ContentDB.get_scene_definition(GameSession.state.scene_id)["name_key"]) + " · " + tr("WORLD_CLOCK") % [clock.get("day", 1), tr(clock.get("label", "WORLD_TIME_0"))] + " · H " + tr("WORLD_TITLE")
 		var guidance: Dictionary = ObjectiveGuide.project(GameSession.state)
 		objective_label.text = tr(guidance["key"]) + "  ·  J " + tr("INV_CODEX_TITLE") + " · M武学"
 		for destination: Dictionary in region.definition.get("interactions", []):

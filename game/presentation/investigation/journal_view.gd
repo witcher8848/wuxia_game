@@ -38,5 +38,13 @@ static func quest_entries(state: GameState, definitions: Dictionary) -> Array[Di
 		entries.append({"id":quest["id"], "title":names[quest["id"]] + " · " + _t("INV_STATUS_" + record["status"]), "detail":detail})
 	return entries
 
+static func people_entries(projected: Array) -> Array[Dictionary]:
+	# ContentDB owns discovery/privacy and localized relationship stages. The UI
+	# accepts only the published card fields, not hidden trust scores or live XY.
+	var entries: Array[Dictionary] = []
+	for item: Dictionary in projected:
+		entries.append({"id":item["id"], "title":item["title"], "detail":item["detail"]})
+	return entries
+
 static func _t(key: String) -> String:
 	return TranslationServer.translate(key)

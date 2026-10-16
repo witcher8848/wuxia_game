@@ -29,7 +29,12 @@ func _ready() -> void:
 		mode = "handover"
 		handover_preview = GameSession.preview_original_handover()
 		cursor = 1 # Keep original is the safe initial selection.
+	GameSession.state_replaced.connect(_on_session_state_replaced)
 	refresh()
+
+func _on_session_state_replaced() -> void:
+	if mode == "journal":
+		refresh()
 
 func refresh() -> void:
 	var evidence: Array[Dictionary] = Journal.evidence_entries(GameSession.state, ContentDB.get_investigation_definitions())
@@ -53,6 +58,9 @@ func refresh() -> void:
 			entries = entries.filter(func(item: Dictionary) -> bool: return GameSession.state.quest_states.has(item["id"]))
 		elif tab == 1:
 			entries = evidence
+		elif tab == 2:
+			entries = Journal.people_entries(ContentDB.people_entries(GameSession.state))
+			if entries.is_empty(): prompt = tr("INV_EMPTY_PEOPLE")
 		else:
 			prompt = tr("INV_UNAVAILABLE_PAGE")
 		if onboarding:
@@ -114,7 +122,7 @@ func handle_input(event: InputEvent) -> void:
 	elif mode == "journal" and (event.is_action_pressed("tab_next") or event.is_action_pressed("tab_previous")):
 		_tab_focus[tab] = cursor
 		# Keep future page definitions, but cycle only through usable pages.
-		tab = posmod(tab + (1 if event.is_action_pressed("tab_next") else -1), 2)
+		tab = posmod(tab + (1 if event.is_action_pressed("tab_next") else -1), 2 if onboarding else 3)
 		cursor = _tab_focus.get(tab, 0)
 		message_key = ""
 		refresh()

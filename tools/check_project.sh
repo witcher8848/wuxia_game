@@ -7,6 +7,7 @@ python3 -B -m unittest discover -s tools/tests -p 'test_hero_manifest.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_review_bundle.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_week6_candidate.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_week6_feedback_candidate.py'
+python3 -B -m unittest discover -s tools/tests -p 'test_world_persistence.py'
 python3 tools/run_checked.py import ./tools/godot.sh --headless --path "$task_root" --editor --import
 python3 tools/run_checked.py character_source ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_source.gd
 python3 tools/run_checked.py character_pipeline ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_pipeline.gd
@@ -45,7 +46,13 @@ python3 tools/run_checked.py onboarding ./tools/godot.sh --headless --path "$tas
 python3 tools/run_checked.py week4_feedback ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week4_feedback.gd
 python3 tools/run_checked.py handover ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_handover.gd
 python3 tools/run_checked.py story_encounter ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_story_encounter.gd
+python3 tools/run_checked.py world_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_world_rules.gd
+python3 tools/run_checked.py week7_content ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_content.gd
+python3 tools/run_checked.py week7_npc_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_npc_ui.gd
+python3 tools/run_checked.py week7_world_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_world_session.gd
+python3 tools/run_checked.py week7_world_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_world_ui.gd
 python3 tools/check_story_persistence.py
 python3 tools/check_martial_persistence.py
+python3 -B tools/check_world_persistence.py
 python3 tools/run_checked.py main_smoke ./tools/godot.sh --headless --path "$task_root" -- --smoke-test
 echo "PROJECT_CHECK_PASS"

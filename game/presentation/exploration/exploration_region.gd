@@ -6,6 +6,8 @@ signal interaction_requested(target: Dictionary)
 const PlayerScript = preload("res://game/presentation/exploration/player_controller.gd")
 const CameraScript = preload("res://game/presentation/exploration/exploration_camera.gd")
 const FONT = preload("res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf")
+const PLAYER_FEET := Vector2(20, 12)
+const RECOVERY_MARGIN := 0.05
 @export var scene_id: String = "SCENE_TOWN_STREET"
 var definition: Dictionary = {}
 var player: CharacterBody2D
@@ -22,20 +24,18 @@ var player_position: Vector2:
 
 func _ready() -> void:
 	process_physics_priority = 10
-	definition = ContentDB.get_exploration_region(scene_id)
-	if definition.is_empty():
-		push_error("Missing exploration definition: " + scene_id)
+	var projected: Dictionary = ContentDB.exploration_view(scene_id, GameSession.state)
+	if not projected.get("error", "").is_empty() or projected.get("region", {}).is_empty():
+		push_error("Missing exploration projection: " + scene_id)
 		return
+	definition = projected["region"]
 	var dimensions := Vector2(definition["size"][0], definition["size"][1])
 	# Match the content validator's 16px inset, including the player's foot extents.
 	for rect: Rect2 in [Rect2(-32, -32, dimensions.x + 64, 48), Rect2(-32, dimensions.y - 16, dimensions.x + 64, 48), Rect2(-32, 0, 48, dimensions.y), Rect2(dimensions.x - 16, 0, 48, dimensions.y)]:
 		_add_obstacle(rect)
 	for obstacle: Dictionary in definition["obstacles"]:
 		_add_obstacle(_rect(obstacle["rect"]))
-	for target: Dictionary in definition["interactions"]:
-		if target["kind"] != "exit":
-			var point := _point(target["position"])
-			_target_bodies[target["id"]] = _add_obstacle(Rect2(point - Vector2(10, 6), Vector2(20, 12)))
+	_sync_target_bodies()
 	player = PlayerScript.new()
 	player.name = "Player"
 	player.position = _saved_position()
@@ -49,14 +49,125 @@ func _ready() -> void:
 	camera.follow(player.position)
 	camera.make_current()
 	camera.force_update_scroll()
+	GameSession.state_replaced.connect(_on_state_replaced)
 	queue_redraw()
 
 func _saved_position() -> Vector2:
 	var saved: Dictionary = GameSession.state.player_state["position"]
 	var result := Vector2(saved["x"], saved["y"])
-	if not ContentDB.is_safe_player_position(scene_id, result):
-		result = ContentDB.get_spawn_position(scene_id, GameSession.state.spawn_id)
+	if not is_safe_position(definition, result):
+		result = nearest_safe_position(definition, result)
+		if is_finite(result.x) and is_finite(result.y):
+			GameSession.update_player_position(result)
 	return result
+
+func _on_state_replaced() -> void:
+	# A transition/load can briefly leave the old region alive. It must not move
+	# the new route's player or render another region's authoritative state.
+	if not is_inside_tree() or GameSession.state.scene_id != scene_id:
+		return
+	refresh_world_view()
+
+func refresh_world_view() -> bool:
+	var projected: Dictionary = ContentDB.exploration_view(scene_id, GameSession.state)
+	if not projected.get("error", "").is_empty() or projected.get("region", {}).is_empty():
+		return false
+	var next_definition: Dictionary = projected["region"]
+	var saved: Dictionary = GameSession.state.player_state["position"]
+	var restored := Vector2(saved["x"], saved["y"])
+	if not is_safe_position(next_definition, restored):
+		restored = nearest_safe_position(next_definition, restored)
+		if not is_finite(restored.x) or not is_finite(restored.y):
+			return false
+		# Only old saves/legacy story ticks need this repair. The world command
+		# normally chooses a persisted NPC anchor clear of the player's feet.
+		if GameSession.update_player_position(restored) != OK:
+			return false
+	definition = next_definition
+	_sync_target_bodies()
+	selected_target.clear()
+	if is_instance_valid(player):
+		player.position = restored
+		player.facing = GameSession.state.player_state.get("facing", "down")
+		player.reset_input()
+		player._sync_visual(0.0)
+		camera.follow(player.position)
+	queue_redraw()
+	return true
+
+func _sync_target_bodies() -> void:
+	var retained: Dictionary = {}
+	for target: Dictionary in definition["interactions"]:
+		if target["kind"] == "exit":
+			continue
+		var identifier: String = target["id"]
+		var point := _point(target["position"])
+		var body: StaticBody2D = _target_bodies.get(identifier)
+		if not is_instance_valid(body):
+			body = _add_obstacle(Rect2(point - PLAYER_FEET / 2.0, PLAYER_FEET))
+		else:
+			body.position = point
+		retained[identifier] = body
+	for identifier: String in _target_bodies:
+		if not retained.has(identifier):
+			var body: StaticBody2D = _target_bodies[identifier]
+			remove_child(body)
+			body.queue_free()
+	_target_bodies = retained
+
+static func is_safe_position(region: Dictionary, point: Vector2) -> bool:
+	if region.is_empty() or not is_finite(point.x) or not is_finite(point.y):
+		return false
+	var feet := Rect2(point - PLAYER_FEET / 2.0, PLAYER_FEET)
+	var size_values: Array = region["size"]
+	var bounds := Rect2(Vector2.ONE * 16, Vector2(size_values[0], size_values[1]) - Vector2.ONE * 32)
+	if not bounds.encloses(feet):
+		return false
+	for rectangle: Rect2 in _solid_rectangles(region):
+		if feet.intersects(rectangle):
+			return false
+	return true
+
+static func _solid_rectangles(region: Dictionary) -> Array[Rect2]:
+	var rectangles: Array[Rect2] = []
+	for obstacle: Dictionary in region["obstacles"]:
+		var values: Array = obstacle["rect"]
+		rectangles.append(Rect2(values[0], values[1], values[2], values[3]))
+	for target: Dictionary in region["interactions"]:
+		if target["kind"] in ["npc", "document"]:
+			var values: Array = target["position"]
+			rectangles.append(Rect2(Vector2(values[0], values[1]) - PLAYER_FEET / 2.0, PLAYER_FEET))
+	return rectangles
+
+static func nearest_safe_position(region: Dictionary, origin: Vector2) -> Vector2:
+	if is_safe_position(region, origin):
+		return origin
+	if region.is_empty() or not is_finite(origin.x) or not is_finite(origin.y):
+		return Vector2.INF
+	# Axis-aligned geometry: a closest free point lies at the original coordinate
+	# or an expanded solid/bounds edge on each axis. Unlike grid BFS this keeps
+	# legacy fractional positions and never teleports farther just to hit a tile.
+	var size_values: Array = region["size"]
+	var minimum := Vector2.ONE * 16 + PLAYER_FEET / 2.0 + Vector2.ONE * RECOVERY_MARGIN
+	var maximum := Vector2(size_values[0], size_values[1]) - minimum
+	var xs: Array[float] = [clampf(origin.x, minimum.x, maximum.x), minimum.x, maximum.x]
+	var ys: Array[float] = [clampf(origin.y, minimum.y, maximum.y), minimum.y, maximum.y]
+	for solid: Rect2 in _solid_rectangles(region):
+		var expanded := Rect2(solid.position - PLAYER_FEET / 2.0, solid.size + PLAYER_FEET)
+		xs.append(clampf(expanded.position.x - RECOVERY_MARGIN, minimum.x, maximum.x))
+		xs.append(clampf(expanded.end.x + RECOVERY_MARGIN, minimum.x, maximum.x))
+		ys.append(clampf(expanded.position.y - RECOVERY_MARGIN, minimum.y, maximum.y))
+		ys.append(clampf(expanded.end.y + RECOVERY_MARGIN, minimum.y, maximum.y))
+	var closest := Vector2.INF
+	var distance := INF
+	for x: float in xs:
+		for y: float in ys:
+			var candidate := Vector2(x, y)
+			var next_distance := candidate.distance_squared_to(origin)
+			if next_distance < distance and is_safe_position(region, candidate):
+				closest = candidate
+				distance = next_distance
+	return closest
 
 func _add_obstacle(rect: Rect2) -> StaticBody2D:
 	var body := StaticBody2D.new()
