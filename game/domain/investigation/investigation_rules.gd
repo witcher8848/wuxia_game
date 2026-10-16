@@ -38,6 +38,18 @@ func definitions() -> Dictionary:
 	return _data.duplicate(true)
 
 
+func public_step_allowed(step_id: String) -> bool:
+	# Registered does not mean safe for a generic dialogue/inquiry command.
+	# Story transitions require an owned battle, and giving away an original
+	# requires the separately previewed/confirmed handover authority.
+	if not _steps.has(step_id) or step_id in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
+		return false
+	for effect: Dictionary in _steps[step_id]["effects"]:
+		if effect["op"] == "transfer" and effect["from"] == "PLAYER" and effect["to"] != "PLAYER":
+			return false
+	return true
+
+
 func valid_condition(value: Variant) -> bool:
 	return _valid_operation(value, false)
 

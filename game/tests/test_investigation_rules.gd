@@ -33,6 +33,10 @@ func _run() -> void:
 func _test_definitions() -> void:
 	var rules := Rules.new()
 	_check(rules.configure(_data).is_empty(), "canonical definitions validate")
+	for step: String in ["STEP_RECEIVE_INDEX", "STEP_ACCEPT_SEARCH", "STEP_INSPECT_BLANK", "STEP_COMPARE_INDEX_BLANK", "STEP_CHALLENGE_BOATMAN"]:
+		_check(rules.public_step_allowed(step), "ordinary registered investigation is public " + step)
+	for step: String in ["STEP_UNKNOWN", "STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY", "STEP_HAND_OVER_BLANK"]:
+		_check(not rules.public_step_allowed(step), "unknown or dedicated-authority command is not public " + step)
 	var published: Dictionary = rules.definitions()
 	published["evidence"].clear()
 	_check(rules.definitions()["evidence"].size() == _data["evidence"].size(), "definitions are deep copies")
@@ -75,6 +79,13 @@ func _test_definitions() -> void:
 	_check(rules.configure(alias).is_empty(), "configurable from caller dictionary")
 	alias["steps"].clear()
 	_check(rules.definitions()["steps"].size() == _data["steps"].size(), "configure owns its definitions")
+	var extended := _data.duplicate(true)
+	extended["steps"].append(_step("STEP_ARBITRARY_TRANSFER", [{"op":"set_fact", "id":"FACT_WEST_GRAVES"}, {"op":"transfer", "id":INDEX, "from":"PLAYER", "to":"CHAR_FATHER"}]))
+	_check(rules.configure(extended).is_empty(), "dedicated-authority transfer remains legal as a domain proposal")
+	var policy_snapshot: Dictionary = rules.definitions()
+	_check(not rules.public_step_allowed("STEP_ARBITRARY_TRANSFER"), "public policy scans all effects regardless of step name")
+	_check(rules.public_step_allowed("STEP_RECEIVE_INDEX"), "receiving an original from another holder remains public")
+	_check(rules.definitions() == policy_snapshot, "authority policy is a read-only query")
 
 
 func _test_rules() -> void:
@@ -178,11 +189,19 @@ func _test_service_and_saves() -> void:
 	session.state_replaced.connect(func() -> void: _signals += 1)
 	var failed: Dictionary = session.apply_investigation_step("STEP_COMPARE_INDEX_BLANK")
 	_check(failed["error"] != OK and _signals == 0 and _same(session.state.to_dict(), untouched), "failed command emits nothing and preserves live state")
-	for step: String in ["STEP_RECEIVE_INDEX", "STEP_ACCEPT_SEARCH", "STEP_INSPECT_BLANK", "STEP_COMPARE_INDEX_BLANK", "STEP_HAND_OVER_BLANK"]:
+	for step: String in ["STEP_RECEIVE_INDEX", "STEP_ACCEPT_SEARCH", "STEP_INSPECT_BLANK", "STEP_COMPARE_INDEX_BLANK"]:
 		_check(session.apply_investigation_step(step)["error"] == OK, "live command succeeds " + step)
 		var snapshot: Dictionary = session.state.to_dict()
 		_check(session.apply_investigation_step(step)["error"] == ERR_ALREADY_EXISTS, "duplicate command refused " + step)
 		_check(_same(session.state.to_dict(), snapshot), "duplicate command has no effects")
+	var before_handover: Dictionary = session.state.to_dict()
+	_check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] != OK and _same(session.state.to_dict(), before_handover), "generic live command cannot bypass original confirmation")
+	_check(session.enter_region("SCENE_TOWN_STREET", "SPAWN_START") == OK and session.mark_inspected("DOC_STREET_NOTICE") == OK, "reach registered handover location for confirmed command")
+	var handover: Dictionary = session.preview_original_handover()
+	_check(handover["error"] == OK, "original transfer preview succeeds")
+	_check(session.confirm_original_handover(handover.get("token", ""))["error"] == OK, "dedicated live original command succeeds after confirmation")
+	var after_handover: Dictionary = session.state.to_dict()
+	_check(session.confirm_original_handover(handover.get("token", ""))["error"] != OK and _same(session.state.to_dict(), after_handover), "confirmed original command cannot repeat")
 	_check(_signals == 5, "exactly one notification per successful command")
 	for field: String in ["time_state", "player_state", "inventory", "relationships", "route_id", "scene_id", "spawn_id"]:
 		_check(_same(session.state.to_dict()[field], untouched[field]), "investigation leaves unrelated field intact " + field)
@@ -197,7 +216,9 @@ func _test_service_and_saves() -> void:
 		_check(session.replace_state(loaded["state"]) == OK, "loaded state installed")
 		loaded["state"].evidence_states[BLANK]["holder_id"] = "PLAYER"
 		_check(session.state.evidence_states[BLANK]["holder_id"] == "FACTION_INSPECTOR", "loaded snapshot cannot alias live ownership")
-		_check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] == ERR_ALREADY_EXISTS, "loaded applied marker prevents duplicate command")
+		var loaded_snapshot: Dictionary = session.state.to_dict()
+		_check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] != OK and _same(session.state.to_dict(), loaded_snapshot), "loaded original cannot bypass confirmation or transfer again")
+		_check(session.preview_original_handover()["error"] != OK, "loaded applied marker prevents a second original preview")
 		_check(content.investigation_condition(session.state, {"op": "fact_is", "id": "FACT_WEST_GRAVES", "value": true}), "loaded fact satisfies same conditions")
 	var old := GameState.new()
 	_check(saves.save_game("manual_02", old) == OK, "old empty schema 1 saves")

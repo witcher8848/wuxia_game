@@ -39,6 +39,7 @@ func _domain() -> void:
 	check(session.confirm_original_handover("fabricated")["error"] != OK and session.state.to_dict() == before, "cannot confirm without issued preview")
 	_prepare()
 	before = session.state.to_dict()
+	check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] != OK and session.state.to_dict() == before, "ordinary investigation commands cannot bypass handover confirmation")
 	var preview: Dictionary = session.preview_original_handover()
 	check(preview["error"] == OK and preview["recipient_id"] == "FACTION_INSPECTOR" and preview["evidence_id"] == "EV_BLANK_DEATH_01", "preview identifies original and recipient")
 	check(session.state.to_dict() == before and not preview.has("state"), "preview neither transfers nor exposes candidate state")
@@ -73,6 +74,29 @@ func _domain() -> void:
 	var graph: Dictionary = content.get_dialogue_definitions()
 	graph["nodes"][0]["choices"][0]["command"] = "STEP_HAND_OVER_BLANK"
 	check(not Catalog.new().configure(graph, rules, content.dialogue_text_keys(), ["DOC_STREET_NOTICE", "DOC_HOME_NOTE", "NPC_DOCK_WORKER"]).is_empty(), "data authors cannot bypass confirmation with a direct transfer choice")
+	# A differently named authoring step is not a back door into the same transfer.
+	_prepare()
+	var bootstrap: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/bootstrap.json"))
+	var authored: Dictionary = content.get_investigation_definitions()
+	for step: Dictionary in authored["steps"].duplicate(true):
+		if step["id"] == "STEP_HAND_OVER_BLANK":
+			step["id"] = "STEP_RENAMED_SUBMISSION"
+			authored["steps"].append(step)
+	check(content.load_definitions(bootstrap,null,authored) == OK, "additional domain transfer can exist for a dedicated workflow")
+	before = session.state.to_dict()
+	check(session.apply_investigation_step("STEP_RENAMED_SUBMISSION")["error"] != OK and session.state.to_dict() == before, "renamed PLAYER transfer is also blocked by public policy")
+	check(content.reload_content() == OK, "restore registered content after command policy test")
+	preview = session.preview_original_handover()
+	authored = content.get_investigation_definitions()
+	for step: Dictionary in authored["steps"]:
+		if step["id"] != "STEP_HAND_OVER_BLANK": continue
+		for effect: Dictionary in step["effects"]:
+			if effect["op"] == "transfer": effect["to"] = "CHAR_FATHER"
+	check(content.load_definitions(bootstrap,null,authored) == OK, "content author may reload a changed custody definition")
+	before = session.state.to_dict()
+	check(session.confirm_original_handover(preview["token"])["error"] != OK and session.state.to_dict() == before, "changed definition cannot silently alter an issued confirmation")
+	check(session.preview_original_handover()["error"] != OK and session.state.to_dict() == before, "preview never advertises inspector while authored effect names a different recipient")
+	check(content.reload_content() == OK, "restore registered handover contract")
 
 func _ui() -> void:
 	main = load("res://game/presentation/main.tscn").instantiate()

@@ -63,16 +63,24 @@ func configure_manifest(path: String) -> Error:
 	reset_pose()
 	return OK
 
+## Public inspection is detached, including nested frames and clip cell arrays.
+## Render-time readers borrow privately so drawing never copies the full manifest.
 func manifest_data() -> Dictionary:
+	return _manifest_data_ref().duplicate(true)
+
+func _manifest_data_ref() -> Dictionary:
 	_ensure_legacy_data()
 	return _manifest if not _manifest.is_empty() else data
 
 func clip_data(name: String = "") -> Dictionary:
-	var manifest := manifest_data()
+	return _clip_data_ref(name).duplicate(true)
+
+func _clip_data_ref(name: String = "") -> Dictionary:
+	var manifest := _manifest_data_ref()
 	return manifest.get("clips",{}).get(clip_name() if name.is_empty() else name,{})
 
 func frame_count() -> int:
-	var manifest := manifest_data()
+	var manifest := _manifest_data_ref()
 	return int(manifest.get("frame_count",0))
 
 func display_size() -> Vector2:
@@ -81,7 +89,7 @@ func display_size() -> Vector2:
 
 ## Anchor is in logical display pixels, relative to the displayed region.
 func frame_geometry(frame: int) -> Dictionary:
-	var manifest := manifest_data()
+	var manifest := _manifest_data_ref()
 	if frame < 0 or frame >= frame_count(): return {}
 	if _geometry_cache.is_empty(): _geometry_cache = _build_geometry(manifest)
 	# Return a copy so a caller cannot corrupt a later frame's cached geometry.
@@ -116,7 +124,7 @@ func presentation_bounds() -> Rect2:
 	if _bounds_cache.has(name): return _bounds_cache[name]
 	var bounds := Rect2()
 	var first := true
-	for cell: Variant in clip_data().get("cells",[]):
+	for cell: Variant in _clip_data_ref().get("cells",[]):
 		var geometry := frame_geometry(int(cell))
 		if geometry.is_empty(): continue
 		var rectangle := Rect2(-geometry["anchor"],geometry["display_size"])
@@ -213,7 +221,7 @@ func _process(delta: float) -> void:
 	if not external_clock: step_time += delta * (300.0/180.0 if sprinting else 1.0)
 	if not _action.is_empty():
 		_elapsed += delta
-		var clip := clip_data()
+		var clip := _clip_data_ref()
 		if not clip.is_empty():
 			var duration: float = clip["cells"].size()/float(clip["fps"])
 			if _action == "down": _elapsed = minf(_elapsed,duration)
@@ -225,7 +233,7 @@ func clip_name() -> String:
 	return (_action if not _action.is_empty() else "walk" if walking else "idle") + "_" + facing
 
 func frame_number() -> int:
-	var clip := clip_data()
+	var clip := _clip_data_ref()
 	if clip.is_empty(): return 0
 	var elapsed := step_time if _action.is_empty() else _elapsed
 	var index := int(elapsed*clip["fps"])
@@ -244,7 +252,7 @@ func frame_draw_rectangle(frame: int, at: Vector2, render_scale := 1.0) -> Rect2
 	return Rect2(at-geometry["anchor"]*render_scale,geometry["display_size"]*render_scale)
 
 func draw_at(canvas: CanvasItem, at: Vector2, render_scale := 1.0) -> void:
-	if clip_data().is_empty(): return
+	if _clip_data_ref().is_empty(): return
 	var geometry := frame_geometry(frame_number())
 	if geometry.is_empty(): return
 	var rectangle := frame_draw_rectangle(frame_number(),at,render_scale)

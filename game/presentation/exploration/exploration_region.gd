@@ -277,11 +277,31 @@ func _draw_target(target: Dictionary) -> void:
 		draw_line(point + Vector2(16, -31), point + Vector2(24, -41), Color("#203934"), 2.0)
 	# Destinations are always legible; only one contextual action prompt lives in HUD.
 	if kind == "exit" or selected or observing:
-		var caption: String = tr(target["name_key"])
-		var width := FONT.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-		var baseline := point + Vector2(-width / 2, -54)
-		draw_rect(Rect2(baseline + Vector2(-4, -16), Vector2(width + 8, 21)), Color("#171820"))
-		draw_string(FONT, baseline, caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#f1e6cf"))
+		var caption := caption_layout(target)
+		if not caption.is_empty():
+			draw_rect(caption["rect"], Color("#171820"))
+			draw_string(FONT, caption["baseline"], caption["text"], HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#f1e6cf"))
+
+func caption_layout(target: Dictionary) -> Dictionary:
+	# Measure against the actual camera/viewport. An offscreen destination must
+	# not leave a clipped word fragment at the edge, or be pulled into view.
+	var transform := get_global_transform_with_canvas()
+	var screen_point: Vector2 = transform * _point(target["position"])
+	var viewport := get_viewport_rect()
+	if not viewport.has_point(screen_point): return {}
+	var caption: String = tr(target["name_key"])
+	var shown := caption
+	var maximum := maxf(1.0, viewport.size.x - 16)
+	var width := FONT.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	while width > maximum and caption.length() > 1:
+		caption = caption.left(caption.length()-1)
+		shown = caption + "…"
+		width = FONT.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	var origin := screen_point + Vector2(-width/2-4, -70)
+	origin.x = clampf(origin.x, viewport.position.x+4, viewport.end.x-width-12)
+	origin.y = clampf(origin.y, viewport.position.y+4, viewport.end.y-25)
+	var inverse := transform.affine_inverse()
+	return {"text":shown,"rect":Rect2(inverse*origin,Vector2(width+8,21)),"baseline":inverse*(origin+Vector2(4,16))}
 
 func _point(values: Array) -> Vector2:
 	return Vector2(values[0], values[1])

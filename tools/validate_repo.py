@@ -7,7 +7,8 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 errors = []
-documents = list(root.glob("*.md")) + list((root / "docs").glob("*.md"))
+documents = (list(root.glob("*.md")) + list((root / "docs").glob("*.md"))
+             + list((root / "docs" / "reviews").rglob("*.md")))
 for doc in documents:
     text = doc.read_text()
     if len(re.findall(r"^\s*```", text, re.M)) % 2:

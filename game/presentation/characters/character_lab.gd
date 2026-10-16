@@ -4,6 +4,7 @@ const FONT = preload("res://assets/runtime/fonts/NotoSansCJKsc-Regular.otf")
 const ACTIONS := ["idle","walk","strike","thrust","slash","guard","hit","down"]
 const NAMES := ["待机","行走／冲刺共用","短拳","直刺","横斩","护剑／守势","受击","倒地"]
 const DIRECTIONS := ["down","left","right","up"]
+const TITLE := "主角动画样本（非正式人设定稿）"
 var figures: Array[Node2D] = []
 var action_index := 1
 var zoom := 3
@@ -86,6 +87,17 @@ func dynamic_layout() -> bool:
 func single_direction_mode() -> bool:
 	return dynamic_layout() and _overview_layout() == 2
 
+func status_ink() -> Color:
+	if single_direction_mode():
+		return Color("#171820") if direction_index%2 == 0 else Color("#f1e6cf")
+	return Color("#d19a5c")
+
+func status_lines() -> PackedStringArray:
+	var state := "暂停" if paused else "冲刺时序" if sprint else "播放"
+	if single_direction_mode():
+		return [NAMES[action_index], "%dx · %s" % [zoom,state]]
+	return [NAMES[action_index]+" · %dx · " % zoom+state]
+
 func _overview_layout() -> int:
 	var columns_fit := true
 	var grid_fit := true
@@ -150,11 +162,13 @@ func _draw_dynamic_figures() -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(0,0,640,360),Color("#171820"))
-	draw_string(FONT,Vector2(16,28),"第五周 · 主角动画样本（非正式人设定稿）",HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color("#f1e6cf"))
+	draw_string(FONT,Vector2(16,28),TITLE,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color("#f1e6cf"))
 	if dynamic_layout():
 		_draw_dynamic_figures()
-		var status := "暂停" if paused else "冲刺时序" if sprint else "播放"
-		draw_string(FONT,Vector2(28,96) if single_direction_mode() else Vector2(16,56),NAMES[action_index]+" · %dx · " % zoom+status,HORIZONTAL_ALIGNMENT_LEFT,180 if single_direction_mode() else -1,14,Color("#d19a5c"))
+		var lines := status_lines()
+		for index: int in lines.size():
+			var at := Vector2(28,96+index*20) if single_direction_mode() else Vector2(16,56)
+			draw_string(FONT,at,lines[index],HORIZONTAL_ALIGNMENT_LEFT,180 if single_direction_mode() else -1,14,status_ink())
 		draw_string(FONT,Vector2(16,344),"↑↓动作 · 1/2/3倍率 · Space暂停 · Shift步频 · ←→逐帧 · A/D方向",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#f1e6cf"))
 		return
 	draw_string(FONT,Vector2(16,56),NAMES[action_index]+"  ·  %dx 最近邻" % zoom + (" · 暂停" if paused else " · 冲刺时序" if sprint else " · 播放"),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#d19a5c"))

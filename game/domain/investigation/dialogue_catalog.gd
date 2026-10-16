@@ -41,12 +41,8 @@ func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionar
 				return "Choice requires text, next and registered command."
 			if not choice["command"].is_empty() and not steps.has(choice["command"]):
 				return "Unknown dialogue command."
-			if not choice["command"].is_empty():
-				if choice["command"] in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY"]:
-					return "Story outcomes require an owned battle instance."
-				for effect: Dictionary in steps[choice["command"]]["effects"]:
-					if effect["op"] == "transfer" and effect["from"] == "PLAYER":
-						return "Handing over a player original requires the confirmation flow."
+			if not choice["command"].is_empty() and not rules.public_step_allowed(choice["command"]):
+				return "Protected dialogue command requires its dedicated confirmation or battle flow."
 			if not _conditions(choice.get("requires"), rules):
 				return "Invalid choice condition."
 			# No scripts, effects or property paths can hide beside a legal command.
@@ -107,7 +103,7 @@ func node_view(identifier: String, state: GameState) -> Dictionary:
 		choice["reason"] = "INV_REQUIREMENTS"
 		if not choice["command"].is_empty():
 			var proposal: Dictionary = _rules.prepare_step(state, choice["command"])
-			choice["enabled"] = choice["enabled"] and proposal["error"] == OK
+			choice["enabled"] = choice["enabled"] and _rules.public_step_allowed(choice["command"]) and proposal["error"] == OK
 			if proposal["error"] == ERR_ALREADY_EXISTS:
 				choice["reason"] = "INV_ALREADY_RECORDED"
 	return view

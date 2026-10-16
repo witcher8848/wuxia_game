@@ -67,6 +67,51 @@ func _invalid(hero: Node, manifest: Dictionary, label: String) -> void:
 	check(hero.manifest_data() == before and hero._action == action and hero._elapsed == elapsed and hero.frame_number() == frame,"failed configuration preserves state: "+label)
 	check(hero.manifest_path() == path and hero.frame_geometry(frame) == geometry and hero.presentation_bounds() == bounds,"failed configuration preserves geometry/bounds/source: "+label)
 
+func _check_query_isolation(hero: Node, label: String) -> void:
+	hero.reset_pose()
+	hero.facing = "right"
+	hero.walking = true
+	hero.step_time = 0.125
+	var before: Dictionary = hero.manifest_data()
+	var path: String = hero.manifest_path()
+	var clip_before: Dictionary = hero.clip_data("walk_right")
+	var frame: int = hero.frame_number()
+	var geometry: Dictionary = hero.frame_geometry(frame)
+	var bounds: Rect2 = hero.presentation_bounds()
+	var exposed: Dictionary = hero.manifest_data()
+	exposed["frame_count"] = 1
+	exposed["clips"]["walk_right"]["cells"][0] = 999
+	exposed["clips"]["walk_right"]["fps"] = 0
+	if int(exposed.get("schema_version",1)) == 2:
+		exposed["frames"][frame]["anchor"][0] = -999
+		exposed["frames"][frame]["region"].clear()
+		exposed["frames"].clear()
+	else:
+		exposed["anchor"][0] = -999
+		exposed["frame_size"].clear()
+	check(hero.manifest_data() == before,"nested manifest query changes cannot mutate active metadata: "+label)
+	check(hero.frame_count() == int(before["frame_count"]) and hero.frame_number() == frame,"manifest query cannot bypass validated frame mapping: "+label)
+	check(hero.frame_geometry(frame) == geometry and hero.presentation_bounds() == bounds,"manifest query cannot desynchronize frame/bounds caches: "+label)
+	var exposed_clip: Dictionary = hero.clip_data("walk_right")
+	exposed_clip["cells"][1] = 999
+	exposed_clip["cells"].clear()
+	exposed_clip["fps"] = 0
+	check(hero.clip_data("walk_right") == clip_before,"named clip query isolates nested cells and playback timing: "+label)
+	var current_clip: Dictionary = hero.clip_data()
+	current_clip["cells"].clear()
+	check(hero.clip_data() == clip_before and hero.frame_number() == frame,"current clip query cannot erase a visible pose: "+label)
+	var exposed_geometry: Dictionary = hero.frame_geometry(frame)
+	exposed_geometry["anchor"] = Vector2.ZERO
+	exposed_geometry["region"] = Rect2()
+	exposed_geometry.clear()
+	check(hero.frame_geometry(frame) == geometry,"geometry dictionary remains detached: "+label)
+	var exposed_bounds: Rect2 = hero.presentation_bounds()
+	exposed_bounds.position = Vector2.ZERO
+	exposed_bounds.size = Vector2.ZERO
+	check(hero.presentation_bounds() == bounds,"bounds value cannot mutate cached rectangle: "+label)
+	check(hero.manifest_path() == path and hero.manifest_data() == before,"all inspection mutations preserve validated source identity: "+label)
+	hero.reset_pose()
+
 func _key(code: Key) -> void:
 	var event := InputEventKey.new()
 	event.physical_keycode = code
@@ -125,8 +170,15 @@ func _run() -> void:
 	var active_data: Variant = JSON.parse_string(FileAccess.get_file_as_string(Hero.ACTIVE_DATA_PATH))
 	check(default_hero.manifest_data() == active_data,"active default really loads its metadata, not the legacy static data")
 	check(Hero.IMAGEGEN_DATA_PATH == "res://assets/runtime/characters/chr_protagonist_imagegen_20261012.json","planned imagegen promotion path is explicit")
+	_check_query_isolation(default_hero,"active production")
 	# Native regression fixtures opt into the old contract regardless of activation.
 	check(default_hero.configure_manifest(Hero.DATA_PATH) == OK,"native fixture explicitly selects legacy metadata")
+	_check_query_isolation(default_hero,"legacy instance")
+	check(Hero.data == default_data,"legacy inspection cannot mutate static fallback metadata")
+	var fallback_hero := Hero.new()
+	_check_query_isolation(fallback_hero,"pre-tree legacy fallback")
+	check(Hero.data == default_data,"pre-tree inspection leaves shared fallback metadata intact")
+	fallback_hero.free()
 	var fixture := _fixture()
 	_write_fixture(fixture)
 	var preconfigured_hero := Hero.new()
@@ -142,6 +194,7 @@ func _run() -> void:
 	player.queue_free()
 	preconfigured_hero.queue_free()
 	check(hero.configure_manifest(fixture_path) == OK,"explicit v2 configuration")
+	_check_query_isolation(hero,"schema2 fixture")
 	check(hero.frame_count() == 57 and hero.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,"v2 frame count and nearest")
 	check(default_hero.manifest_data() == default_data and Hero.data == default_data,"v2 instance does not mutate static default manifest")
 	check(default_hero.display_size() == Vector2(32,48) and hero.display_size() == Vector2(48,72),"instances retain different display sizes")

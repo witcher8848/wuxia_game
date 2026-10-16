@@ -19,6 +19,7 @@ func _run() -> void:
 	fixture = JSON.parse_string(FileAccess.get_file_as_string("res://game/tools/battle_lab/combat_encounter.json"))
 	fixture["skill_definitions"] = JSON.parse_string(FileAccess.get_file_as_string("res://game/content/data/battle_skills.json"))
 	_test_validation()
+	_test_fallback_action()
 	_test_movement()
 	_test_actions()
 	_test_statuses()
@@ -91,6 +92,21 @@ func _test_validation() -> void:
 		var bad := fixture.duplicate(true)
 		bad["objective"] = goal
 		bad_cases.append(bad)
+	# These remain otherwise well-formed skill definitions, but remove the
+	# always-legal self action relied on by both players and the AI fallback.
+	for change: Dictionary in [
+		{"qi_cost": 1},
+		{"cooldown_rounds": 1},
+		{"range_pattern": "adjacent", "target": "enemy", "range": 1},
+		{"range_pattern": "step", "target": "empty", "range": 1},
+		{"area_pattern": "adjacent_allies"},
+		{"ultimate": true, "category": "绝技"},
+		{"category": "内功", "restore_qi": 0, "effects": [], "passive_rules": {"max_qi": 3, "basic_restore_qi": 0, "breath_restore_qi": 1}}
+	]:
+		var bad := fixture.duplicate(true)
+		for skill: Dictionary in bad["skill_definitions"]:
+			if skill["id"] == "ACT_BREATH": skill.merge(change, true)
+		bad_cases.append(bad)
 	for bad: Dictionary in bad_cases:
 		check(not battle.configure(bad).is_empty(), "reject malformed encounter")
 		check(battle.snapshot() == before, "bad configure atomic")
@@ -98,6 +114,33 @@ func _test_validation() -> void:
 	external["effects"].append("bleed")
 	check(battle.skill("SK_FIST_BASIC")["effects"].is_empty(), "skill query detached")
 	check(not battle.finish_turn(C), "cannot bypass command reducer")
+
+
+func _test_fallback_action() -> void:
+	var data := fixture.duplicate(true)
+	# No walking and no resources must still permit a legal complete round.
+	# Recovery amount/effects deliberately differ from the legacy table: these
+	# are balance data, not part of the safety invariant (W6 breath has no guard).
+	for unit: Dictionary in data["units"]:
+		unit["qi"] = 0
+		unit["move"] = 0
+	for skill: Dictionary in data["skill_definitions"]:
+		if skill["id"] == "ACT_BREATH":
+			skill["restore_qi"] = 0
+			skill["effects"] = []
+	var battle := create(data)
+	var first_round := battle.round_number
+	for index: int in range(data["units"].size()):
+		var actor := battle.current_actor_id()
+		var target := Grid.cell_of(battle.unit(actor))
+		var before := battle.snapshot()
+		var plan := battle.preview_action(actor, "ACT_BREATH", target)
+		check(plan["ok"] and plan["qi_cost"] == 0, "fallback usable at zero qi without targets or movement")
+		check(battle.snapshot() == before, "fallback preview is read only")
+		var result := battle.perform_action(actor, "ACT_BREATH", target, battle.revision)
+		check(result["ok"] and battle.unit(actor)["qi"] == 0, "zero-recovery fallback completes a turn without manufacturing qi")
+		check(battle.unit(actor)["statuses"].is_empty(), "fallback does not manufacture a guard effect")
+	check(battle.round_number == first_round + 1 and battle.outcome == "ongoing", "all zero-qi immobile units can finish a full round")
 
 
 func _test_movement() -> void:

@@ -86,10 +86,12 @@ func refresh() -> void:
 	var greeting := ContentDB.world_greeting(GameSession.state, target_id)
 	if not greeting.is_empty():
 		var npc: Dictionary = ContentDB.world_npc(GameSession.state, target_id)["npc"]
-		heading.text = tr(npc["name_key"])
-		# Some quest nodes are the protagonist's inner monologue. Keep their
-		# original speaker explicit instead of attributing NPC chatter to him.
-		body.text = greeting + "\n\n" + tr(view["speaker_key"]) + ": " + body.text
+		# Keep the current answer/instructions first and retain its actual speaker.
+		# Repeating four ambient lines before every answer hides the quest text in
+		# this short reading viewport. Only the entry adds local chatter afterwards;
+		# H still opens the complete time/relationship conversation at any node.
+		if node_id == ContentDB.dialogue_entry(target_id, GameSession.state):
+			body.text += "\n\n" + tr(npc["name_key"]) + ": " + greeting
 		hint.text = tr("WORLD_DIALOGUE_KEYS")
 	for index: int in choices.size():
 		choices[index].visible = index < view["choices"].size()

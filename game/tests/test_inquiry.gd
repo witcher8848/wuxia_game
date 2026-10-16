@@ -34,6 +34,7 @@ func _run() -> void:
 	inquiry = Inquiry.new()
 	check(inquiry.configure(data["inquiries"], rules, content.dialogue_text_keys()).is_empty(), "canonical inquiries")
 	_definitions()
+	_protected_commands()
 	_domain()
 	await _ui()
 	print("INQUIRY: %d checks, %d failures (scripted UI and domain; no human-play claim)" % [checks, failures.size()])
@@ -73,6 +74,43 @@ func _definitions() -> void:
 	check(registry.get_investigation_definitions() == data and not registry.get_dialogue_definitions().is_empty(), "transaction retains all content")
 	registry.free()
 
+func _protected_commands() -> void:
+	var extended := data.duplicate(true)
+	extended["steps"].append({"id":"STEP_GIVE_INDEX_WITH_FACT", "feedback_key":"INV_ORIGINAL_TRANSFERRED", "requires":[], "effects":[{"op":"set_fact", "id":"FACT_WEST_GRAVES"}, {"op":"transfer", "id":"EV_INDEX_01", "from":"PLAYER", "to":"CHAR_FATHER"}]})
+	var protected_rules := Rules.new()
+	check(protected_rules.configure(extended).is_empty(), "protected steps are valid domain proposals, not public commands")
+	var guarded := Inquiry.new()
+	check(guarded.configure(extended["inquiries"], protected_rules, content.dialogue_text_keys()).is_empty(), "normal inquiries remain valid with protected domain steps registered")
+	var registry := Content.new()
+	check(registry.reload_content() == OK, "protected command transaction fixture loads")
+	var bootstrap: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(Content.BOOTSTRAP_PATH))
+	var published_dialogue: Dictionary = registry.get_dialogue_definitions()
+	var published_world: Dictionary = registry.world_definitions()
+	var published_region: Dictionary = registry.get_exploration_region("SCENE_RIVER_DOCK")
+	var initial := GameState.new()
+	var original_view: Dictionary = guarded.view("INQ_INDEX", initial)
+	for step: String in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY", "STEP_HAND_OVER_BLANK", "STEP_GIVE_INDEX_WITH_FACT"]:
+		for index: int in 2:
+			var bad := extended.duplicate(true)
+			bad["inquiries"][index]["step_id"] = step
+			check(not guarded.configure(bad["inquiries"], protected_rules, content.dialogue_text_keys()).is_empty(), "challenge and compare reject protected command " + step)
+			check(guarded.view("INQ_INDEX", initial) == original_view, "protected inquiry reload retains prior registry " + step)
+			check(registry.load_definitions(bootstrap, null, bad) == ERR_INVALID_DATA, "ContentDB rejects protected inquiry command " + step)
+			check(registry.get_investigation_definitions() == data and registry.get_dialogue_definitions() == published_dialogue and registry.world_definitions() == published_world and registry.get_exploration_region("SCENE_RIVER_DOCK") == published_region, "failed protected command load publishes no partial registry " + step)
+	# The inquiry retains the same rules object, whose definition may change later.
+	var known := GameState.new()
+	for step: String in ["STEP_RECEIVE_INDEX", "STEP_ACCEPT_SEARCH", "STEP_INSPECT_BLANK"]:
+		var proposal: Dictionary = protected_rules.prepare_step(known, step)
+		check(proposal["error"] == OK, "protected execution fixture " + step)
+		known = proposal["state"]
+	var before := known.to_dict()
+	for step: Dictionary in extended["steps"]:
+		if step["id"] == "STEP_COMPARE_INDEX_BLANK":
+			step["effects"] = [{"op":"transfer", "id":"EV_BLANK_DEATH_01", "from":"PLAYER", "to":"FACTION_INSPECTOR"}]
+	check(protected_rules.configure(extended).is_empty(), "domain rule can be reconfigured after inquiry registration")
+	check(guarded.prepare(known, "INQ_INDEX", ["EV_INDEX_01", "EV_BLANK_DEATH_01"])["error"] != OK and known.to_dict() == before, "execution rechecks changed command authority without transferring original")
+	registry.free()
+
 func _begin() -> void:
 	session.start_new_game()
 	for step: String in ["STEP_RECEIVE_INDEX", "STEP_ACCEPT_SEARCH"]:
@@ -107,7 +145,11 @@ func _domain() -> void:
 	check(session.apply_investigation_step("STEP_INSPECT_BLANK")["error"] == OK, "can supplement other entrance")
 	check(session.resolve_inquiry("INQ_INDEX", ["EV_BLANK_DEATH_01", "EV_INDEX_01"])["error"] == OK, "reverse-order correct pair works")
 	check(session.state.world_flags["FACT_YAMEN_FORMATION"] and session.state.world_flags["FACT_FERRY_ROUTE"], "supplement retains both advantages")
-	check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] == OK, "transfer original with domain command")
+	check(session.enter_region("SCENE_TOWN_STREET", "SPAWN_START") == OK and session.mark_inspected("DOC_STREET_NOTICE") == OK, "reach registered original handover location")
+	before = session.state.to_dict()
+	check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] != OK and session.state.to_dict() == before, "public investigation command cannot bypass original confirmation")
+	var handover: Dictionary = session.preview_original_handover()
+	check(handover["error"] == OK and session.confirm_original_handover(handover.get("token", ""))["error"] == OK, "transfer original only through preview and explicit confirmation")
 	before = session.state.to_dict()
 	var items := Journal.evidence_entries(session.state, data)
 	check(items.size() == 4 and items[1]["detail"].contains(TranslationServer.translate("INV_HOLDER_FACTION_INSPECTOR")), "journal preserves knowledge and current ownership")

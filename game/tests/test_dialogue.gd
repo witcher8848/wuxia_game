@@ -71,6 +71,10 @@ func _definitions() -> void:
 		bad = source.duplicate(true)
 		bad["nodes"][0]["choices"][0][field] = "UNKNOWN"
 		mutations.append(bad)
+	for protected: String in ["STEP_PREPARE_RESCUE", "STEP_GRAVES_VICTORY", "STEP_HAND_OVER_BLANK"]:
+		bad = source.duplicate(true)
+		bad["nodes"][0]["choices"][0]["command"] = protected
+		mutations.append(bad)
 	for choices: Variant in [null, [], [source["nodes"][0]["choices"][0]], source["nodes"][0]["choices"] + source["nodes"][0]["choices"]]:
 		bad = source.duplicate(true)
 		bad["nodes"][0]["choices"] = choices
@@ -111,6 +115,14 @@ func _definitions() -> void:
 	var bootstrap: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CONTENT.BOOTSTRAP_PATH))
 	check(registry.load_definitions(bootstrap, null, null, bad) == ERR_INVALID_DATA, "ContentDB rejects broken graph")
 	check(registry.get_dialogue_definitions() == source and registry.get_investigation_definitions() == rules.definitions() and registry.has_spawn("SCENE_TOWN_STREET", "SPAWN_START"), "all ContentDB registries preserved")
+	var extended: Dictionary = rules.definitions()
+	extended["steps"].append({"id":"STEP_GIVE_INDEX", "feedback_key":"INV_ORIGINAL_TRANSFERRED", "requires":[], "effects":[{"op":"transfer", "id":"EV_INDEX_01", "from":"PLAYER", "to":"CHAR_FATHER"}]})
+	var extended_rules := Rules.new()
+	check(extended_rules.configure(extended).is_empty(), "arbitrary player-transfer domain step fixture validates")
+	bad = source.duplicate(true)
+	bad["nodes"][0]["choices"][0]["command"] = "STEP_GIVE_INDEX"
+	check(not catalog.configure(bad, extended_rules, keys, TARGETS).is_empty() and catalog.definitions() == source, "shared policy rejects arbitrary transfer names and retains dialogue registry")
+	check(registry.load_definitions(bootstrap, null, extended, bad) == ERR_INVALID_DATA and registry.get_dialogue_definitions() == source and registry.get_investigation_definitions() == rules.definitions(), "ContentDB atomically refuses an arbitrary transfer dialogue command")
 	registry.free()
 
 func _services() -> void:
@@ -137,7 +149,11 @@ func _services() -> void:
 	check(session.choose_dialogue("D_HOME", "inspect")["error"] != OK and session.state.to_dict() == before, "duplicate acquisition fails atomically")
 	check(session.choose_dialogue("D_HOME", "read")["error"] == OK and session.state.to_dict() == before, "read known evidence is free")
 	check(session.apply_investigation_step("STEP_COMPARE_INDEX_BLANK")["error"] == OK, "existing comparison command")
-	check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] == OK, "existing handover command")
+	check(session.enter_region("SCENE_TOWN_STREET", "SPAWN_START") == OK and session.mark_inspected("DOC_STREET_NOTICE") == OK, "visit registered handover location")
+	before = session.state.to_dict()
+	check(session.apply_investigation_step("STEP_HAND_OVER_BLANK")["error"] != OK and session.state.to_dict() == before, "public command cannot transfer original without confirmation")
+	var handover: Dictionary = session.preview_original_handover()
+	check(handover["error"] == OK and session.confirm_original_handover(handover.get("token", ""))["error"] == OK, "dedicated handover preview and confirmation remain usable")
 	before = session.state.to_dict()
 	check(session.choose_dialogue("D_HOME", "inspect")["error"] != OK and session.state.to_dict() == before, "revisiting cannot reclaim transferred original")
 	check(content.dialogue_view("D_HOME", session.state)["choices"][1]["enabled"], "knowledge remains readable without original")

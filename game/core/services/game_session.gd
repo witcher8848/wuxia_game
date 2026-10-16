@@ -131,6 +131,8 @@ func apply_investigation_step(step_id: String) -> Dictionary:
 	var content: Node = _content_db()
 	if content == null:
 		return {"error": ERR_UNAVAILABLE, "message": "ContentDB unavailable.", "feedback_key": ""}
+	if not content.public_investigation_step_allowed(step_id):
+		return {"error": ERR_UNAVAILABLE, "message": "This command requires its dedicated confirmation or encounter workflow.", "feedback_key": "INV_COMMAND_FAILED"}
 	var prepared: Dictionary = content.prepare_investigation_step(state, step_id)
 	if prepared["error"] != OK:
 		return {"error": prepared["error"], "message": prepared["message"], "feedback_key": ""}
@@ -186,23 +188,45 @@ func preview_original_handover() -> Dictionary:
 	var content: Node = _content_db()
 	if content == null or state.scene_id != "SCENE_TOWN_STREET" or not is_inspected("DOC_STREET_NOTICE"):
 		return {"error": ERR_UNAVAILABLE, "feedback_key": "INV_HANDOVER_LOCATION"}
-	var proposal: Dictionary = content.prepare_investigation_step(state, "STEP_HAND_OVER_BLANK")
+	var proposal: Dictionary = _original_handover_proposal(content)
 	if proposal["error"] != OK:
 		return {"error": proposal["error"], "feedback_key": "INV_ALREADY_RECORDED" if proposal["error"] == ERR_ALREADY_EXISTS else "INV_REQUIREMENTS"}
 	_handover_sequence += 1
 	var token := "HANDOVER_%d_%d" % [_handover_sequence, Time.get_ticks_usec()]
-	_handover = {"token": token, "before": state.to_dict()}
+	_handover = {"token": token, "before": state.to_dict(), "after":proposal["state"].to_dict()}
 	return {"error": OK, "token": token, "evidence_id": "EV_BLANK_DEATH_01", "recipient_id": "FACTION_INSPECTOR", "effect_key": "INV_HANDOVER_EFFECT"}
 
 
 func confirm_original_handover(token: String) -> Dictionary:
 	if token.is_empty() or token != _handover.get("token", ""):
 		return {"error": ERR_INVALID_PARAMETER, "feedback_key": "INV_HANDOVER_STALE"}
-	var before: Dictionary = _handover["before"]
+	var pending := _handover.duplicate(true)
 	_handover.clear()
-	if before != state.to_dict():
+	if combat_active() or pending["before"] != state.to_dict():
 		return {"error": ERR_BUSY, "feedback_key": "INV_HANDOVER_STALE"}
-	return apply_investigation_step("STEP_HAND_OVER_BLANK")
+	var content := _content_db()
+	if content == null: return {"error":ERR_UNAVAILABLE,"feedback_key":"INV_COMMAND_FAILED"}
+	# Dedicated capability: ordinary investigation/dialogue/inquiry entry points
+	# cannot commit PLAYER custody transfers. Recompute the exact preview effect.
+	var proposal := _original_handover_proposal(content)
+	if proposal["error"] != OK or proposal["state"].to_dict() != pending["after"]:
+		return {"error":ERR_BUSY,"feedback_key":"INV_HANDOVER_STALE"}
+	var error := replace_state(proposal["state"])
+	return {"error":error,"feedback_key":proposal["feedback_key"] if error == OK else "INV_COMMAND_FAILED"}
+
+
+func _original_handover_proposal(content: Node) -> Dictionary:
+	var proposal: Dictionary = content.prepare_investigation_step(state, "STEP_HAND_OVER_BLANK")
+	if proposal["error"] != OK: return proposal
+	# The preview explicitly promises this original, recipient, and no other
+	# consequences. Reject a content reload that silently changes that contract.
+	var expected := state.to_dict()
+	if not expected["evidence_states"].has("EV_BLANK_DEATH_01"):
+		return {"error":ERR_INVALID_DATA}
+	expected["evidence_states"]["EV_BLANK_DEATH_01"]["holder_id"] = "FACTION_INSPECTOR"
+	expected["world_flags"]["APPLIED_STEP_HAND_OVER_BLANK"] = true
+	if proposal["state"].to_dict() != expected: return {"error":ERR_INVALID_DATA}
+	return proposal
 
 
 func cancel_original_handover(token: String) -> void:

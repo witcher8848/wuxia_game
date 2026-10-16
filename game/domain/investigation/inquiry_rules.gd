@@ -29,6 +29,8 @@ func configure(data: Variant, rules: InvestigationRules, keys: Dictionary) -> St
 				return "Missing inquiry translation."
 		if not entry.get("step_id") is String or not steps.has(entry["step_id"]):
 			return "Unknown inquiry command."
+		if not rules.public_step_allowed(entry["step_id"]):
+			return "Protected inquiry command requires its dedicated confirmation or battle flow."
 		if entry["kind"] == "challenge":
 			if entry.size() != 9 or not entry.get("claim_id") is String or not evidence.has(entry["claim_id"]) or not entry.get("proof_id") is String or not seen.has(entry["proof_id"]) or entry["proof_id"] == entry["claim_id"]:
 				return "Invalid challenge claim/proof."
@@ -56,6 +58,10 @@ func prepare(state: GameState, identifier: String, selected: Array) -> Dictionar
 	if not _entries.has(identifier) or not _rules.validate_state(state).is_empty():
 		return _failure(ERR_INVALID_DATA, "INV_COMMAND_FAILED")
 	var entry: Dictionary = _entries[identifier]
+	# A rules object can be reconfigured after the inquiry registry was built.
+	# Recheck authority at execution, not only while accepting content.
+	if not _rules.public_step_allowed(entry["step_id"]):
+		return _failure(ERR_UNAVAILABLE, "INV_COMMAND_FAILED")
 	var count: int = 1 if entry["kind"] == "challenge" else 2
 	if selected.size() != count or (count == 2 and selected[0] == selected[1]):
 		return _failure(ERR_INVALID_PARAMETER, "INV_PAIR_DISTINCT")

@@ -51,6 +51,7 @@ python3 tools/run_checked.py week7_content ./tools/godot.sh --headless --path "$
 python3 tools/run_checked.py week7_npc_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_npc_ui.gd
 python3 tools/run_checked.py week7_world_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_world_session.gd
 python3 tools/run_checked.py week7_world_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week7_world_ui.gd
+python3 tools/run_checked.py review_presentation ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_review_presentation.gd
 python3 tools/check_story_persistence.py
 python3 tools/check_martial_persistence.py
 python3 -B tools/check_world_persistence.py

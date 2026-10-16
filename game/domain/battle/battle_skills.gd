@@ -54,6 +54,12 @@ static func validate(data: Variant) -> String:
 			return "Area support must originate at self."
 		if skill["area_pattern"] == "front_arc" and (pattern != "adjacent" or skill["target"] != "enemy"):
 			return "Front arc requires an adjacent enemy attack."
+		# There is no unrestricted pass command. At zero qi, with every route
+		# blocked or no enemy in range, both the player and AI must still have
+		# an active self action that can finish the turn. Recovery and effects
+		# remain authored balance data, including W6's guard-free breath.
+		if skill["id"] == "ACT_BREATH" and (skill["category"] == "内功" or skill["ultimate"] or pattern != "self" or skill["target"] != "self" or skill["area_pattern"] != "single" or skill["qi_cost"] != 0 or skill["cooldown_rounds"] != 0):
+			return "Breath must remain a free, cooldown-free active self fallback."
 		ids[skill["id"]] = true
 	for identifier: String in BASE:
 		if not ids.has(identifier):

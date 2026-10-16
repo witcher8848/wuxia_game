@@ -199,6 +199,10 @@ func prepare_investigation_step(state: GameState, step_id: String) -> Dictionary
 	return _investigation.prepare_step(state, step_id)
 
 
+func public_investigation_step_allowed(step_id: String) -> bool:
+	return _investigation.public_step_allowed(step_id)
+
+
 func investigation_condition(state: GameState, condition: Dictionary) -> bool:
 	return _investigation.condition_matches(state, condition)
 
