@@ -59,7 +59,7 @@ func _build_layout() -> void:
 	box.add_child(hint)
 
 func go_to(identifier: String) -> void:
-	if identifier in DialogueCatalog.ACTIVITIES:
+	if identifier in DialogueCatalog.ACTIVITIES or identifier == "@branch":
 		activity_requested.emit(identifier)
 		return
 	if identifier == "@entry":
@@ -79,7 +79,8 @@ func refresh() -> void:
 		return
 	cursor = clampi(cursor, 0, view["choices"].size() - 1)
 	heading.text = tr(view["speaker_key"])
-	body.text = tr(view["text_key"])
+	var text_key: String = "W8_D_JOURNEY_TEXT" if node_id == "D_JOURNEY" and GameSession.state.world_flags.get("FACT_W8_ACTIVE", false) else view["text_key"]
+	body.text = tr(text_key).replace("\\n", "\n")
 	if node_id == "D_TOKEN" and GameSession.state.evidence_states.has("CL_BOATMAN_01"):
 		body.text += "\n" + tr("INV_TRACE_HINT")
 	hint.text = tr("INV_DIALOGUE_KEYS")
@@ -126,8 +127,12 @@ func handle_input(event: InputEvent) -> void:
 		var choice_id: String = view["choices"][cursor]["id"]
 		var result: Dictionary = GameSession.choose_dialogue(node_id, choice_id)
 		feedback.text = tr(result.get("feedback_key", "INV_COMMAND_FAILED"))
-		if result["error"] == OK:
+		if result.get("activity", "") == "@branch":
+			activity_requested.emit("@branch")
+		elif result["error"] == OK:
 			go_to(result["next"])
+			if result.has("saved") and not result["saved"]:
+				feedback.text = tr("W8_PROGRESS_SAVE_FAILED")
 		else:
 			refresh()
 	elif event is InputEventKey and event.pressed and event.physical_keycode in [KEY_PAGEDOWN, KEY_PAGEUP]:

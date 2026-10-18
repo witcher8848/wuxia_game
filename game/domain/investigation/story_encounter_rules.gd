@@ -48,6 +48,7 @@ func prepare(state: GameState) -> Dictionary:
 	if proposal["error"] != OK: return proposal
 	if not _valid_relationship(state): return _failure(ERR_INVALID_DATA)
 	var ferry: bool = state.world_flags.get(_data["ferry_fact"], false)
+	if state.world_flags.get("FACT_W8_ACTIVE",false): ferry = state.world_flags.get("FACT_W8_FERRY_ASSISTANCE",false)
 	var definition: Dictionary = _with_deployment(_data) if ferry else _data["battle"].duplicate(true)
 	# Empty schema-1 records preserve the original story seed. An explicitly
 	# confirmed preparation is applied to the protagonist, not the companion.
@@ -110,8 +111,17 @@ func validate_persistent_state(state: GameState) -> String:
 	var find: Dictionary = state.quest_states.get("QUEST_FIND_GRAVEKEEPER", {})
 	if find.get("status") != "changed" or find.get("next_quest") != "QUEST_RESCUE_GRAVEKEEPER" or find.get("reason_key") != "INV_RESCUE_REASON":
 		return "Missing story quest transition."
-	if state.quest_states.get("QUEST_TRACE_LEDGER", {}).get("status") != "available":
+	var raw_follow: Variant = state.quest_states.get("QUEST_TRACE_LEDGER", {}).get("status", "")
+	if not raw_follow is String: return "Invalid follow-up objective status."
+	var follow_status: String = raw_follow
+	var new_flow: bool = state.world_flags.get("FACT_W8_ACTIVE",false)
+	if follow_status != "available" and not (new_flow and follow_status in ["active","resolved"]):
 		return "Missing follow-up objective."
+	if new_flow and follow_status in ["active","resolved"]:
+		if not state.world_flags.get("APPLIED_STEP_W8_COLLECT_GRAVES",false) or not state.evidence_states.has("EV_GRAVE_TAG_03") or not state.evidence_states.has("EV_BURIAL_PAGE_01"):
+			return "Missing follow-up evidence receipt."
+		if follow_status == "resolved" and (not state.world_flags.get("APPLIED_STEP_W8_REVIEW",false) or not state.world_flags.get("FACT_W8_REVIEWED",false) or not state.world_flags.get("FACT_BURIAL_MISMATCH",false)):
+			return "Missing follow-up review receipt."
 	var resolution: Variant = rescue.get("resolution")
 	if not resolution is Dictionary or resolution.get("battle_id") != _data["id"] or resolution.get("outcome") != "victory":
 		return "Invalid settlement receipt."

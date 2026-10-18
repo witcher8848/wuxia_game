@@ -5,7 +5,7 @@ extends RefCounted
 var _data: Dictionary = {}
 var _nodes: Dictionary = {}
 var _rules: InvestigationRules
-const ACTIVITIES := ["@challenge", "@compare", "@journal", "@handover", "@battle"]
+const ACTIVITIES := ["@challenge", "@compare", "@journal", "@handover", "@battle", "@branch", "@graves_compare"]
 
 func configure(data: Dictionary, rules: InvestigationRules, text_keys: Dictionary, interactions: Array) -> String:
 	if not GameState.is_json_value(data) or data.size() != 2 or not data.get("nodes") is Array or not data.get("entries") is Dictionary or data["nodes"].is_empty():

@@ -265,6 +265,12 @@ func _draw_target(target: Dictionary) -> void:
 		draw_rect(Rect2(point - Vector2(15, 28), Vector2(30, 28)), Color("#5b3a30"))
 		draw_rect(Rect2(point - Vector2(11, 25), Vector2(22, 19)), Color("#d8d0be"))
 		draw_rect(Rect2(point - Vector2(2, 15), Vector2(5, 5)), Color("#b84a3e"))
+		var receipt: Variant = GameSession.state.world_flags.get("CHOICE_CH01_FIRST_LEAD",{})
+		if target["id"] == "DOC_HOME_NOTE" and GameSession.state.world_flags.get("FACT_W8_ACTIVE",false) and receipt is Dictionary and receipt.get("choice") == "dock":
+			# A local, visible confiscation seal. It changes neither collision nor
+			# source art, and is shown only in the affected new-route location.
+			draw_line(point + Vector2(-12,-26),point + Vector2(12,-5),Color("#b84a3e"),4.0)
+			draw_line(point + Vector2(12,-26),point + Vector2(-12,-5),Color("#b84a3e"),4.0)
 	else:
 		draw_rect(Rect2(point - Vector2(20, 18), Vector2(40, 36)), Color("#34594a"), false, 3.0)
 		draw_line(point - Vector2(10, 0), point + Vector2(10, 0), Color("#171820"), 2.0)

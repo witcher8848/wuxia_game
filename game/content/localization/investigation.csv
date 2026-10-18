@@ -221,3 +221,93 @@ WORLD_DOCK_CHAT_4,下午要修补这张旧篷，河上起风，总得有处挡�
 WORLD_DOCK_CHAT_5,天色收了，得逐条检查系船的绳结。夜里松开可不是小事。,Light is fading. Every mooring knot needs checking before night.
 WORLD_DOCK_CHAT_6,灯挂好了，岸边还有些零碎货没归拢。我暂不走远。,The lamp is hung but some cargo still needs sorting. I will stay nearby.
 WORLD_DOCK_CHAT_7,夜深船静，正好补补桨柄。有话慢慢说，别惊了歇息的人。,The river is quiet. I can mend this oar handle; speak softly for those resting nearby.
+W8_CHOICE_TITLE,一刻两头：先保文书，还是先保人证？,One moment; two leads: papers or witness first?
+W8_CHOICE_PROMPT,女囚：县衙在查抄亡籍经手人的住所，也在传问渡口相关人。你能先保住一处完整机会。读材料、走路和问错证物不会偷偷耗掉机会；开始取证前先作选择。另一线可在救援后补查，但不能把错过的当场协助补回。,The county is searching clerks' homes and questioning ferry contacts. Preserve one full opportunity first. Reading and travel are free; wrong evidence does not secretly consume the window. Choose before taking evidence. You may follow up after the rescue but cannot restore assistance missed at departure.
+W8_CHOICE_HOME,先保文书：回住所,Preserve the papers: go home first
+W8_CHOICE_DOCK,先保人证：去码头,Preserve the witness: visit the docks first
+W8_CHOICE_CANCEL,暂不决定，返回,Not yet; return without choosing
+W8_CHOICE_CONFIRM_TITLE,确认这次取证顺序？,Confirm this investigation priority?
+W8_CHOICE_HOME_SUMMARY,你先回住所，争取保全父亲的文书与原件；与此同时船夫会遭传问，可能无法亲自引渡。影响类别：文书原件／渡口协助／战前准备。不会自动发放证物或情报。选择前状态会独立保护；本版尚未开放重勘。,You head home to preserve Father's papers and an original. Meanwhile the boatman will be questioned and may be unable to guide you himself. Affects original custody / ferry assistance / battle preparation. No evidence or intel is granted automatically. A separate pre-choice snapshot is protected; replay from it is not available in this build.
+W8_CHOICE_DOCK_SUMMARY,你先去码头，争取在传问前问到船夫；与此同时住所会被查抄，原件转入官府控制。救援后仍可补查来源清楚的摘记，摘记不等于原件。影响类别：文书原件／渡口协助／战前准备。选择本身不授予调查奖励。,You visit the boatman before questioning. Meanwhile the home is searched and its original goes into official custody. After the rescue a clearly sourced extract remains available; it is not the original. Affects original custody / ferry assistance / battle preparation. Choosing alone grants no investigation reward.
+W8_CHOICE_CONFIRM,确认此次优先行动,Confirm this priority
+W8_CHOICE_BACK,返回比较，不作决定,Back; compare before deciding
+W8_CHOICE_KEYS,↑↓选择 · E确认 · Esc取消 · PgUp/PgDn翻阅,Up/Down select · E confirm · Esc cancel · PgUp/PgDn scroll
+W8_CHOICE_SAVED,选择已记录并保存。接下来仍须亲自调查，才会获得相应情报。,Choice recorded and saved. Investigate to earn its possible intel.
+W8_CHOICE_SAVE_PENDING,选择已确认，但结果尚未保存。重试只保存，不重做选择。也可返回标题，丢弃本次未保存进度；原有存档保留。,Choice confirmed but not saved. Retry saves only; it does not repeat the choice. Or return to title and discard this unsaved progress. Existing saves remain.
+W8_CHOICE_RETRY_SAVE,重试保存已确认的结果,Retry saving the confirmed result
+W8_CHOICE_SAVE_FAILED,保护选择前状态失败，未接受选择。可返回或重试。,Snapshot failed. No choice accepted. Return or retry.
+W8_CHOICE_RESULT_SAVE_FAILED,选择已确认，结果尚未保存；可重试或返回标题。,Choice confirmed; result not saved. Retry or return to title.
+W8_CHOICE_RETURN_TITLE,返回标题，丢弃未存进度,Return to title; discard unsaved progress
+W8_CHOICE_NEEDED,先确认此次取证优先顺序；取消不会锁定路线。,Confirm the first-lead priority before investigating. Cancelling locks no route.
+W8_OPPORTUNITY_CLOSED,另一处完整机会已经过去。可继续救援；战后能补查，但不会补发首战准备。,The other full opportunity has passed. Continue the rescue; later follow-up will not restore first-battle preparation.
+W8_SAVE_REQUIRED,此次选择已确认但尚未保存；请先重试保存，再继续行动。,The choice is confirmed but not yet saved. Retry saving before continuing.
+W8_PROGRESS_SAVE_FAILED,本次进展尚未保存。运行时结果保留；退出前请按F5重试保存，不必重复调查。,This progress is not saved. The runtime result is retained. Press F5 before leaving; do not repeat the investigation.
+W8_ROUTES_EMPTY,尚未确定本次取证顺序。选择前会说明影响；命卷只记录你已知和已做的事。,No investigation priority chosen. Its effects will be explained first; the journal records only what you know and have done.
+W8_ROUTES_TITLE,已发生的取舍,Recorded choices and consequences
+W8_ROUTE_HOME,首次取证：先保文书,First lead: preserved the papers
+W8_ROUTE_DOCK,首次取证：先保人证,First lead: approached the witness
+W8_ROUTE_PHASE,案件阶段：第一日下午 · 首次取证机会,Case phase: Day 1 afternoon · first-lead opportunity
+W8_ROUTE_RECALL_LOCKED,此页是只读记录，不会撤销选择。选择前状态已单独保护；本版尚未开放章节重勘。,This is a read-only record; it does not undo the choice. The pre-choice state is separately protected. Chapter replay is not available in this build.
+W8_ROUTE_AFTER_HOME,取舍回顾：文书先行,Papers first: aftermath
+W8_ROUTE_AFTER_DOCK,取舍回顾：人证先行,Witness first: aftermath
+W8_ROUTE_AFTER_HOME_TEXT,你先保住了文书调查机会，船夫因此已受传问，不能亲自引渡。首战是否看见编组意图取决于出发前有没有完成文书校勘；仅作记录，不补发奖励。,You preserved the paper trail while the boatman was questioned and could not guide you. First-round forecasts depended on completing the comparison before departure. This review grants no missed reward.
+W8_ROUTE_AFTER_DOCK_TEXT,你先接触船夫，住所原件同时被收走。首战是否从近处部署取决于出发前有没有用证物争取当场引渡；战后摘记不是原件，也不补发部署优势。,You reached the boatman while the home original was confiscated. Closer deployment depended on securing his assistance before departure. A later extract is not that original and restores no missed deployment benefit.
+W8_CLOCK_PROTOTYPE,日程原型,Routine prototype
+W8_WORLD_AUTOSAVE,确认后会自动保存；若写入失败，行动仍已发生。按F5只重试保存，也可返回标题放弃未保存进度。,Confirmation saves automatically. If writing fails the action has still happened. F5 retries saving only; returning to title discards unsaved progress.
+W8_OBJECTIVE_CHOOSE,下一步：确认先保文书还是先保人证；取消不消耗机会。,Next: choose papers or witness first. Cancelling consumes no opportunity.
+W8_OBJECTIVE_HOME,下一步：回住所检查文书并对照索引。另一处完整机会已过去；可不取额外情报，直接去码头商议救援。,Next: examine the home papers and compare the index. The other full opportunity has passed. You may still go to the docks and start the rescue without extra intel.
+W8_OBJECTIVE_DOCK,下一步：到码头记下船夫的说法，检查铁牌，再决定是否出示。住所原件已被收走；没有额外情报也能出发救人。,Next: record the boatman's claim and inspect the token before presenting evidence. The home original has been confiscated. The rescue remains possible without extra intel.
+W8_OBJECTIVE_AFTERMATH,下一步：在码头整理女囚带回的尸牌与残页，查清此次救人保住了什么。,Next: at the docks examine the grave tag and ledger page brought back by the prisoner. Find what the rescue preserved.
+W8_OBJECTIVE_COMPARE,下一步：读尸牌与残页，对照同一坟号的记载。命卷证据页也能进入墓证校勘。,Next: read the tag and ledger page; compare their entries for the same grave number. The journal's Evidence page also opens this comparison.
+W8_OBJECTIVE_REVIEW,下一步：回到码头对话，确认已核实的事实与尚不能断定的部分，记下下一案方向。,Next: return to the dock dialogue. Separate the verified fact from what remains unproven and record the next lead.
+W8_OBJECTIVE_END,本次内测到此。下一案：去旧义庄找真簿与老妇，核对女囚父亲的遗骨。后续地区未开放；可补查、看命卷并存档。,Internal test ends here. Next case: find the true ledger and gravekeeper at the old mortuary; verify the prisoner's father's remains. That region is not open. Follow up clues; review the journal and save.
+W8_INTRO_ROUTE,你：我会查清我爹的事。找到她之前，暂且同行。\n外头传来封门查籍的吆喝。女囚：住所和码头都在被查，你只能先保住一处完整机会。先看两种行动的影响，再确认。\n救人仍有兜底路线；不必猜遍所有证物，问错也不扣时间。,I will find out what happened to Father. Until we find her we travel together.\nA search is announced outside. The prisoner says: Both the home and ferry are being checked. Preserve one full opportunity first; review the effects before confirming.\nThe rescue has a fallback route. You need not guess every item; wrong evidence costs no time.
+W8_D_JOURNEY_TEXT,女囚：我认得河西旧坟道，没有额外情报也找得到她。取证顺序已经决定，错过的完整机会不会在出发前重开。\n遇追兵时我们留下掩护，让老妇先走。出发后不存战中进度，退出回到出发前，但不撤销此次取舍。只有胜利结算才推进一日程槽。,I know the old grave road; we can find her without extra intel. Our priority is already decided; the missed full opportunity will not reopen before departure.\nWe will cover her withdrawal if pursued. No mid-battle saves. Leaving restores departure but not the earlier choice. Only victory settlement advances one routine slot.
+W8_BATTLE_NO_HOME,没有出发前的文书校勘情报：首轮不显示敌方意图。F仍可看移动范围，敌人属性不提高。错过的原件调查不能在首战前补回；无此情报也能取胜。,No pre-departure paper comparison: first-round forecasts are unavailable. F still shows movement range; enemies are not stronger. The missed original cannot be recovered before this battle. Victory remains possible.
+W8_BATTLE_NO_DOCK,没有争取到船夫当场引渡：两人从旧坟道部署，接敌较远。知道路线不等于有人领路；不提高敌人属性，仍可取胜。,No immediate ferry assistance: both allies deploy on the farther grave road. Knowing the route is not the same as having a guide. Enemy stats are unchanged; victory remains possible.
+W8_BOATMAN_ADMITS_LATE,船夫承认今晨送老妇去了河西，并解释铜钉铁牌的来历。证言和路线已核实；那场救援已经结束，此次补查不改变当时部署，也不会再次推进时段。,The boatman admits taking her west this morning and explains the repaired token. Testimony and route are verified. The rescue has already ended; this follow-up changes no past deployment and spends no extra slot.
+W8_HOME_QUESTION,县印为何比姓名更早？,Why was the seal stamped before the name?
+W8_HOME_NOTES_TEXT,女囚：若人死了才开亡籍，姓名怎会比县印来得晚？\n你翻到父亲批注：方位、列数、牌数、尸况。索引可能不是行走七步，而是在指某一列、某一块牌。两张纸要对着看。,If a death record follows a death then why stamp it before naming the dead?\nFather's margin lists direction / row / marker / body. Seven may refer to a row rather than seven walking paces. Compare the two papers.
+W8_HOME_DOUBT,这能证明父亲无罪吗？,Does this prove Father's innocence?
+W8_HOME_DOUBT_TEXT,还不能。空白县印说明此案不只是一个书吏随手写错；父亲为何参与、替谁改籍，仍要问经手尸体的人。\n你把疑点和事实分开记下：先找到老妇，不把猜测当成翻案。,Not yet. The pre-stamped blank suggests more than one clerk's mistake. It does not explain why Father took part or whose identity he changed.\nYou keep suspicion separate from fact. Find the gravekeeper before calling it a vindication.
+W8_TOKEN_QUESTION,今日验痕，为什么能对应到老妇？,How does today's mark connect to her?
+W8_TOKEN_DETAIL_TEXT,女囚：只看新验痕，最多证明今天有人用过。船夫自己认出了老妇的铜钉补法，这才把痕迹和人连在一起。\n他为何一面认得牌，一面说三个月没见她？若要追问，就把矛盾摆出来；不是拿东西逼他认罪。,A fresh mark alone proves only that someone used it today. The boatman himself recognized her copper-nail repair; that connects the trace to her.\nWhy recognize the token yet deny seeing her for three months? Present the contradiction to ask for an explanation; the item alone proves no crime.
+W8_HOME_SEIZED_TEXT,封条压住了门缝。父亲案上的原件已被差役装走，不会因为重进院子而回来。\n桌脚夹着一片旧抄记。这是救援后可以细查的剩余线索，只保存部分内容，不是官封原件；取走它也不会补回已经错过的当场机会。,An official seal crosses the door. The papers were carried away; re-entering the yard will not restore them.\nAn old note is trapped under a desk leg. It can be retrieved after the rescue. It preserves only part of the trail and is not an official original; taking it will not restore the missed opportunity.
+W8_SUPPLEMENT_HOME,战后补查桌脚旧抄记,After rescue: retrieve the old note
+W8_SUPPLEMENT_HOME_INFO,了解住所还剩什么可补查,What can still be checked at home?
+W8_HOME_FOLLOWUP_GUIDE_TEXT,女囚：住所的原件已经被收走。不过父亲案边也许还有抄记。若想补查，就回住所亲自查看文书处；在码头无法替你取到。旧抄记不是官封原件，也不会补回已经结束的首战准备。,The originals were confiscated. Father may have left a copy near his desk. To follow up return home and inspect the papers yourself; nothing can be retrieved from the docks. A copy is not an official original and cannot restore preparation for a battle already finished.
+W8_SUPPLEMENT_SOURCE_REQUIRED,请到线索原处近距离查看：抄记在住所文书处，补充证言与铁牌要当面向码头船夫取得。,Inspect the actual source nearby: the note is at the home desk; the correction and token must be obtained from the boatman at the docks.
+W8_READ_EXTRACT,重看已取得的抄记,Read the recovered note
+W8_SUPPLEMENT_RECORDED,已收起父亲留下的旧抄记。它不等于官封原件，也不补发已结束救援的情报。,Father's old note recovered. It is not the official original and grants no intel for the rescue already finished.
+EV_HOME_EXTRACT_01_TITLE,父亲留下的办籍抄记,Father's registration note
+EV_HOME_EXTRACT_01_DESC,救援后在住所桌脚找到，笔迹可辨为父亲：先领印纸，再填亡名；缺尸者另记。它没有县印、原件背面的编组图或完整方位简记。能留下办籍疑点，不能冒充被收走的空白亡籍，也不补发已结束救援的战术情报。,Found under the home desk after the rescue; the handwriting is Father's. Take stamped paper first; fill the dead name later; note missing bodies separately. It lacks the county seal and the original's formation sketch and complete location notation. It preserves a question about registration; it is not the confiscated original and restores no past tactical intel.
+W8_BOATMAN_QUESTIONED_TEXT,船夫拉了拉松开的领口：刚才县衙来人，把每个渡客问了两遍。再替你们领路，我这条船就保不住了。\n女囚：你告诉我们旧坟道朝哪边走就够了，我们自己去。\n他指向西岸，收回了递到一半的船篙。路线可以知道，亲自引渡的机会却已经过去。,The county questioned every passenger twice. If I guide you now they will seize my boat.\nThe prisoner says: Point out the old grave road. We will go ourselves.\nHe points west and takes back the pole he almost offered. Directions remain; personal guidance does not.
+W8_SUPPLEMENT_BOATMAN,救援后补问船夫与铁牌,After rescue: follow up the boatman's token
+W8_SUPPLEMENT_BOATMAN_TEXT,船夫：你们把人救出来了，我也不能一直装聋。今晨的确是我送她过河；先前若说三月没渡，那是怕查籍。铜钉铁牌也交给你，验痕还能对上。\n你可以把这次补充证言与旧铁牌一起记下，但现在说实话，不会改写当时没有亲自引渡的事实。,You saved her; I cannot keep pretending. I took her across this morning. A three-month denial was fear of the registry check. Take the repaired token; today's mark still matches.\nRecord this correction and the old token together. Telling the truth now cannot change that I did not guide you then.
+W8_SUPPLEMENT_BOATMAN_RECORD,记下补充证言，接过旧铁牌,Record his correction and take the old token
+W8_SUPPLEMENT_BOATMAN_READ,重看已核实的补充证言,Review the recorded correction
+W8_SUPPLEMENT_OTHER,战后补查另一条线索,Follow up the other lead after rescue
+W8_QUESTIONED_DETAIL,他为何没能亲自引渡？,Why could he not guide us himself?
+W8_AFTER_HOME_TEXT,回到码头，女囚解开老妇临走时塞来的布包。人活着走出了追兵的刀口，包里的东西才有机会被核实。\n你先保全文书，船夫却因此遭了传问。若出发前完成校勘，父亲的编组注记已用于那场救援；没有做完，也不会现在补发。先看看保下的尸牌与残页。,Back at the docks the prisoner opens the bundle the gravekeeper passed to her while withdrawing. A living witness and her records survived the pursuit.\nYou preserved the papers while the boatman was questioned. If compared before departure Father's formation notes helped in the rescue; unfinished work grants no reward now. Examine the saved tag and page.
+W8_AFTER_DOCK_TEXT,女囚把老妇交给她的布包放到岸石上：先问到船夫，才有争取引渡的机会；有没有拿到协助，要看出发前是否揭开了他的隐瞒。\n住所原件已经被收走，但被收走不等于被烧毁。先核对这次保下的尸牌与残页，战后仍可回去找真实留下的抄记。,The prisoner sets down the gravekeeper's bundle. Reaching the boatman first gave you a chance to secure guidance; assistance depended on exposing his concealment before departure.\nThe home original was seized; that does not mean it was burned. Check the saved tag and page. A genuine note can still be sought at home.
+W8_COLLECT_GRAVES,打开布包，记录尸牌与残页,Open the bundle; record the tag and page
+W8_GRAVES_COLLECTED,取得尸牌与埋尸簿残页。女囚是转交者，原刻与书写者另有其人；两件都还只是待核对线索。,Grave tag and burial page received through the prisoner. She is their carrier rather than their maker. Both remain clues pending comparison.
+EV_GRAVE_TAG_03_TITLE,第七列三号尸牌,Row seven; third grave tag
+EV_GRAVE_TAG_03_DESC,女囚在撤离时从老妇手里接过。正面新刻第七列三号、女、病亡；背面磨浅的旧字却记无名男尸。坟号相同而姓名与尸况被改过。单看木牌还不能判断是正常重用、错记，还是替人造了一次死亡。,Passed from the gravekeeper through the prisoner during withdrawal. Its fresh front reads row seven / third grave / woman / disease. Faint older carving on the reverse records an unnamed man's body. The number stayed while identity and body changed. The tag alone does not distinguish reuse from error or a fabricated death.
+EV_BURIAL_PAGE_01_TITLE,私人埋尸簿残页,Page from a private burial ledger
+EV_BURIAL_PAGE_01_DESC,老妇交给女囚保全的旧页，原藏三号空坟暗格。正文：第七列三号，无骨；真簿移旧义庄。页边另记：旧牌换字，不添新骨。字迹与墨色尚能对照，是否对应同一号尸牌仍须校勘。,An old page entrusted to the prisoner by the gravekeeper; formerly hidden in the third empty grave. Row seven; third grave; no bones. True ledger moved to the old mortuary. A margin adds: old tag renamed; no new bones. Compare the number with the saved tag before drawing a conclusion.
+W8_GRAVES_FOUND_TEXT,你将两件东西并排放好。一件是能摸到旧刻痕的木牌，一件是写着无骨与真簿去向的旧页。\n女囚：铁牌只能证明她渡过河。现在要问的是——这块尸牌记下的死亡，真有一具对应的尸体吗？,You place the tag beside the page. One retains older carving; the other records no bones and the true ledger's destination.\nThe ferry token proves a crossing. This question is different: did the death on this grave tag have a corresponding body?
+W8_READ_TAG,翻看尸牌正反两面,Read both sides of the grave tag
+W8_READ_PAGE,细看残页正文与页边记号,Read the ledger page and its margin
+W8_GRAVES_COMPARE_TITLE,墓证校勘：姓名与尸体,Burial comparison: name and body
+W8_GRAVES_COMPARE_PROMPT,要核实的是同一个坟号有没有对应尸体。先读材料，再选两件互相印证或冲突的记录；索引给方向，渡船铁牌给行程，不必穷举。不正确的对照不扣时。,Check whether the same grave number has a corresponding body. Read first; choose two records that corroborate or contradict each other. The index gives direction; the ferry token gives travel. No exhaustive guessing is needed. Wrong pairs cost no time.
+W8_GRAVES_COMPARE_WRONG,这组材料还不能对应同一坟号的姓名与入葬。先看哪件记录墓号，哪件说明有没有添新骨；不扣时，也不把猜测登记为事实。,This pair does not link the same grave number to a name and burial. Look for a record of the marker and one of whether new bones were added. No time is spent and no guess becomes a fact.
+W8_GRAVES_COMPARED,校勘成立：第七列三号被改记为病亡女子，却没有添入对应尸骨。这一笔亡籍与真实入葬不符；不是证明所有亡籍都假。真簿去向：旧义庄。,Comparison verified: row seven's third tag was renamed for a woman without a corresponding new burial. This entry does not match the bodies; it does not prove every death record false. True ledger: old mortuary.
+W8_READ_CONCLUSION,查看已经核实的墓证结论,Review the verified burial finding
+W8_GRAVES_MATCHED_TEXT,牌号、改字与无骨记载对上了。这不是女囚凭空诬告，也不只是一张纸写错：至少有一次死亡登记，没有对应的新尸体。\n要替父亲翻案，还缺谁下令、为何改籍的证词；要取回她父亲遗骨，还得找真簿。老妇把真簿转去了旧义庄，她为何宁愿冒险带走？,Marker number and renaming match the no-bones entry. There was at least one registered death without a corresponding new body; not merely an unsupported accusation or a clerical typo.\nVindicating Father still requires who ordered it and why. Recovering her father's remains requires the true ledger. Why did the gravekeeper risk taking it to the old mortuary?
+W8_FACT_LIMIT_QUESTION,这能断言名册上的人都还活着吗？,Can we say everyone in the register is alive?
+W8_FACT_LIMIT_TEXT,女囚：不能。真死、假死、换名，可能混在一本册里。我想拿回父亲的骨，不是把所有坟都说成假的。\n你：也不能凭这两件东西就说我爹无罪。先把能证明的这一笔记实，再追问他为何经手。,No. Real deaths and false deaths and changed names may share one ledger. I want my father's bones back; I am not claiming every grave is false.\nNor do these two items alone prove Father innocent. Record what they establish; then ask why he handled it.
+W8_COMPLETE_REVIEW,记录本段结论与旧义庄线索,Record this finding and the mortuary lead
+W8_REVIEW_RECORDED,本段核对完成；下一案指向旧义庄真簿。只结算本次调查，不等于已翻案、取骨或选择最终结局。,This investigation stage is complete; the true ledger at the old mortuary is next. This settles only the current inquiry; no vindication or recovery of remains or final ending is granted.
+W8_REVIEW_RECORDS,重看本段尸牌与残页,Review this stage's tag and ledger page
+W8_END_TEXT,你把结论写进命卷：先保哪条线索改变了调查与救援准备，但没有让真相只剩一种解释。\n女囚：去旧义庄。我要找回父亲的骨；你要问清你父亲为何改籍。先把活人和真簿找齐。\n本次内测到此。后续地区、最终裁定与章节重勘尚未开放；可补查、查看命卷并存档。,You record the finding: your priority changed the investigation and rescue preparation but did not reduce the truth to one explanation.\nThe prisoner says: The old mortuary next. I need my father's remains; you need to know why your father changed identities. Find the living witness and true ledger.\nThis internal test ends here. Later regions and final judgment and chapter replay are not available. Follow up clues; review the journal and save.

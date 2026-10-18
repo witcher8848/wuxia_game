@@ -52,6 +52,9 @@ func _run() -> void:
 		TranslationServer.set_locale(locale)
 		for lead: String in ["home", "dock"]:
 			main = load("res://game/presentation/main.tscn").instantiate()
+			# Preserve the complete legacy two-lead teaching regression explicitly;
+			# Week 8's production mutual-exclusion flow has its own keyboard test.
+			main.week8_enabled = false
 			root.add_child(main)
 			await _frames()
 			await _tap(KEY_E) # Actual title button, not a fixture entry.

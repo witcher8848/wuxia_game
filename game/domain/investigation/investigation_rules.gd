@@ -47,6 +47,9 @@ func public_step_allowed(step_id: String) -> bool:
 	for effect: Dictionary in _steps[step_id]["effects"]:
 		if effect["op"] == "transfer" and effect["from"] == "PLAYER" and effect["to"] != "PLAYER":
 			return false
+		if effect["op"] == "set_fact" and effect["id"] in ["FACT_GRAVES_SAFE","FACT_W8_FERRY_ASSISTANCE"]: return false
+		if effect["op"] == "set_quest" and effect["id"] == "QUEST_RESCUE_GRAVEKEEPER": return false
+		if effect["op"] == "set_quest" and effect["id"] == "QUEST_FIND_GRAVEKEEPER" and effect["value"] == "changed": return false
 	return true
 
 

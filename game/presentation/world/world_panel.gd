@@ -60,7 +60,7 @@ func refresh() -> void:
 		var summary: Dictionary = preview["summary"]
 		body.text = tr("WORLD_CONFIRM_TIME") % [_clock(summary["before"]), _clock(summary["after"])]
 		body.text += "\n\n" + tr("WORLD_CONFIRM_HELP" if summary["action_id"] == "WORLD_HELP_NPC" else "WORLD_CONFIRM_WAIT")
-		body.text += "\n\n" + tr("WORLD_NO_AUTOSAVE")
+		body.text += "\n\n" + tr("W8_WORLD_AUTOSAVE" if GameSession.state.world_flags.get("FACT_W8_ACTIVE", false) else "WORLD_NO_AUTOSAVE")
 		option_ids.assign(["cancel", "confirm"])
 	else:
 		heading.text = tr("WORLD_TITLE") + " · " + _clock(ContentDB.world_time(GameSession.state))
@@ -125,6 +125,8 @@ func _choose() -> void:
 		confirmation = false
 		cursor = 0
 		feedback.text = tr("WORLD_APPLIED" if result["error"] == OK else "WORLD_STALE")
+		if result["error"] == OK and result.has("saved"):
+			feedback.text = tr("UI_SAVE_SLOT_OK") % (tr("UI_AUTO_SLOT") % int(str(result.get("slot", "auto_01")).trim_prefix("auto_"))) if result["saved"] else tr("W8_PROGRESS_SAVE_FAILED")
 	else:
 		var result: Dictionary = GameSession.preview_world_action(action, npc_id if action == "help" else "")
 		if result["error"] == OK:

@@ -9,6 +9,9 @@ const Dialogue = preload("res://game/domain/investigation/dialogue_catalog.gd")
 const Inquiry = preload("res://game/domain/investigation/inquiry_rules.gd")
 const StoryEncounter = preload("res://game/domain/investigation/story_encounter_rules.gd")
 const World = preload("res://game/domain/world/world_rules.gd")
+const BranchChoice = preload("res://game/domain/investigation/branch_choice_rules.gd")
+var _branch_choice: RefCounted = BranchChoice.new()
+var _generation := 0
 var _investigation: RefCounted = Investigation.new()
 var _dialogue: RefCounted = Dialogue.new()
 var _inquiry: RefCounted = Inquiry.new()
@@ -184,6 +187,7 @@ func load_definitions(data: Dictionary, exploration_data: Variant = null, invest
 	start_scene_id = data["start_scene_id"]
 	start_spawn_id = data["start_spawn_id"]
 	last_error = ""
+	_generation += 1
 	return OK
 
 
@@ -196,7 +200,84 @@ func get_investigation_definitions() -> Dictionary:
 
 
 func prepare_investigation_step(state: GameState, step_id: String) -> Dictionary:
+	if branch_command_requires_confirmation(state,step_id):
+		return {"error":ERR_UNAVAILABLE,"state":null,"message":"Confirm the opportunity before proceeding.","feedback_key":"W8_CHOICE_NEEDED","activity":"@branch"}
+	if not _branch_step_allowed(state, step_id):
+		return {"error":ERR_UNAVAILABLE,"state":null,"message":"The full opportunity on this route is no longer available.","feedback_key":"INV_REQUIREMENTS"}
 	return _investigation.prepare_step(state, step_id)
+
+
+func content_generation() -> int:
+	return _generation
+
+
+func prepare_branch_choice(state: GameState, choice: String) -> Dictionary:
+	if not validate_persistent_state(state).is_empty(): return {"error":ERR_INVALID_DATA,"state":null,"summary":{}}
+	return _branch_choice.prepare(state, choice)
+
+
+func validate_branch_choice_state(state: GameState) -> String:
+	return _branch_choice.validate_state(state)
+
+
+func branch_required(state: GameState) -> bool:
+	return _branch_choice.required(state)
+
+
+func branch_command_requires_confirmation(state: GameState, step_id: String) -> bool:
+	if not branch_required(state): return false
+	if step_id == "STEP_PREPARE_RESCUE": return true
+	for step: Dictionary in _investigation.definitions().get("steps",[]):
+		if step["id"] != step_id: continue
+		for effect: Dictionary in step["effects"]:
+			if effect["op"] == "discover" and effect["id"] in ["EV_BLANK_DEATH_01","CL_BOATMAN_01","EV_FERRY_TOKEN_01"]: return true
+			if effect["op"] == "set_fact" and effect["id"] in ["FACT_YAMEN_FORMATION","FACT_FERRY_ROUTE"]: return true
+	return false
+
+
+func _branch_step_allowed(state: GameState, step_id: String) -> bool:
+	if not _branch_choice.allows_step(state, step_id): return false
+	var receipt: Dictionary = _branch_choice.record(state)
+	if receipt.is_empty(): return true
+	if state.world_flags.get("FACT_W8_ACTIVE",false):
+		if step_id == "STEP_W8_SUPPLEMENT" and receipt["choice"] != "dock": return false
+		if step_id == "STEP_W8_SUPPLEMENT_BOATMAN" and receipt["choice"] != "home": return false
+		# Evidence must come from its actual source, not a remote dialogue link
+		# or renamed command. Inspection alone is not proof of current proximity.
+		for step: Dictionary in _investigation.definitions().get("steps",[]):
+			if step["id"] != step_id: continue
+			for effect: Dictionary in step["effects"]:
+				if effect["op"] != "discover": continue
+				if effect["id"] == "EV_HOME_EXTRACT_01" and not _at_supplement_source(state,"DOC_HOME_NOTE"): return false
+				if receipt["choice"] == "home" and state.world_flags.get("FACT_GRAVES_SAFE",false) and effect["id"] in ["CL_BOATMAN_01","EV_FERRY_TOKEN_01"] and not _at_supplement_source(state,"NPC_DOCK_WORKER"): return false
+	if state.world_flags.get("FACT_W8_ACTIVE",false) and state.world_flags.get("FACT_GRAVES_SAFE",false):
+		# A later excerpt is not the confiscated original. Even aliases may not
+		# materialize it out of nowhere; actual future custody recovery is owned.
+		if receipt["choice"] == "dock":
+			for step: Dictionary in _investigation.definitions().get("steps",[]):
+				if step["id"] != step_id: continue
+				for effect: Dictionary in step["effects"]:
+					if effect["op"] == "discover" and effect["id"] == "EV_BLANK_DEATH_01" and not state.evidence_states.has("EV_BLANK_DEATH_01"): return false
+		return true
+	# Names alone are not authority: authoring a renamed or multi-effect command
+	# must not reacquire the opposite complete source. Already-known evidence is
+	# different: deriving the same true conclusion remains legitimate.
+	var unavailable: Array = ["CL_BOATMAN_01","EV_FERRY_TOKEN_01"] if receipt["choice"] == "home" else ["EV_BLANK_DEATH_01"]
+	for step: Dictionary in _investigation.definitions().get("steps", []):
+		if step["id"] != step_id: continue
+		for effect: Dictionary in step["effects"]:
+			if effect["op"] == "discover" and effect["id"] in unavailable and not state.evidence_states.has(effect["id"]):
+				return false
+			if effect["op"] == "set_fact":
+				if effect["id"] == "FACT_FERRY_ROUTE" and receipt["choice"] == "home" and (not state.evidence_states.has("CL_BOATMAN_01") or not state.evidence_states.has("EV_FERRY_TOKEN_01")):
+					return false
+				if effect["id"] == "FACT_YAMEN_FORMATION" and receipt["choice"] == "dock" and not state.evidence_states.has("EV_BLANK_DEATH_01"):
+					return false
+	return true
+
+
+func _at_supplement_source(state: GameState, target: String) -> bool:
+	return state.world_flags.get("INSPECTED_"+target,false) == true and can_reach_interaction(state,target)
 
 
 func public_investigation_step_allowed(step_id: String) -> bool:
@@ -226,11 +307,29 @@ func get_dialogue_definitions() -> Dictionary:
 
 
 func dialogue_entry(target: String, state: GameState) -> String:
+	if state.world_flags.get("FACT_W8_ACTIVE",false):
+		var receipt: Dictionary = _branch_choice.record(state)
+		if not receipt.is_empty():
+			if target == "DOC_HOME_NOTE" and receipt["choice"] == "dock": return "D_W8_HOME_SEIZED"
+			if target == "NPC_DOCK_WORKER":
+				if state.world_flags.get("FACT_W8_REVIEWED",false): return "D_W8_END"
+				if state.world_flags.get("FACT_BURIAL_MISMATCH",false): return "D_W8_GRAVES_MATCHED"
+				if state.evidence_states.has("EV_GRAVE_TAG_03"): return "D_W8_GRAVES_FOUND"
+				if state.world_flags.get("FACT_GRAVES_SAFE",false): return "D_W8_AFTER_HOME" if receipt["choice"] == "home" else "D_W8_AFTER_DOCK"
+				if receipt["choice"] == "home": return "D_W8_BOATMAN_QUESTIONED"
 	return _dialogue.entry(target, state)
 
 
 func dialogue_view(identifier: String, state: GameState) -> Dictionary:
-	return _dialogue.node_view(identifier, state)
+	var view: Dictionary = _dialogue.node_view(identifier, state)
+	for option: Dictionary in view.get("choices",[]):
+		if identifier == "D_W8_END" and option["id"] == "supplement":
+			var receipt: Dictionary = _branch_choice.record(state)
+			if receipt.get("choice") == "dock": option["next"] = "D_W8_HOME_FOLLOWUP_GUIDE"
+		if not option["command"].is_empty() and not _branch_step_allowed(state,option["command"]):
+			option["enabled"] = false
+			option["reason"] = "W8_SUPPLEMENT_SOURCE_REQUIRED" if option["command"] in ["STEP_W8_SUPPLEMENT","STEP_W8_SUPPLEMENT_BOATMAN"] else "W8_OPPORTUNITY_CLOSED"
+	return view
 
 
 func inquiry_view(identifier: String, state: GameState, first: String = "") -> Dictionary:
@@ -238,10 +337,22 @@ func inquiry_view(identifier: String, state: GameState, first: String = "") -> D
 
 
 func prepare_inquiry(state: GameState, identifier: String, selected: Array) -> Dictionary:
-	return _inquiry.prepare(state, identifier, selected)
+	# Inquiry resolves through its own rules; protect this second command entry
+	# as well as the ordinary investigation entry when a new choice exists.
+	for entry: Dictionary in _investigation.definitions().get("inquiries", []):
+		if entry["id"] == identifier and not _branch_step_allowed(state, entry["step_id"]):
+			return {"error":ERR_UNAVAILABLE,"state":null,"feedback_key":"INV_REQUIREMENTS"}
+	var proposal: Dictionary = _inquiry.prepare(state, identifier, selected)
+	if proposal.get("error") == OK and identifier == "INQ_BOATMAN" and state.world_flags.get("FACT_W8_ACTIVE",false):
+		var receipt: Dictionary = _branch_choice.record(state)
+		if not receipt.is_empty() and receipt["choice"] == "dock" and not state.world_flags.get("FACT_GRAVES_SAFE",false):
+			proposal["state"].world_flags["FACT_W8_FERRY_ASSISTANCE"] = true
+		elif state.world_flags.get("FACT_GRAVES_SAFE",false): proposal["feedback_key"] = "W8_BOATMAN_ADMITS_LATE"
+	return proposal
 
 
 func prepare_story_encounter(state: GameState) -> Dictionary:
+	if branch_required(state): return {"error":ERR_UNAVAILABLE,"activity":"@branch"}
 	return _story_encounter.prepare(state)
 
 
@@ -255,6 +366,8 @@ func validate_investigation_state(state: GameState) -> String:
 
 func validate_persistent_state(state: GameState) -> String:
 	var error: String = _investigation.validate_state(state)
+	if not error.is_empty(): return error
+	error = validate_branch_choice_state(state)
 	if not error.is_empty(): return error
 	var martial: Dictionary = martial_configuration(state)
 	if not martial.get("error","").is_empty(): return martial["error"]
@@ -319,18 +432,26 @@ func prepare_world_action(state: GameState, kind: String, npc_id: String = "") -
 func can_reach_world_npc(state: GameState, npc_id: String) -> bool:
 	var result := world_npc(state, npc_id)
 	if result.get("error", ERR_INVALID_DATA) != OK or result["npc"]["scene_id"] != state.scene_id: return false
-	var start := Vector2(state.player_state["position"]["x"], state.player_state["position"]["y"])
-	var finish := _point(result["npc"]["position"])
-	if start.distance_to(finish) > 58.0: return false
+	return can_reach_interaction(state,npc_id)
+
+
+func can_reach_interaction(state: GameState, interaction_id: String) -> bool:
 	var view := exploration_view(state.scene_id, state)
 	if not view["error"].is_empty(): return false
+	var source: Dictionary = {}
+	for target: Dictionary in view["region"]["interactions"]:
+		if target["id"] == interaction_id: source = target; break
+	if source.is_empty() or source["kind"] == "exit": return false
+	var start := Vector2(state.player_state["position"]["x"], state.player_state["position"]["y"])
+	var finish := _point(source["position"])
+	if start.distance_to(finish) > 58.0: return false
 	if not _safe_player_position(view["region"], start): return false
 	# Domain-side geometry check: a UI target ID cannot help through a wall.
 	for obstacle: Dictionary in view["region"]["obstacles"]:
 		var rect: Array = obstacle["rect"]
 		if _segment_hits_rect(start, finish, Rect2(rect[0],rect[1],rect[2],rect[3])): return false
 	for target: Dictionary in view["region"]["interactions"]:
-		if target["kind"] == "exit" or target["id"] == npc_id: continue
+		if target["kind"] == "exit" or target["id"] == interaction_id: continue
 		if _segment_hits_rect(start, finish, Rect2(_point(target["position"])-PLAYER_FEET/2, PLAYER_FEET)): return false
 	return true
 

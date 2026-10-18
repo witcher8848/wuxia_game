@@ -4,6 +4,7 @@ signal settlement_requested
 signal retry_requested
 var reveal_intent := false
 var ferry_deployment := false
+var week8_active := false
 var briefing: Panel
 var briefing_body: RichTextLabel
 
@@ -44,8 +45,8 @@ func _process(delta: float) -> void:
 func _open_briefing() -> void:
 	briefing_body.text = "\n\n".join([
 		tr("BATTLE_STORY_CAUSE"),
-		tr("BATTLE_INTEL_HOME" if reveal_intent else "BATTLE_NO_HOME"),
-		tr("BATTLE_INTEL_DOCK" if ferry_deployment else "BATTLE_NO_DOCK"),
+		tr("BATTLE_INTEL_HOME" if reveal_intent else "W8_BATTLE_NO_HOME" if week8_active else "BATTLE_NO_HOME"),
+		tr("BATTLE_INTEL_DOCK" if ferry_deployment else "W8_BATTLE_NO_DOCK" if week8_active else "BATTLE_NO_DOCK"),
 		tr("BATTLE_STORY_LIMITS"),
 		"战斗规则（PgDn）\n" + Text.status_help(battle) + "\n" + Text.resource_help(battle, "CHAR_PROTAGONIST")])
 	briefing_body.text += "\nT红纹：现站位招式射程（不判断内力/冷却），非锁定计划；移动后重算。"

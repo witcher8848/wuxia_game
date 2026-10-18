@@ -4,9 +4,12 @@
     {"id":"EV_INDEX_01","title_key":"EV_INDEX_01_TITLE","description_key":"EV_INDEX_01_DESC","source_id":"CHAR_PRISONER","kind":"document","initial_holder":"CHAR_PRISONER"},
     {"id":"EV_BLANK_DEATH_01","title_key":"EV_BLANK_DEATH_01_TITLE","description_key":"EV_BLANK_DEATH_01_DESC","source_id":"CHAR_FATHER","kind":"document","initial_holder":"PLAYER"},
     {"id":"EV_FERRY_TOKEN_01","title_key":"EV_FERRY_TOKEN_01_TITLE","description_key":"EV_FERRY_TOKEN_01_DESC","source_id":"CHAR_BOATMAN","kind":"object","initial_holder":"PLAYER"},
-    {"id":"CL_BOATMAN_01","title_key":"CL_BOATMAN_01_TITLE","description_key":"CL_BOATMAN_01_DESC","source_id":"CHAR_BOATMAN","kind":"testimony","initial_holder":"PLAYER"}
+    {"id":"CL_BOATMAN_01","title_key":"CL_BOATMAN_01_TITLE","description_key":"CL_BOATMAN_01_DESC","source_id":"CHAR_BOATMAN","kind":"testimony","initial_holder":"PLAYER"},
+    {"id":"EV_HOME_EXTRACT_01","title_key":"EV_HOME_EXTRACT_01_TITLE","description_key":"EV_HOME_EXTRACT_01_DESC","source_id":"CHAR_FATHER","kind":"document","initial_holder":"PLAYER"},
+    {"id":"EV_GRAVE_TAG_03","title_key":"EV_GRAVE_TAG_03_TITLE","description_key":"EV_GRAVE_TAG_03_DESC","source_id":"CHAR_PRISONER","kind":"object","initial_holder":"PLAYER"},
+    {"id":"EV_BURIAL_PAGE_01","title_key":"EV_BURIAL_PAGE_01_TITLE","description_key":"EV_BURIAL_PAGE_01_DESC","source_id":"CHAR_PRISONER","kind":"document","initial_holder":"PLAYER"}
   ],
-  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE", "FACT_GRAVES_SAFE", "FACT_FIRST_HOME", "FACT_FIRST_DOCK"],
+  "facts": ["FACT_WEST_GRAVES", "FACT_YAMEN_FORMATION", "FACT_FERRY_ROUTE", "FACT_GRAVES_SAFE", "FACT_FIRST_HOME", "FACT_FIRST_DOCK", "FACT_W8_ACTIVE", "FACT_W8_FERRY_ASSISTANCE", "FACT_BURIAL_MISMATCH", "FACT_W8_REVIEWED"],
   "quests": [
     {"id":"QUEST_FIND_GRAVEKEEPER","title_key":"QUEST_FIND_GRAVEKEEPER_TITLE"},
     {"id":"QUEST_RESCUE_GRAVEKEEPER","title_key":"QUEST_RESCUE_GRAVEKEEPER_TITLE"},
@@ -62,6 +65,51 @@
       {"op":"set_quest","id":"QUEST_TRACE_LEDGER","value":"available","reason_key":"","next_quest":""},
       {"op":"set_fact","id":"FACT_GRAVES_SAFE"}
     ]},
+    {"id":"STEP_W8_COLLECT_GRAVES","feedback_key":"W8_GRAVES_COLLECTED","requires":[
+      {"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},
+      {"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true},
+      {"op":"quest_is","id":"QUEST_TRACE_LEDGER","value":"available"}
+    ],"effects":[
+      {"op":"discover","id":"EV_GRAVE_TAG_03"},
+      {"op":"discover","id":"EV_BURIAL_PAGE_01"},
+      {"op":"set_quest","id":"QUEST_TRACE_LEDGER","value":"active","reason_key":"","next_quest":""}
+    ]},
+    {"id":"STEP_W8_COMPARE_GRAVES","feedback_key":"W8_GRAVES_COMPARED","requires":[
+      {"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},
+      {"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true},
+      {"op":"evidence_at_least","id":"EV_GRAVE_TAG_03","value":"clue"},
+      {"op":"evidence_at_least","id":"EV_BURIAL_PAGE_01","value":"clue"},
+      {"op":"quest_is","id":"QUEST_TRACE_LEDGER","value":"active"}
+    ],"effects":[
+      {"op":"knowledge","id":"EV_GRAVE_TAG_03","value":"fact"},
+      {"op":"knowledge","id":"EV_BURIAL_PAGE_01","value":"fact"},
+      {"op":"set_fact","id":"FACT_BURIAL_MISMATCH"}
+    ]},
+    {"id":"STEP_W8_REVIEW","feedback_key":"W8_REVIEW_RECORDED","requires":[
+      {"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},
+      {"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true},
+      {"op":"fact_is","id":"FACT_BURIAL_MISMATCH","value":true},
+      {"op":"quest_is","id":"QUEST_TRACE_LEDGER","value":"active"}
+    ],"effects":[
+      {"op":"set_quest","id":"QUEST_TRACE_LEDGER","value":"resolved","reason_key":"","next_quest":""},
+      {"op":"set_fact","id":"FACT_W8_REVIEWED"}
+    ]},
+    {"id":"STEP_W8_SUPPLEMENT","feedback_key":"W8_SUPPLEMENT_RECORDED","requires":[
+      {"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},
+      {"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}
+    ],"effects":[
+      {"op":"discover","id":"EV_HOME_EXTRACT_01"}
+    ]},
+    {"id":"STEP_W8_SUPPLEMENT_BOATMAN","feedback_key":"W8_BOATMAN_ADMITS_LATE","requires":[
+      {"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},
+      {"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}
+    ],"effects":[
+      {"op":"discover","id":"CL_BOATMAN_01"},
+      {"op":"discover","id":"EV_FERRY_TOKEN_01"},
+      {"op":"knowledge","id":"CL_BOATMAN_01","value":"doubt"},
+      {"op":"knowledge","id":"EV_FERRY_TOKEN_01","value":"fact"},
+      {"op":"set_fact","id":"FACT_FERRY_ROUTE"}
+    ]},
     {"id":"STEP_HAND_OVER_BLANK","feedback_key":"INV_ORIGINAL_TRANSFERRED","requires":[
       {"op":"holder_is","id":"EV_BLANK_DEATH_01","value":"PLAYER"},
       {"op":"fact_is","id":"FACT_WEST_GRAVES","value":true}
@@ -69,6 +117,7 @@
   ],
   "inquiries": [
     {"id":"INQ_BOATMAN","kind":"challenge","title_key":"INV_CHALLENGE_TITLE","prompt_key":"INV_CHALLENGE_PROMPT","wrong_key":"INV_CHALLENGE_WRONG","claim_id":"CL_BOATMAN_01","proof_id":"EV_FERRY_TOKEN_01","candidates":["EV_INDEX_01","CL_BOATMAN_01","EV_FERRY_TOKEN_01","EV_BLANK_DEATH_01"],"step_id":"STEP_CHALLENGE_BOATMAN"},
-    {"id":"INQ_INDEX","kind":"compare","title_key":"INV_COMPARE_TITLE","prompt_key":"INV_COMPARE_PROMPT","wrong_key":"INV_COMPARE_WRONG","pair":["EV_INDEX_01","EV_BLANK_DEATH_01"],"candidates":["EV_INDEX_01","EV_BLANK_DEATH_01","EV_FERRY_TOKEN_01"],"step_id":"STEP_COMPARE_INDEX_BLANK"}
+    {"id":"INQ_INDEX","kind":"compare","title_key":"INV_COMPARE_TITLE","prompt_key":"INV_COMPARE_PROMPT","wrong_key":"INV_COMPARE_WRONG","pair":["EV_INDEX_01","EV_BLANK_DEATH_01"],"candidates":["EV_INDEX_01","EV_BLANK_DEATH_01","EV_FERRY_TOKEN_01"],"step_id":"STEP_COMPARE_INDEX_BLANK"},
+    {"id":"INQ_W8_GRAVES","kind":"compare","title_key":"W8_GRAVES_COMPARE_TITLE","prompt_key":"W8_GRAVES_COMPARE_PROMPT","wrong_key":"W8_GRAVES_COMPARE_WRONG","pair":["EV_GRAVE_TAG_03","EV_BURIAL_PAGE_01"],"candidates":["EV_GRAVE_TAG_03","EV_BURIAL_PAGE_01","EV_INDEX_01","EV_FERRY_TOKEN_01"],"step_id":"STEP_W8_COMPARE_GRAVES"}
   ]
 }

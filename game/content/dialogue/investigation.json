@@ -2,11 +2,22 @@
   "entries": {
     "DOC_STREET_NOTICE": [{"node":"D_NOTICE","requires":[]}],
     "DOC_HOME_NOTE": [
+      {"node":"D_W8_HOME_SEIZED","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"evidence_at_least","id":"EV_HOME_EXTRACT_01","value":"clue"}]},
+      {"node":"D_W8_END","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_W8_REVIEWED","value":true}]},
+      {"node":"D_W8_GRAVES_MATCHED","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_BURIAL_MISMATCH","value":true}]},
+      {"node":"D_W8_GRAVES_FOUND","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"evidence_at_least","id":"EV_GRAVE_TAG_03","value":"clue"}]},
+      {"node":"D_W8_AFTER_HOME","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
+      {"node":"D_W8_AFTER_DOCK","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
       {"node":"D_START","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"locked"}]},
       {"node":"D_ACCEPT","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"available"}]},
       {"node":"D_HOME","requires":[]}
     ],
     "NPC_DOCK_WORKER": [
+      {"node":"D_W8_END","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_W8_REVIEWED","value":true}]},
+      {"node":"D_W8_GRAVES_MATCHED","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_BURIAL_MISMATCH","value":true}]},
+      {"node":"D_W8_GRAVES_FOUND","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"evidence_at_least","id":"EV_GRAVE_TAG_03","value":"clue"}]},
+      {"node":"D_W8_AFTER_HOME","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
+      {"node":"D_W8_AFTER_DOCK","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true},{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
       {"node":"D_AFTER_GRAVES","requires":[{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
       {"node":"D_DOCK_ADMITS","requires":[{"op":"fact_is","id":"FACT_FERRY_ROUTE","value":true}]},
       {"node":"D_START","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"locked"}]},
@@ -42,6 +53,7 @@
     {"id":"D_BLANK","speaker_key":"INV_SELF","text_key":"EV_BLANK_DEATH_01_DESC","choices":[
       {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
       {"id":"compare","text_key":"INV_COMPARE_TITLE","next":"@compare","command":"","requires":[]},
+      {"id":"meaning","text_key":"W8_HOME_QUESTION","next":"D_W8_HOME_NOTES","command":"","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true}]},
       {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
     ]},
     {"id":"D_DOCK","speaker_key":"INV_BOATMAN","text_key":"D_DOCK_TEXT","choices":[
@@ -73,6 +85,93 @@
     {"id":"D_TOKEN","speaker_key":"INV_SELF","text_key":"EV_FERRY_TOKEN_01_DESC","choices":[
       {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
       {"id":"challenge","text_key":"INV_CHALLENGE_TITLE","next":"@challenge","command":"","requires":[{"op":"evidence_at_least","id":"CL_BOATMAN_01","value":"clue"}]},
+      {"id":"meaning","text_key":"W8_TOKEN_QUESTION","next":"D_W8_TOKEN_DETAIL","command":"","requires":[{"op":"fact_is","id":"FACT_W8_ACTIVE","value":true}]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_HOME_NOTES","speaker_key":"INV_PRISONER","text_key":"W8_HOME_NOTES_TEXT","choices":[
+      {"id":"compare","text_key":"INV_COMPARE_TITLE","next":"@compare","command":"","requires":[]},
+      {"id":"doubt","text_key":"W8_HOME_DOUBT","next":"D_W8_HOME_DOUBT","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"D_BLANK","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_HOME_DOUBT","speaker_key":"INV_SELF","text_key":"W8_HOME_DOUBT_TEXT","choices":[
+      {"id":"compare","text_key":"INV_COMPARE_TITLE","next":"@compare","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"D_BLANK","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_TOKEN_DETAIL","speaker_key":"INV_PRISONER","text_key":"W8_TOKEN_DETAIL_TEXT","choices":[
+      {"id":"challenge","text_key":"INV_CHALLENGE_TITLE","next":"@challenge","command":"","requires":[{"op":"evidence_at_least","id":"CL_BOATMAN_01","value":"clue"}]},
+      {"id":"back","text_key":"INV_BACK","next":"D_TOKEN","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_HOME_SEIZED","speaker_key":"INV_SELF","text_key":"W8_HOME_SEIZED_TEXT","choices":[
+      {"id":"supplement","text_key":"W8_SUPPLEMENT_HOME","next":"D_W8_HOME_EXTRACT","command":"STEP_W8_SUPPLEMENT","requires":[{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
+      {"id":"read","text_key":"W8_READ_EXTRACT","next":"D_W8_HOME_EXTRACT","command":"","requires":[{"op":"evidence_at_least","id":"EV_HOME_EXTRACT_01","value":"clue"}]},
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_HOME_FOLLOWUP_GUIDE","speaker_key":"INV_PRISONER","text_key":"W8_HOME_FOLLOWUP_GUIDE_TEXT","choices":[
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_HOME_EXTRACT","speaker_key":"INV_SELF","text_key":"EV_HOME_EXTRACT_01_DESC","choices":[
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_BOATMAN_QUESTIONED","speaker_key":"INV_BOATMAN","text_key":"W8_BOATMAN_QUESTIONED_TEXT","choices":[
+      {"id":"journey","text_key":"D_JOURNEY","next":"D_JOURNEY","command":"","requires":[{"op":"quest_is","id":"QUEST_FIND_GRAVEKEEPER","value":"active"}]},
+      {"id":"supplement","text_key":"W8_SUPPLEMENT_BOATMAN","next":"D_W8_SUPPLEMENT_HOME","command":"","requires":[{"op":"fact_is","id":"FACT_GRAVES_SAFE","value":true}]},
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_AFTER_HOME","speaker_key":"INV_PRISONER","text_key":"W8_AFTER_HOME_TEXT","choices":[
+      {"id":"collect","text_key":"W8_COLLECT_GRAVES","next":"D_W8_GRAVES_FOUND","command":"STEP_W8_COLLECT_GRAVES","requires":[]},
+      {"id":"compare","text_key":"W8_GRAVES_COMPARE_TITLE","next":"@graves_compare","command":"","requires":[{"op":"evidence_at_least","id":"EV_GRAVE_TAG_03","value":"clue"}]},
+      {"id":"conclusion","text_key":"W8_READ_CONCLUSION","next":"D_W8_GRAVES_MATCHED","command":"","requires":[{"op":"fact_is","id":"FACT_BURIAL_MISMATCH","value":true}]},
+      {"id":"supplement","text_key":"W8_SUPPLEMENT_BOATMAN","next":"D_W8_SUPPLEMENT_HOME","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_AFTER_DOCK","speaker_key":"INV_PRISONER","text_key":"W8_AFTER_DOCK_TEXT","choices":[
+      {"id":"collect","text_key":"W8_COLLECT_GRAVES","next":"D_W8_GRAVES_FOUND","command":"STEP_W8_COLLECT_GRAVES","requires":[]},
+      {"id":"compare","text_key":"W8_GRAVES_COMPARE_TITLE","next":"@graves_compare","command":"","requires":[{"op":"evidence_at_least","id":"EV_GRAVE_TAG_03","value":"clue"}]},
+      {"id":"conclusion","text_key":"W8_READ_CONCLUSION","next":"D_W8_GRAVES_MATCHED","command":"","requires":[{"op":"fact_is","id":"FACT_BURIAL_MISMATCH","value":true}]},
+      {"id":"supplement","text_key":"W8_SUPPLEMENT_HOME_INFO","next":"D_W8_HOME_FOLLOWUP_GUIDE","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_SUPPLEMENT_HOME","speaker_key":"INV_BOATMAN","text_key":"W8_SUPPLEMENT_BOATMAN_TEXT","choices":[
+      {"id":"record","text_key":"W8_SUPPLEMENT_BOATMAN_RECORD","next":"D_W8_SUPPLEMENT_RECORDED","command":"STEP_W8_SUPPLEMENT_BOATMAN","requires":[]},
+      {"id":"read","text_key":"W8_SUPPLEMENT_BOATMAN_READ","next":"D_W8_SUPPLEMENT_RECORDED","command":"","requires":[{"op":"evidence_at_least","id":"CL_BOATMAN_01","value":"doubt"},{"op":"evidence_at_least","id":"EV_FERRY_TOKEN_01","value":"fact"}]},
+      {"id":"cost","text_key":"W8_QUESTIONED_DETAIL","next":"D_W8_BOATMAN_QUESTIONED","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_SUPPLEMENT_RECORDED","speaker_key":"INV_BOATMAN","text_key":"W8_BOATMAN_ADMITS_LATE","choices":[
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_GRAVES_FOUND","speaker_key":"INV_PRISONER","text_key":"W8_GRAVES_FOUND_TEXT","choices":[
+      {"id":"tag","text_key":"W8_READ_TAG","next":"D_W8_TAG_DETAIL","command":"","requires":[]},
+      {"id":"page","text_key":"W8_READ_PAGE","next":"D_W8_PAGE_DETAIL","command":"","requires":[]},
+      {"id":"compare","text_key":"W8_GRAVES_COMPARE_TITLE","next":"@graves_compare","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_TAG_DETAIL","speaker_key":"INV_SELF","text_key":"EV_GRAVE_TAG_03_DESC","choices":[
+      {"id":"compare","text_key":"W8_GRAVES_COMPARE_TITLE","next":"@graves_compare","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"D_W8_GRAVES_FOUND","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_PAGE_DETAIL","speaker_key":"INV_SELF","text_key":"EV_BURIAL_PAGE_01_DESC","choices":[
+      {"id":"compare","text_key":"W8_GRAVES_COMPARE_TITLE","next":"@graves_compare","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"D_W8_GRAVES_FOUND","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_GRAVES_MATCHED","speaker_key":"INV_SELF","text_key":"W8_GRAVES_MATCHED_TEXT","choices":[
+      {"id":"review","text_key":"W8_COMPLETE_REVIEW","next":"D_W8_END","command":"STEP_W8_REVIEW","requires":[]},
+      {"id":"limits","text_key":"W8_FACT_LIMIT_QUESTION","next":"D_W8_FACT_LIMIT","command":"","requires":[]},
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"@entry","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_FACT_LIMIT","speaker_key":"INV_PRISONER","text_key":"W8_FACT_LIMIT_TEXT","choices":[
+      {"id":"review","text_key":"W8_COMPLETE_REVIEW","next":"D_W8_END","command":"STEP_W8_REVIEW","requires":[]},
+      {"id":"back","text_key":"INV_BACK","next":"D_W8_GRAVES_MATCHED","command":"","requires":[]}
+    ]},
+    {"id":"D_W8_END","speaker_key":"INV_PRISONER","text_key":"W8_END_TEXT","choices":[
+      {"id":"journal","text_key":"INV_CODEX_TITLE","next":"@journal","command":"","requires":[]},
+      {"id":"records","text_key":"W8_REVIEW_RECORDS","next":"D_W8_GRAVES_FOUND","command":"","requires":[]},
+      {"id":"supplement","text_key":"W8_SUPPLEMENT_OTHER","next":"D_W8_SUPPLEMENT_HOME","command":"","requires":[]},
       {"id":"leave","text_key":"INV_LEAVE","next":"","command":"","requires":[]}
     ]}
   ]

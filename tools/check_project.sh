@@ -8,6 +8,8 @@ python3 -B -m unittest discover -s tools/tests -p 'test_review_bundle.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_week6_candidate.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_week6_feedback_candidate.py'
 python3 -B -m unittest discover -s tools/tests -p 'test_world_persistence.py'
+python3 -B -m unittest discover -s tools/tests -p 'test_branch_persistence.py'
+python3 -B -m unittest discover -s tools/tests -p 'test_week8_candidate.py'
 python3 tools/run_checked.py import ./tools/godot.sh --headless --path "$task_root" --editor --import
 python3 tools/run_checked.py character_source ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_source.gd
 python3 tools/run_checked.py character_pipeline ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_character_pipeline.gd
@@ -40,6 +42,12 @@ python3 tools/run_checked.py tactics_encounter ./tools/godot.sh --headless --pat
 python3 tools/run_checked.py week6_feedback_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_feedback_ui.gd
 python3 tools/run_checked.py week6_feedback_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week6_feedback_session.gd
 python3 tools/run_checked.py investigation_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_investigation_rules.gd
+python3 tools/run_checked.py branch_choice_rules ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_branch_choice_rules.gd
+python3 tools/run_checked.py choice_anchors ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_choice_anchors.gd
+python3 tools/run_checked.py branch_choice_session ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_branch_choice_session.gd
+python3 tools/run_checked.py automatic_saves ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_automatic_saves.gd
+python3 tools/run_checked.py week8_flow ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week8_flow.gd
+python3 tools/run_checked.py week8_branch_ui ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_week8_branch_ui.gd
 python3 tools/run_checked.py dialogue ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_dialogue.gd
 python3 tools/run_checked.py inquiry ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_inquiry.gd
 python3 tools/run_checked.py onboarding ./tools/godot.sh --headless --path "$task_root" --script res://game/tests/test_onboarding.gd
@@ -55,5 +63,7 @@ python3 tools/run_checked.py review_presentation ./tools/godot.sh --headless --p
 python3 tools/check_story_persistence.py
 python3 tools/check_martial_persistence.py
 python3 -B tools/check_world_persistence.py
+python3 -B tools/check_branch_persistence.py
+python3 -B tools/check_week8_persistence.py
 python3 tools/run_checked.py main_smoke ./tools/godot.sh --headless --path "$task_root" -- --smoke-test
 echo "PROJECT_CHECK_PASS"

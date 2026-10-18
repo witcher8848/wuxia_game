@@ -22,7 +22,8 @@ func _ready() -> void:
 
 func refresh() -> void:
 	heading.text = tr("INTRO_TITLE") + " · %d/7" % (page + 1)
-	body.text = tr(PAGES[page]).replace("\\n", "\n")
+	var text_key: String = "W8_INTRO_ROUTE" if page == 6 and GameSession.state.world_flags.get("FACT_W8_ACTIVE", false) else PAGES[page]
+	body.text = tr(text_key).replace("\\n", "\n")
 	hint.text = tr("INTRO_KEYS")
 	if skip_pending:
 		heading.text = tr("INTRO_SKIP_TITLE")

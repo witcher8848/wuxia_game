@@ -21,6 +21,7 @@ var slot_entries: Array[Dictionary] = []
 const SLOT_PAGE_SIZE: int = 3
 const DialoguePanel = preload("res://game/presentation/investigation/dialogue_panel.gd")
 const ActivityPanel = preload("res://game/presentation/investigation/activity_panel.gd")
+const BranchChoicePanel = preload("res://game/presentation/investigation/branch_choice_panel.gd")
 const ProloguePanel = preload("res://game/presentation/investigation/prologue_panel.gd")
 const ObjectiveGuide = preload("res://game/presentation/investigation/objective_guide.gd")
 var objective_label: Label
@@ -40,6 +41,9 @@ var _story_layer: CanvasLayer
 var _story_token := ""
 var _combat_v1_screen: Node
 var _combat_v1_layer: CanvasLayer
+## Explicit legacy fixtures can keep the historical additive investigation flow.
+## The production title entry enables the Week 8 opportunity window.
+var week8_enabled := true
 
 func _ready() -> void:
 	_automation = OS.is_debug_build() and ("--smoke-test" in OS.get_cmdline_user_args() or "--capture-week1" in OS.get_cmdline_user_args())
@@ -215,7 +219,7 @@ func _close_combat_v1() -> void:
 	_show_title()
 
 func _start_game() -> void:
-	GameSession.start_new_game()
+	GameSession.start_new_game(week8_enabled)
 	if _enter_yard() != OK: return
 	App.push_context(&"dialogue")
 	_reset_movement()
@@ -398,7 +402,7 @@ func _close_reading() -> void:
 func _open_activity(activity: String) -> void:
 	if transitioning or App.current_context() not in [&"exploration", &"dialogue"]:
 		return
-	if not activity in DialogueCatalog.ACTIVITIES:
+	if not activity in DialogueCatalog.ACTIVITIES and activity != "@branch":
 		return
 	if activity == "@battle":
 		_start_story_battle()
@@ -410,16 +414,22 @@ func _open_activity(activity: String) -> void:
 	_reset_movement()
 	App.push_context(&"codex")
 	if is_instance_valid(activity_panel): activity_panel.queue_free()
-	activity_panel = ActivityPanel.new()
+	activity_panel = BranchChoicePanel.new() if activity == "@branch" else ActivityPanel.new()
 	activity_panel.theme = ui_theme
 	activity_panel.activity = activity
-	activity_panel.onboarding = reading_panel is ProloguePanel and _activity_from_dialogue
+	if activity_panel is BranchChoicePanel:
+		activity_panel.title_requested.connect(_leave_unsaved_branch)
+	else:
+		activity_panel.onboarding = reading_panel is ProloguePanel and _activity_from_dialogue
 	activity_panel.close_requested.connect(_close_activity)
 	$UIRoot.add_child(activity_panel)
 
 func _close_activity() -> void:
 	if not is_instance_valid(activity_panel) or not activity_panel.visible: return
-	GameSession.cancel_original_handover(activity_panel.handover_preview.get("token", ""))
+	if activity_panel is BranchChoicePanel:
+		activity_panel.cancel_preview()
+	else:
+		GameSession.cancel_original_handover(activity_panel.handover_preview.get("token", ""))
 	activity_panel.hide()
 	if App.current_context() == &"codex": App.pop_context()
 	if _activity_from_dialogue and is_instance_valid(reading_panel):
@@ -429,6 +439,15 @@ func _close_activity() -> void:
 		else: reading_panel.refresh()
 	_activity_from_dialogue = false
 	_reset_movement()
+
+func _leave_unsaved_branch() -> void:
+	if not is_instance_valid(activity_panel) or not activity_panel is BranchChoicePanel: return
+	# Explicitly abandons only the unsaved live result, never overwrites a slot or
+	# clears the read-only anchor. The next title action chooses load/new game.
+	activity_panel.cancel_preview()
+	activity_panel.hide()
+	_activity_from_dialogue = false
+	_return_to_title()
 
 func _open_martial() -> void:
 	if transitioning or App.current_context() != &"exploration" or GameSession.combat_active(): return
@@ -506,6 +525,7 @@ func _start_story_battle() -> void:
 	story_battle_screen.battle = prepared["battle"]
 	story_battle_screen.reveal_intent = prepared["reveal"]
 	story_battle_screen.ferry_deployment = prepared["ferry"]
+	story_battle_screen.week8_active = GameSession.state.world_flags.get("FACT_W8_ACTIVE", false)
 	story_battle_screen.message = tr("INV_RESCUE_CHANGED")
 	story_battle_screen.settlement_requested.connect(_settle_story_battle)
 	story_battle_screen.retry_requested.connect(_retry_story_battle)
@@ -628,6 +648,8 @@ func _resume() -> void:
 func _save_game(slot: String = "quick") -> Error:
 	if transitioning or App.current_context() not in [&"exploration", &"system_menu"] or $SceneHost.get_child_count() != 1:
 		return ERR_UNAVAILABLE
+	if GameSession.pending_branch_save():
+		return _retry_pending_save()
 	# A future-version backup is data too: the UI must not overwrite its slot.
 	if not SaveService.slot_summary(slot).get("can_overwrite", false):
 		status.text = tr("UI_SLOT_NEWER")
@@ -640,6 +662,22 @@ func _save_game(slot: String = "quick") -> Error:
 	var result := SaveService.save_game(slot, GameSession.state)
 	status.text = tr("UI_SAVE_SLOT_OK") % _slot_name(slot) if result == OK else tr("UI_SAVE_FAILED") % error_string(result)
 	return result
+
+func _retry_pending_save() -> Error:
+	var result: Dictionary = GameSession.retry_branch_save()
+	var saved: bool = result.get("error", ERR_INVALID_DATA) == OK and result.get("saved", false)
+	var message := tr("UI_SAVE_SLOT_OK") % _slot_name(result.get("slot", "auto_01")) if saved else tr("W8_PROGRESS_SAVE_FAILED")
+	status.text = message
+	if is_instance_valid(reading_panel) and reading_panel.visible and reading_panel is DialoguePanel:
+		reading_panel.feedback.text = message
+	if is_instance_valid(activity_panel) and activity_panel.visible and activity_panel is ActivityPanel:
+		if saved and activity_panel.message_key == "W8_PROGRESS_SAVE_FAILED":
+			activity_panel.message_key = ""
+			activity_panel.refresh()
+		activity_panel.feedback.text = message
+	if is_instance_valid(world_panel) and world_panel.visible:
+		world_panel.feedback.text = message
+	return OK if saved else result.get("save_error", result.get("error", ERR_CANT_CREATE))
 
 func _load_game(slot: String = "quick") -> void:
 	if GameSession.story_encounter_active(): return
@@ -843,6 +881,12 @@ func _input(event: InputEvent) -> void:
 	if transitioning:
 		get_viewport().set_input_as_handled()
 		return
+	# A pending result is a persistence retry, not a normal manual save. Handle
+	# its explicit F5 before reading/world panels consume input; no event repeats.
+	if GameSession.pending_branch_save() and event.is_action_pressed("quick_save") and App.current_context() in [&"exploration", &"dialogue", &"codex"] and not (is_instance_valid(activity_panel) and activity_panel.visible and activity_panel is BranchChoicePanel):
+		get_viewport().set_input_as_handled()
+		if not event.is_echo(): _retry_pending_save()
+		return
 	if App.current_context() == &"codex" and is_instance_valid(world_panel) and world_panel.visible:
 		world_panel.handle_input(event)
 		return
@@ -905,12 +949,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	var controls_at_top := false
+	if GameSession.pending_branch_save() and App.current_context() in [&"exploration", &"dialogue", &"codex"]:
+		status.text = tr("W8_PROGRESS_SAVE_FAILED")
+		if is_instance_valid(world_panel) and world_panel.visible: world_panel.feedback.text = tr("W8_PROGRESS_SAVE_FAILED")
 	objective_label.visible = App.current_context() == &"exploration"
 	region_label.visible = App.current_context() == &"exploration"
 	if App.current_context() == &"exploration" and $SceneHost.get_child_count() == 1:
 		var region: Node = $SceneHost.get_child(0)
 		var clock: Dictionary = ContentDB.world_time(GameSession.state)
-		region_label.text = tr(ContentDB.get_scene_definition(GameSession.state.scene_id)["name_key"]) + " · " + tr("WORLD_CLOCK") % [clock.get("day", 1), tr(clock.get("label", "WORLD_TIME_0"))] + " · H " + tr("WORLD_TITLE")
+		var clock_prefix := tr("W8_CLOCK_PROTOTYPE") + " · " if GameSession.state.world_flags.get("FACT_W8_ACTIVE", false) else ""
+		region_label.text = tr(ContentDB.get_scene_definition(GameSession.state.scene_id)["name_key"]) + " · " + clock_prefix + tr("WORLD_CLOCK") % [clock.get("day", 1), tr(clock.get("label", "WORLD_TIME_0"))] + " · H " + tr("WORLD_TITLE")
 		var guidance: Dictionary = ObjectiveGuide.project(GameSession.state)
 		objective_label.text = tr(guidance["key"]) + "  ·  J " + tr("INV_CODEX_TITLE") + " · M武学"
 		for destination: Dictionary in region.definition.get("interactions", []):
