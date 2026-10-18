@@ -329,14 +329,65 @@ class Week8CandidateTests(unittest.TestCase):
         self.assertIn("Play-on-Mac.command", source)
 
     def test_packaged_playtest_keeps_zero_humans_and_updates_candidate_identity(self):
-        original = "# Feedback\n\n状态：候选尚未制作。\n\n| 候选版本／构建目录 | 未生成 |\n| Windows真实运行／实体手柄 | 未验 |\n\n实际独立参与人数：0／5。\n"
+        records = "## 单人记录（每人复制一份）\n\n真人意见：开场很清楚，码头这里不明白。\n\n实际独立参与人数：0／5。\n"
+        original = ("# Feedback\n\n状态：候选尚未制作。\n\n## 版本与环境（发出前由开发者填）\n\n"
+                    "| 候选版本／构建目录 | old-candidate |\n| commit／dirty身份／PCK SHA | old-commit／old-pack-sha |\n"
+                    "| ZIP | old-build.zip |\n| Windows真实运行／实体手柄 | 未验 |\n\n" + records)
         result = builder.packaged_playtest_text(original, {"commit": "a" * 40, "dirty": True, "pack_sha256": "b" * 64})
         self.assertIn(builder.VERSION, result)
+        self.assertIn("a" * 40, result)
+        self.assertIn("b" * 64, result)
+        self.assertIn("dirty=true", result)
         self.assertIn("0／5", result)
         self.assertIn("不是本包自动通行的测量结果", result)
         self.assertNotIn("候选尚未制作", result)
         self.assertNotIn("[HANDOFF]", result)  # Collector must not resolve output links against source docs/.
         self.assertIn("候选尚未制作", original)
+        self.assertTrue(result.endswith(records))
+        for obsolete in ("old-candidate", "old-commit", "old-pack-sha", "old-build.zip", "| ZIP |"):
+            self.assertNotIn(obsolete, result)
+
+    def test_packaged_playtest_replaces_current_filled_environment_not_human_answers(self):
+        old_commit = "ffed656f086abab8225fd4730e072cd7065c7867"
+        old_pack = "758baae8c2ad12a6d2d132b32d11ebdd9cfd0160fa22f32e446a0d75c16910ee"
+        old_zip_sha = "a08c1129624947ae7d734acdfc02036f249b7f1f5c0bb8288c6a93ea839f752a"
+        prefix = "# 第八周内部试玩与反馈模板\n\n状态：旧包" + old_commit + "。\n\n## 给测试者的话\n\n请自然游玩，不需要穷举。\n\n"
+        environment = ("## 实际候选版本与环境\n\n| 字段 | 实际值 |\n|---|---|\n"
+                       "| 候选版本／构建目录 | builds/week8/old-filled-build/ |\n"
+                       "| 可转发ZIP／SHA-256 | builds/week8/Wuming-Week8-VS01-ffed656.zip；" + old_zip_sha + " |\n"
+                       "| commit／dirty身份 | 源提交`" + old_commit + "`；构建时`dirty=false` |\n"
+                       "| PCK SHA-256 | `" + old_pack + "` |\n"
+                       "| 工程检查、Mac运行证据 | 旧包159项SHA全通过 |\n\n旧包特有说明必须移除。\n\n")
+        records = ("## 单人记录（每人复制一份）\n\n匿名编号：T01。\n\n"
+                   "| 开始后，你觉得主角为什么要行动？ | 救父亲，但质证引导还不够。 |\n\n"
+                   "## 开发者观察（不要先给测试者看解法）\n\n玩家在码头停留了4分钟。\n\n"
+                   "## 首批反馈汇总\n\n实际独立参与人数：1／5。\n")
+        result = builder.packaged_playtest_text(prefix + environment + records,
+                    {"game_version": "0.8.1-next", "save_directory": "NextCandidateSaves", "commit": "c" * 40, "dirty": True, "pack_sha256": "d" * 64})
+        self.assertIn("0.8.1-next", result)
+        self.assertIn("NextCandidateSaves", result)
+        self.assertIn("c" * 40, result)
+        self.assertIn("d" * 64, result)
+        self.assertIn("dirty=true", result)
+        self.assertIn("请自然游玩，不需要穷举。", result)
+        self.assertTrue(result.endswith(records))
+        for obsolete in (old_commit, old_pack, old_zip_sha, "Wuming-Week8-VS01-ffed656.zip", "old-filled-build", "旧包159项", "旧包特有说明", "可转发ZIP"):
+            self.assertNotIn(obsolete, result)
+
+    def test_packaged_playtest_rejects_missing_or_duplicate_environment_sections(self):
+        metadata = {"commit": "a" * 40, "dirty": False, "pack_sha256": "b" * 64}
+        heading = "## 实际候选版本与环境\n\n"
+        records = "## 单人记录（每人复制一份）\n\n真人答案保留。\n"
+        for original in ("# Feedback\n\n" + records, heading + heading + records,
+                         "## 版本与环境（发出前由开发者填）\n\n" + heading + records):
+            with self.subTest(original=original), self.assertRaisesRegex(ValueError, "Exactly one candidate"):
+                builder.packaged_playtest_text(original, metadata)
+
+    def test_packaged_playtest_rejects_missing_or_unexpected_record_boundary(self):
+        metadata = {"commit": "a" * 40, "dirty": False, "pack_sha256": "b" * 64}
+        for tail in ("no next heading", "## 其他必须保留的章节\n\n## 单人记录\n"):
+            with self.subTest(tail=tail), self.assertRaisesRegex(ValueError, "single-person records heading"):
+                builder.packaged_playtest_text("## 实际候选版本与环境\n\n" + tail, metadata)
 
 
 if __name__ == "__main__":

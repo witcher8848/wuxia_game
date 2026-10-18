@@ -337,22 +337,40 @@ def verify_captures(folder, expected=CAPTURE_NAMES):
 
 
 def packaged_playtest_text(source, metadata):
-    summary = (f"状态：本包候选 {VERSION}，commit `{metadata['commit']}`，"
+    # The source form may already describe a previous frozen candidate. Replace
+    # its entire environment section: matching individual legacy row keys can
+    # silently retain an old archive, source identity, or hash after a redesign.
+    headings = list(re.finditer(r"^## (?:版本与环境（发出前由开发者填）|实际候选版本与环境)[ \t]*$", source, re.M))
+    if len(headings) != 1:
+        raise ValueError("Exactly one candidate environment section is required")
+    following = re.search(r"^##[ \t]+[^\n]+$", source[headings[0].end():], re.M)
+    if following is None or not re.match(r"^##[ \t]+单人记录(?:[ \t（(]|$)", following.group(0)):
+        raise ValueError("Candidate environment section must end at the single-person records heading")
+    records_start = headings[0].end() + following.start()
+    version = metadata.get("game_version", VERSION)
+    save_directory = metadata.get("save_directory", SAVE_DIRECTORY)
+    summary = (f"状态：本包候选 {version}，commit `{metadata['commit']}`，"
                f"dirty={str(metadata['dirty']).lower()}；工程证据见包内 HANDOFF.md 与 build_info.json。"
                "尚未邀请／收到本周5人反馈，当前0／5；约30分钟是待真人计时的目标，不是本包自动通行的测量结果。")
-    source = re.sub(r"^状态：[^\n]*$", summary, source, count=1, flags=re.M)
-    values = {
-        "候选版本／构建目录": VERSION,
-        "commit／dirty身份／PCK SHA": f"`{metadata['commit']}`／dirty={str(metadata['dirty']).lower()}／`{metadata['pack_sha256']}`",
-        "启动方式、必要依赖": "双击 Play-on-Mac.command；保留包内 runtime/Godot.app。Windows EXE与PCK须同目录。",
-        "存档目录／已知问题": SAVE_DIRECTORY + "；未完成后续章节／完整八阶段时限与六NPC事件。",
-        "工程检查、Mac运行证据": "见本包 validation/ 与 evidence/；自动工程通行不计真人试玩。",
-        "仓库外干净目录按测试者步骤启动": "本包已复制至仓库外目录，用相对启动器及内置运行时实际启动；见portable日志。",
-        "Windows真实运行／实体手柄": "未验；Windows只导出并校验x86_64 PE，不推断真机运行。",
-    }
-    for key, value in values.items():
-        source = re.sub(r"^\| " + re.escape(key) + r" \|[^\n]*$", "| " + key + " | " + value + " |", source, count=1, flags=re.M)
-    return source
+    environment = f"""## 实际候选版本与环境
+
+| 字段 | 本包实际值 |
+|---|---|
+| 候选版本 | `{version}`；本表随当前候选目录提供 |
+| commit／dirty身份 | 源提交`{metadata['commit']}`；构建时`dirty={str(metadata['dirty']).lower()}` |
+| PCK SHA-256 | `{metadata['pack_sha256']}` |
+| Mac启动方式、必要依赖 | 双击包内`Play-on-Mac.command`；保留整个目录及`runtime/Godot.app`，无需另装Godot；不是独立签名游戏App，不保证其他Mac无系统安全提示 |
+| Windows启动方式 | `{BINARY}.exe`与同名PCK保持相邻；只验证Release导出和x86_64 PE，不推断真机运行 |
+| 存档目录 | 独立`{save_directory}`；不读取开发版或旧候选存档 |
+| 工程检查、Mac运行证据 | 以本包`HANDOFF.md`、`build_info.json`、`validation/`和`evidence/`为准；工程检查不计真人反馈或自然流程计时 |
+| 仓库外干净目录启动证据 | 见本包`build_info.json`中的`portable_launch`及`validation/week8_portable_launch.log`；不沿用旧包结论 |
+| Windows真实运行／实体手柄 | 未验；不得由导出成功或模拟输入代签 |
+
+先读本包`HANDOFF.md`。下方真人记录保持原文，历史意见不自动算作本候选已复测；转发与意见收集由你执行。
+
+"""
+    source = source[:headings[0].start()] + environment + source[records_start:]
+    return re.sub(r"^状态：[^\n]*$", lambda _match: summary, source, count=1, flags=re.M)
 
 
 def handoff_text(metadata):
