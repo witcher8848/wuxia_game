@@ -317,8 +317,9 @@ class Week8CandidateTests(unittest.TestCase):
 
     def test_portable_probe_requires_native_main_not_only_engine_version(self):
         source = builder.portable_probe_source()
-        for value in ('DisplayServer.get_name() == "headless"', "RenderingServer.frame_post_draw", builder.MAIN, "ContentDB", "native=true", builder.SAVE_DIRECTORY):
+        for value in ('DisplayServer.get_name() == "headless"', "RenderingServer.force_draw(true)", builder.MAIN, "ContentDB", "native=true", builder.SAVE_DIRECTORY):
             self.assertIn(value, source)
+        self.assertNotIn("await RenderingServer.frame_post_draw", source)
 
     def test_handoff_discloses_human_windows_and_signed_app_limits(self):
         source = builder.handoff_text({"commit": "a" * 40, "dirty": True})

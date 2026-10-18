@@ -292,7 +292,7 @@ def portable_probe_source():
         '\tif ProjectSettings.get_setting("application/config/version", "") != ' + json.dumps(VERSION) + ': failures.append("Wrong version")',
         '\tif ProjectSettings.get_setting("application/config/custom_user_dir_name", "") != ' + json.dumps(SAVE_DIRECTORY) + ': failures.append("Wrong save isolation")',
         '\tvar main: Node = load(' + json.dumps(MAIN) + ').instantiate()', '\troot.add_child(main)', '\tawait process_frame', '\tawait process_frame',
-        '\tawait RenderingServer.frame_post_draw', '\tif main.get_node_or_null("UIRoot") == null or root.get_node("ContentDB").last_error != "": failures.append("Actual main/content startup failed")',
+        '\tRenderingServer.force_draw(true)', '\tif main.get_node_or_null("UIRoot") == null or root.get_node("ContentDB").last_error != "": failures.append("Actual main/content startup failed")',
         '\troot.remove_child(main)', '\tmain.free()', '\tfor failure: String in failures: printerr("WEEK8_PORTABLE_LAUNCH_FAIL ", failure)',
         '\tif failures.is_empty(): print("WEEK8_PORTABLE_LAUNCH_PASS checks=%d failures=0 packed=true native=true" % checks)',
         '\tquit(0 if failures.is_empty() else 1)', "",

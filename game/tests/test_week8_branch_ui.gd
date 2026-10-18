@@ -40,7 +40,12 @@ func tap(code: Key) -> void:
 
 func capture(label: String) -> void:
 	if not capture_enabled: return
-	await RenderingServer.frame_post_draw
+	print("WEEK8_UI_TRACE capture_begin=",label)
+	# Explicit native rendering avoids waiting indefinitely for a future draw
+	# signal when the test window is occluded. This still reads the actual GPU
+	# viewport; never substitute a mock or headless image for native evidence.
+	await process_frame
+	RenderingServer.force_draw(true)
 	var folder := OS.get_environment("WUXIA_CAPTURE_DIR")
 	if folder.is_empty(): folder = "res://builds/qa/week8"
 	check(DirAccess.make_dir_recursive_absolute(folder) == OK, "capture directory")
@@ -48,6 +53,7 @@ func capture(label: String) -> void:
 	check(image.get_size() == Vector2i(640,360), "native logical viewport 640x360")
 	check(image.save_png(folder.path_join("week8_"+label+".png")) == OK, "capture "+label)
 	captures += 1
+	print("WEEK8_UI_TRACE capture_done=",label)
 
 func _start(lead: String, locale: String) -> void:
 	saves.test_root = "user://tests/week8_ui_%s_%s_%d_%d" % [locale,lead,OS.get_process_id(),Time.get_ticks_usec()]
@@ -83,6 +89,7 @@ func _near(target: String) -> void:
 	await frames()
 
 func _travel(scene: String, target: String) -> void:
+	if capture_enabled: print("WEEK8_UI_TRACE travel=",scene," target=",target)
 	for _layer: int in 3:
 		if app.current_context() != &"codex": break
 		await tap(KEY_ESCAPE)
@@ -96,6 +103,7 @@ func _travel(scene: String, target: String) -> void:
 
 func _dialogue_choice(identifier: String) -> bool:
 	var panel: Node = main.reading_panel
+	if capture_enabled: print("WEEK8_UI_TRACE dialogue=",panel.node_id," option=",identifier)
 	for _attempt: int in panel.view["choices"].size():
 		if panel.view["choices"][panel.cursor]["id"] == identifier:
 			await tap(KEY_E)
@@ -106,6 +114,7 @@ func _dialogue_choice(identifier: String) -> bool:
 
 func _entry(identifier: String) -> bool:
 	var panel: Node = main.activity_panel
+	if capture_enabled: print("WEEK8_UI_TRACE activity=",panel.mode," evidence=",identifier)
 	for _attempt: int in panel.entries.size():
 		if panel.entries[panel.cursor]["id"] == identifier:
 			await tap(KEY_E)
