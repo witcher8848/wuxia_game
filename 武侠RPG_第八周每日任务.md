@@ -95,7 +95,7 @@ W8-03与04顺序：Day50先约定“预览→锚点落盘→确认→记录→�
 
 已记录决定：首个分支窗口及相关世界事件先行；M08余项随第13～16周剧情接入且保留全部要求；候选由你转发并收集5名真人意见。正式姓名、全部女角色细节和终局设计不阻塞本周；如首次时长不足或工程超支，需要新的实质内容／排期取舍时再共同决定。
 
-实际候选为`builds/week8/0.8.0-week8-vs01_ffed656_20261018T161356_1792340036144350000/`，构建时`dirty=false`；PCK SHA为`758baae8c2ad12a6d2d132b32d11ebdd9cfd0160fa22f32e446a0d75c16910ee`。先读[HANDOFF](./builds/week8/0.8.0-week8-vs01_ffed656_20261018T161356_1792340036144350000/HANDOFF.md)，Mac双击包内`Play-on-Mac.command`，无需另装Godot，保留整个目录；不是独立签名游戏App，Windows仅导出未真机。意见填[源码试玩表](./docs/week8_playtest.md)或包内`PLAYTEST.md`；后续文档修订不改冻结包元数据。
+实际候选为`builds/week8/0.8.0-week8-vs01_ffed656_20261018T161356_1792340036144350000/`，构建时`dirty=false`；PCK SHA为`758baae8c2ad12a6d2d132b32d11ebdd9cfd0160fa22f32e446a0d75c16910ee`。先读本地候选目录中的`HANDOFF.md`（构建包不在Git中），Mac双击包内`Play-on-Mac.command`，无需另装Godot，保留整个目录；不是独立签名游戏App，Windows仅导出未真机。意见填[源码试玩表](./docs/week8_playtest.md)或包内`PLAYTEST.md`；后续文档修订不改冻结包元数据。2026-10-19项目已按开发者要求暂停，后续工作以[暂停交接](./docs/project_pause.md)为准。
 
 ## 8. 本轮文档审查记录（2026-10-17）
 
